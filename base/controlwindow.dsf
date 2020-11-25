@@ -1,0 +1,429 @@
+﻿
+Import("viewpager.dsf")
+
+function Control(self, status)
+
+    if self.status == status then
+        Logm("Ignoring duplicated events")
+        return
+    end
+    
+    if status then
+        
+        self.status = status
+        
+        self.layoutSetting:SetVisibility(false)
+        self.iviewStop:SetVisibility(true)
+        
+        self.iviewUp:SetVisibility(false)
+        self.iviewDown:SetVisibility(false)
+        
+        if self.tviewStatusControl ~= nil  then
+            self.tviewStatusControl:SetVisibility(false)
+        end
+        
+        if self.onStartListener ~= nil then
+            self.onStartListener()
+        end
+        
+    else
+    
+        self.status = status
+        
+        self.layoutSetting:SetVisibility(true)
+        self.iviewStop:SetVisibility(false)
+ 
+        self.iviewUp:SetVisibility(true)
+        self.iviewDown:SetVisibility(false)
+        
+        if self.tviewStatusControl ~= nil  then
+            self.tviewStatusControl:SetVisibility(true)
+        end
+        
+        if self.onStopListener ~= nil then
+            self.onStopListener()
+        end
+        
+    end
+
+end
+
+function Quit(self)
+    if self.onQuitListener ~= nil then
+        self.onQuitListener()
+    end
+    Exit()
+end
+
+function OnLogoAction()
+end
+
+function AddStyle(self, style)
+    
+    if style == "left_right_stop" then
+        self.iviewRightStop = CreateImageView("iviewRightStop", DpToPixel(32), self.statusHeight)
+        self.iviewRightStop:SetBackgroundImage("controlwindow_stop.png")
+        self.iviewRightStop:SetVisibility(false)
+        self.iviewRightStop:SetOnClickListener(function()
+            --Logm("right stop clicked")
+            Control(self, false)
+        end)
+        layoutStatus:AddControl(self.iviewRightStop)
+    end
+    
+end
+
+function EnableLeftStop(self)
+    self.iviewStop = self.iviewLeftStop
+end
+
+function EnableRightStop(self)
+    self.iviewStop = self.iviewRightStop
+end
+
+function EnableStatus(self, status)
+    if status then
+        self.tviewStatusControl = nil
+    else
+        self.tviewStatusControl = self.tviewStatus
+    end
+end
+
+function CreateWindow(self, width,  height, logo, backgroundColor, foregroundColor, startTittle, quitTittle, statusWidth, statusHeight)
+    
+    self.width =width
+    self.height = height
+    self.logo = logo
+    self.backgroundColor = backgroundColor
+    self.foregroundColor = foregroundColor
+    
+    self.startTittle = startTittle
+    self.quitTittle = quitTittle
+    
+    if statusWidth == nil then
+        self.statusWidth = DpToPixel(180)
+    else
+        self.statusWidth = statusWidth
+    end
+    if statusHeight == nil then
+        self.statusHeight = DpToPixel(32)
+    else
+        self.statusHeight = statusHeight
+    end
+    
+    -- 创建一个toast窗口
+	self.winMain = CreateFrame("controwindow", "",  "center",  0,  self.width, self.height)
+	-- 禁止显示actionbar和移动窗口
+    if GetSystemName() == "windows" then    
+        self.winMain:SetStyle("no_taskbar|stay_on_top")
+    else
+        self.winMain:EnableActionBar(false)
+        self.winMain:EnableMovable(false)
+    end
+    
+    -- 创建和设置默认面板
+    self.layoutMain =  CreateLinearLayout("layoutFit", "horizontal")
+    self.winMain:Attach(self.layoutMain)
+    
+	self.layoutContent =  CreateLinearLayout("layoutContent", "vertical", "match_parent", "wrap_content")
+    self.layoutContent:SetWeight(1)
+    self.layoutContent:SetBackgroundColor(RGBAToColor(0, 0, 0, 0))
+	--
+        layoutStatus =  CreateLinearLayout("layoutControl", "horizontal", "match_parent", "wrap_content")
+        layoutStatus:SetGravity("center")
+        --
+            self.action = 0
+            
+            self.iviewUp = CreateImageView("iviewUp", DpToPixel(32), self.statusHeight)
+            self.iviewUp:SetBackgroundImage("controlwindow_up.png")
+            self.iviewUp:SetOnClickListener(function()
+            
+                if self.action == 0 then
+                
+                    self.layoutPager:SetVisibility(false)
+                    self:ShowControlBar()
+                    
+                    self.action = self.action + 1
+                    
+                elseif self.action == 1 then
+                
+                    self.layoutPager:SetVisibility(false)
+                    self:HideControlBar()
+                    
+                    self.iviewUp:SetVisibility(false)
+                    self.iviewDown:SetVisibility(true)
+                    
+                    self.action = self.action + 1
+                    
+                end
+                
+            end)
+            self.iviewUp:SetVisibility(true)
+            layoutStatus:AddControl(self.iviewUp)
+            
+            self.iviewDown = CreateImageView("iviewDown", DpToPixel(32), self.statusHeight)
+            self.iviewDown:SetBackgroundImage("controlwindow_down.png")
+            self.iviewDown:SetOnClickListener(function()
+            
+                self.layoutPager:SetVisibility(true)
+                self:ShowControlBar()
+                
+                self.iviewUp:SetVisibility(true)
+                self.iviewDown:SetVisibility(false)
+                
+                self.action = 0
+
+            end)
+            self.iviewDown:SetVisibility(false)
+            layoutStatus:AddControl(self.iviewDown)
+            
+            self.iviewLeftStop = CreateImageView("iviewLeftStop", DpToPixel(32), self.statusHeight)
+            self.iviewLeftStop:SetBackgroundImage("controlwindow_stop.png")
+            self.iviewLeftStop:SetVisibility(false)
+            self.iviewLeftStop:SetOnClickListener(function()
+                --Logm("lef stop clicked")
+                Control(self, false)
+            end)
+            layoutStatus:AddControl(self.iviewLeftStop)
+            
+            -- Use left stop as default
+            self:EnableLeftStop()
+            
+            self.tviewStatus = CreateTextView("tviewStatus", "",  self.statusWidth, self.statusHeight)
+            self.tviewStatus:SetForegroundColor(self.foregroundColor)
+            self.tviewStatus:SetBackgroundColor(RGBAToColor(0, 170, 221, 150))
+            self.tviewStatus:SetGravity("center")
+            layoutStatus:AddControl(self.tviewStatus)
+        --
+        self.layoutContent:AddControl(layoutStatus)
+        
+        self.layoutSetting =  CreateLinearLayout("layoutSettingShadow", "vertical", "match_parent",  "wrap_content")
+        self.layoutSetting:SetBackgroundColor(self.backgroundColor)
+        --
+            self.layoutPager =  CreateLinearLayout("layoutPager", "vertical", "match_parent", "wrap_content")
+            self.layoutPager:SetLayoutMarginLeft(2)
+            self.layoutPager:SetLayoutMarginRight(2)
+            self.layoutPager:SetLayoutMarginBottom(2)
+            self.layoutPager:SetLayoutMarginTop(2)
+            self.layoutPager:SetBackgroundColor(RGBAToColor(255, 255, 255, 255))
+            --
+                view = self.pager:CreateView(self.style)
+                view:SetLayoutMarginLeft(5)
+                view:SetLayoutMarginRight(5)
+                self.layoutPager:AddControl(view)
+            --
+            self.layoutSetting:AddControl(self.layoutPager)
+            
+            self.layoutControl =  CreateLinearLayout("layoutControl", "horizontal", "match_parent", "wrap_content")
+            self.layoutControl:SetGravity("center")
+            --
+                self.btnStart = CreateButton("btnStart", self.startTittle, "match_parent", DpToPixel(36))
+                self.btnStart:SetGravity("center")
+                self.btnStart:SetWeight(1)
+                self.btnStart:SetForegroundColor(self.foregroundColor)
+                self.btnStart:SetBackgroundColor(RGBAToColor(0, 170, 221, 150))
+                self.btnStart:SetOnClickListener(function()
+                   Control(self, true)
+                end)
+                self.layoutControl:AddControl(self.btnStart)
+                
+                divider = CreateDivider("divider", 1, "match_parent")
+                divider:SetBackgroundColor(backgroundColor)
+                self.layoutControl:AddControl(divider)
+            
+                self.btnExit = CreateButton("btnExit", self.quitTittle, "match_parent", DpToPixel(36))
+                self.btnExit:SetGravity("center")
+                self.btnExit:SetWeight(1)
+                self.btnExit:SetForegroundColor(self.foregroundColor)
+                self.btnExit:SetBackgroundColor(RGBAToColor(0, 170, 221, 150))
+                self.btnExit:SetOnClickListener(function()
+                    Quit(self)
+                end)
+                self.layoutControl:AddControl(self.btnExit)
+            --
+            self.layoutSetting:AddControl(self.layoutControl)
+        --
+        self.layoutContent:AddControl(self.layoutSetting)
+	--
+    self.layoutMain:AddControl(self.layoutContent)
+
+    -- android doesn't allow to hide entire window and we just need to 
+    -- leave transparent layout with width/height 1
+    self.layoutBorder =  CreateLinearLayout("layoutBorder", "vertical", 1, 1)
+    self.layoutMain:AddControl(self.layoutBorder)
+    
+    self.winShown = false
+    
+end
+
+function Show(self)
+    if self.winShown == false then
+        self.winMain:Show()
+        self.winShown = true
+    else
+        self.layoutContent:SetVisibility(true)
+    end
+end
+
+function IsShown(self)
+    return self.layoutContent:GetVisibility()
+end
+
+function Hide(self)
+    self.layoutContent:SetVisibility(false)
+end
+
+function Close(self)
+    self.winMain:Close()
+end
+
+function ShowControlBar(self)
+    if self.m_controlEnable == false then
+        return
+    end
+    
+    self.layoutControl:SetVisibility(true)
+end
+function HideControlBar(self)
+    if self.m_controlEnable == false then
+        return
+    end
+    
+    self.layoutControl:SetVisibility(false)
+end
+
+function EnableControlBar(self, enable)
+    self.m_controlEnable = enable
+end
+
+function Start(self)
+    Control(self, true)
+end
+
+function Stop(self)
+    Control(self, false)
+end
+
+function SetStatus(self, msg)
+    if self.tviewStatusMsg == msg then
+        return
+    end
+    self.tviewStatusMsg = msg
+    self.tviewStatus:SetLabel(msg)
+end
+
+function SetPosition(self, x, y)
+	self.winMain:SetPosition(x, y)
+end
+
+function AddPage(self, name, view, style)
+    self.pager:AddPage(name, view, style)
+end
+
+function AddScrollPage(self, orientation, size, name, view, style)
+    self.pager:AddScrollPage(orientation, size, name, view, style)
+end
+
+function SetOnStartListener(self, listener)
+    self.onStartListener = listener
+end
+function SetOnStopListener(self, listener)
+    self.onStopListener = listener
+end
+function SetOnQuitListener(self, listener)
+    self.onQuitListener = listener
+end
+
+function SetStyle(self, style)
+    self.style = style
+end
+
+function GetStyle(self)
+    return self.style
+end
+
+function GetSelection(self)
+    return self.pager:GetSelection()
+end
+function SetSelection(self, selection)
+    self.pager:SetSelection(selection)
+end
+
+function SetOnSelectListener(self, listener)
+    self.pager:SetOnSelectListener(function(position)
+        listener(position)
+    end)
+end
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+        local obj = {}
+        
+        obj.CreateWindow = CreateWindow
+        
+        obj.Show = Show
+        obj.IsShown = IsShown
+        obj.Hide = Hide
+        obj.Close = Close
+        
+        obj.ShowControlBar = ShowControlBar
+        obj.HideControlBar = HideControlBar
+        obj.EnableControlBar = EnableControlBar
+        
+        obj.AddPage = AddPage
+        obj.AddScrollPage = AddScrollPage
+        obj.SetStatus = SetStatus
+        obj.SetPosition = SetPosition
+        obj.SetStyle = SetStyle
+        obj.GetStyle = GetStyle
+        obj.GetSelection = GetSelection
+        obj.SetSelection = SetSelection
+        
+        obj.AddStyle = AddStyle
+        
+        obj.Start = Start
+        obj.Stop = Stop
+        
+        obj.SetOnStartListener = SetOnStartListener
+        obj.SetOnStopListener = SetOnStopListener
+        obj.SetOnQuitListener = SetOnQuitListener
+        
+        obj.SetOnSelectListener = SetOnSelectListener
+        
+        obj.EnableLeftStop = EnableLeftStop
+        obj.EnableRightStop = EnableRightStop
+        obj.EnableStatus = EnableStatus
+       
+        obj.m_controlEnable = true
+        
+        obj.style = "option"
+        obj.logo = ""
+        obj.winMain = nil
+        obj.layoutMain = nil
+        
+        obj.startTittle = "Start"
+        obj.quitTittle = "Quit"
+        
+        obj.iviewStop = nil
+        obj.iviewLeftStop = nil
+        obj.iviewRightStop = nil
+        
+        obj.backgroundColor = RGBAToColor(0, 170, 221, 150)
+        obj.foregroundColor = RGBAToColor(255, 255, 255, 255)
+        
+        obj.onStartListener = nil
+        obj.onStopListener = nil
+        obj.onQuitListener = nil
+        
+        obj.pager = GetObject("LuaViewPagerFactory"):Create()
+        
+        obj.status = false
+        
+        return obj
+    end
+
+	SetObject("LuaControlWindowFactory", obj)
+	Logd("LuaControlWindowFactory has been registered")
+end

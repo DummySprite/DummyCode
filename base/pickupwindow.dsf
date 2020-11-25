@@ -1,0 +1,273 @@
+﻿
+Import("window.dsf")
+
+Import("listview.dsf")
+Import("option.dsf")
+
+g_fileUtil = GetObject("LuaFileUtil")
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = GetObject("LuaWindowFactory"):Create()
+        
+        -- Override parent methods
+        obj.Show_LuaWindow = obj.Show
+        
+        -- load_from or save_as
+        obj:SetStyle("load_from")
+        
+        obj.path = nil
+        
+        obj.lviewPath = nil
+        obj.lviewList = nil
+        
+        obj.filter = "all"
+        
+        -- Window methods
+        obj.Show = function(self, path, title, x, y)
+
+            local width = DpToPixel(256)
+            
+            local height = 0
+            if self:GetOptions():Has("location") then
+                height = height + DpToPixel(36)
+            end
+            height = DpToPixel(32) + height + DpToPixel(36) * 4 + DpToPixel(36) + DpToPixel(36) 
+            if self:GetOptions():Has("deletion") then
+                height = height + DpToPixel(36)
+            end
+            height = height
+            
+            self:Show_LuaWindow(title,  x,  y, width, height, function(layoutMain)
+            
+                if self.options:Has("location") then
+                
+                    local layoutBackward =  CreateLinearLayout("layoutBackward", "horizontal", "match_parent")
+                    --
+                        local iviewBack = CreateImageView("left_arrow", DpToPixel(20), DpToPixel(20))
+                        iviewBack:SetBackgroundImage("left_arrow.png")
+                        iviewBack:SetLayoutMarginLeft(DpToPixel(2))
+                        iviewBack:SetOnClickListener(function()
+                        
+                            local path = self.tctrlPath:GetLabel()
+                            Logm("path : %s", path)
+                            if path == "" or not GetObject("LuaFileUtil"):FolderExists(path) then
+                                Toast(string.format("Invalid path : %s", path))
+                                return
+                            end
+                            
+                            local parentPath = GetObject("LuaPathUtil"):PathGetDirectory(path)
+                            if parentPath == "" or not GetObject("LuaFileUtil"):FolderExists(parentPath) then
+                                Toast(string.format("Invalid path : %s", parentPath))
+                                return
+                            end
+                            Logm("backward : %s", parentPath)
+                            self:Update(parentPath)
+                            
+                        end)
+                        layoutBackward:AddControl(iviewBack)
+                        
+                        local iviewForward = CreateImageView("right_arrow", DpToPixel(20), DpToPixel(20))
+                        iviewForward:SetBackgroundImage("right_arrow.png")
+                        iviewForward:SetLayoutMarginRight(DpToPixel(2))
+                        iviewForward:SetOnClickListener(function()
+                            
+                            local item = self.lviewList:GetSelection()
+                            if item == nil then
+                                return
+                            end
+                            
+                            local param = self.lviewList:GetItemParam(item)
+                            if param == nil then
+                                return
+                            end
+                            
+                            local path = JoinPath(param.folderName, param.fileName)
+                            Logm("path : %s", path)
+                            if path == "" or not GetObject("LuaFileUtil"):FolderExists(path) then
+                                Toast(string.format("Invalid path : %s", path))
+                                return
+                            end
+                            
+                            Logm("forward : %s", path)
+                            self:Update(path)
+                            
+                        end)
+                        layoutBackward:AddControl(iviewForward)
+                        
+                        self.tctrlPath = CreateTextCtrl("tctrlPath", "", "match_parent", DpToPixel(32))
+                        self.tctrlPath:SetWeight(1)
+                        self.tctrlPath:SetSingleLine()
+                        layoutBackward:AddControl(self.tctrlPath)
+                        
+                        local iviewUpdate = CreateImageView("iviewUpdate", DpToPixel(20), DpToPixel(20))
+                        iviewUpdate:SetBackgroundImage("update.png")
+                        iviewUpdate:SetLayoutMarginLeft(DpToPixel(2))
+                        iviewUpdate:SetLayoutMarginRight(DpToPixel(2))
+                        iviewUpdate:SetOnClickListener(function()
+                        
+                            local path = self.tctrlPath:GetLabel()
+                            Logm("path : %s", path)
+                            if path == "" or not GetObject("LuaFileUtil"):FolderExists(path) then
+                                Toast(string.format("Invalid path : %s", path))
+                                return
+                            end
+                            
+                            Logm("update : %s", path)
+                            self:Update(path)
+                            
+                        end)
+                        layoutBackward:AddControl(iviewUpdate)
+                    --
+                    layoutMain:AddControl(layoutBackward)
+
+                end
+
+                self.lviewList = GetObject("LuaListViewFactory"):Create()
+                lviewListView = self.lviewList:Create("match_parent", "match_parent")
+                lviewListView:SetWeight(1)
+
+                self.lviewList:SetOnSelectedListener(function(item)
+                    local param = self.lviewList:GetItemParam(item)
+                    Logm("Set filename to %s", param.fileName)
+                    self.lviewPath:SetLabel(param.fileName)
+                end)
+                
+                layoutMain:AddControl(lviewListView)
+            
+                self.lviewPath = CreateTextCtrl("lviewPath", "", "match_parent", "wrap_content")
+                self.lviewPath:SetSingleLine()
+                self.lviewPath:SetLayoutMargin(DpToPixel(5))
+                layoutMain:AddControl(self.lviewPath)
+                if self:GetStyle() == "load_from" then
+                    self.lviewPath:Disable()
+                else
+                end
+                
+                if self.options:Has("deletion") then
+                    local btnDelete = CreateButton("Delete", "Del", "match_parent",   DpToPixel(36))
+                    btnDelete:SetWeight(1)
+                    btnDelete:SetGravity("center")
+                    btnDelete:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+                    btnDelete:SetLayoutMarginLeft(DpToPixel(1))
+                    btnDelete:SetOnClickListener(function()
+                    
+                        local item = self.lviewList:GetSelection()
+                        if item == nil then
+                            return
+                        end
+                        local param = self.lviewList:GetItemParam(item)
+                        
+                        local childPath = JoinPath(param.folderName, param.fileName)
+                        Logm("Deleting %s", childPath)
+
+                        if self.filter ~= "folder" then
+                            if not (childPath == "") and GetObject("LuaFileUtil"):FileExists(childPath) then
+                                GetObject("LuaFileUtil"):DeleteFile(childPath)
+                                self:OnCancel()
+                            end
+                        else
+                            if not (childPath == "") and GetObject("LuaFileUtil"):FolderExists(childPath) then
+                                GetObject("LuaFileUtil"):DeleteFolder(childPath)
+                                self:OnCancel()
+                            end
+                        end
+                        
+                    end)
+                    self:GetBottom():AddControl(btnDelete)
+                end
+                
+                -- Load file list
+                Logm("pickup path %s", path)
+                self:Load(path)
+                
+            end)
+            
+        end
+        
+        obj.Update = function(self, path)
+        
+            self.lviewPath:SetLabel("")
+            self.lviewList:ClearItems()
+            self:Load(path)
+            
+        end
+        
+        obj.Load = function(self, path)
+
+            self.path = path
+            if self:GetOptions():Has("location") then
+                self.tctrlPath:SetLabel(self.path)
+            end
+
+            g_fileUtil:EnumerateFolders(self.path, function(folderName, fileName, _type)
+                
+                if self.filter == "all " then
+                
+                elseif self.filter == "file" then
+                    if _type == "folder" then
+                        return true
+                    end
+                elseif self.filter == "folder" then
+                    if _type == "file" then
+                        return true
+                    end
+                end
+                
+                local param = {}
+                param.type = _type
+                param.folderName = folderName
+                param.fileName = fileName
+                --
+                    local layoutItem =  CreateLinearLayout("layoutItem", "horizontal", "match_parent",  "wrap_content")
+                    layoutItem:SetLayoutMarginTop(DpToPixel(8))
+                    --  
+                        local iviewIcon = CreateImageView("iviewIcon", DpToPixel(16), "match_parent")
+                        if _type == "file" then
+                        else
+                            iviewIcon:SetBackgroundImage("folder.png")
+                        end
+                        layoutItem:AddControl(iviewIcon)
+                        
+                        local tviewLabel = CreateTextView("tviewLabel", fileName, "match_parent", "wrap_content")
+                        tviewLabel:SetLayoutMarginLeft(DpToPixel(8))
+                        tviewLabel:SetWeight(1)
+                        tviewLabel:SetGravity("left")
+                        tviewLabel:SetOnClickListener(function()
+                            if self.lviewList.onSelectedListener ~= nil then
+                                self.lviewList:SetSelection(param.item)
+                                self.lviewList.onSelectedListener(param.item)
+                            end
+                        end)
+                        layoutItem:AddControl(tviewLabel)
+                    --
+                --
+                param.item = self.lviewList:AddItem(fileName, param, layoutItem)
+                
+                return true
+            end, false)
+            
+        end
+        
+        obj.GetLabel= function(self)
+            return self.lviewPath:GetLabel()
+        end
+        
+        obj.GetPath = function(self)
+            return self.tctrlPath:GetLabel()
+        end
+        
+        obj.SetFilter= function(self, filter)
+            self.filter = filter
+        end
+        
+        return obj
+    end
+
+	SetObject("LuaPickupWindowFactory", obj)
+	Logd("LuaPickupWindowFactory has been registered")
+end
+

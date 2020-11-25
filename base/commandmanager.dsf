@@ -1,0 +1,187 @@
+﻿
+function AddCommand(self, command)
+    local index = self.commandsCount
+    self.commands[index] = {}
+    self.commands[index].command = command
+    self.commands[index].startTimedoutMs = -1
+    self.commands[index].startTimedout = nil
+    self.commands[index].stopTimedoutMs = -1
+    self.commands[index].stopTimedout = nil
+    -- Logm("[%d] %s added", index, command)
+    self.commandsCount = self.commandsCount + 1
+    return index
+end
+
+function AddCommandWithTimedout(self, command, startMs, stopMs)
+    local index = self:AddCommand(command)
+    
+    if startMs == -1 or startMs == nil then
+    else
+        self.commands[index].startTimedoutMs = startMs
+        self.commands[index].startTimedout = GetSystemTime() + 0
+    end
+    
+    if stopMs == -1 or stopMs == nil then
+    else
+        self.commands[index].stopTimedoutMs = stopMs
+        self.commands[index].stopTimedout = GetSystemTime() + stopMs
+    end
+ 
+    Logm("[%d] %s added with %dms %dms", index, command, startMs, stopMs)
+
+    return index
+end
+
+function SetCurrentCommand(self, command)
+    
+    local index = -1
+    for i = 0, self.commandsCount - 1 do
+        if self.commands[i].command == command then
+            index = i
+            break
+        end
+    end
+    
+    if index ~= -1 then
+        
+        self.previousCommandIndex = self.currentCommandIndex
+        self.previousCommandTimestamp = GetSystemTime()
+        
+        self.currentCommandIndex = index
+        self.currentCommandTimestamp = GetSystemTime()
+        if self.commands[index].stopTimedoutMs == -1 then
+        else
+            self.commands[index].stopTimedout = GetSystemTime() + self.commands[index].stopTimedoutMs
+        end
+        
+    else
+        Loge("Command %s not found", command)
+    end
+    
+end
+
+function GetCurrentCommand(self)
+
+    if self.commands[self.currentCommandIndex].stopTimedoutMs == -1 then
+    else
+        if GetSystemTime() >= self.commands[self.currentCommandIndex].stopTimedout then
+            Logm("命令超时, 切换下一个命令")
+            self:NextCommand()
+        end
+    end
+    
+    return self.commands[self.currentCommandIndex].command
+    
+end
+
+function GetCurrentCommandDuration(self)
+    return GetSystemTime() - self.currentCommandTimestamp
+end
+
+function GetPreviousCommand(self)
+    return self.commands[self.previousCommandIndex].command
+end
+
+function GetPreviousCommandDuration(self)
+    return GetSystemTime() - self.previousCommandTimestamp
+end
+
+function NextCommand(self)
+
+    self.previousCommandIndex = self.currentCommandIndex
+    self.previousCommandTimestamp = GetSystemTime()
+    
+    local index = self.currentCommandIndex + 1
+    
+    while true do
+    
+         if index >= self.commandsCount then
+            index = 0
+        end
+        
+        if self.commands[index].startTimedoutMs == -1 then
+            Logm("[%d] Next command %s", index, self.commands[index].command)
+            break
+        else
+        
+            if GetSystemTime() >= self.commands[index].startTimedout then
+                self.commands[index].startTimedout = GetSystemTime() + self.commands[index].startTimedoutMs
+                Logm("[%d] Next Command %s timedout", index, self.commands[index].command)
+                break
+            else
+                Logm("[%d] Next Command %s isn't timedout, %d ms left ...", index, self.commands[index].command, self.commands[index].startTimedout - GetSystemTime())
+            end
+            
+        end
+        
+        index = index + 1
+       
+    end
+    
+    self.currentCommandIndex = index
+    self.currentCommandTimestamp = GetSystemTime()
+    if self.commands[index].stopTimedoutMs == -1 then
+    else
+        self.commands[index].stopTimedout = GetSystemTime() + self.commands[index].stopTimedoutMs
+    end
+    return true
+    
+end
+
+function Clear(self)
+    self.commands = {}
+    self.commandsCount = 0
+    
+    self.currentCommandIndex = 0
+    self.currentCommandTimestamp = GetSystemTime()
+  
+    self.previousCommandIndex = 0
+    self.previousCommandTimestamp = GetSystemTime()
+end
+
+function Print(self)
+    Logm("---------- Commands -----------")
+    Logm("count: %d",  self.commandsCount)
+    for i = 0,  self.commandsCount - 1 do
+        Logm("[%d] %s", i, self.commands[i].command)
+    end
+end
+
+function RegisterObject()
+	local obj = { }  
+
+	obj.Create = function(self)
+        local obj = { }
+        
+        obj.commands = {}
+        obj.commandsCount = 0
+        
+        obj.currentCommandIndex = 0
+        obj.currentCommandTimestamp = GetSystemTime()
+        
+        obj.previousCommandIndex = 0
+        obj.previousCommandTimestamp = GetSystemTime()
+        
+        obj.AddCommand = AddCommand
+        obj.AddCommandWithTimedout = AddCommandWithTimedout
+        
+        obj.NextCommand = NextCommand
+        
+        obj.SetCurrentCommand = SetCurrentCommand
+        obj.GetCurrentCommand = GetCurrentCommand
+        obj.GetCurrentCommandDuration = GetCurrentCommandDuration
+        
+        obj.GetPreviousCommand = GetPreviousCommand
+        obj.GetPreviousCommandDuration = GetPreviousCommandDuration
+        
+        obj.Clear = Clear
+        obj.Print = Print
+        
+        return obj
+    end
+
+	SetObject("LuaCommandManager", obj)
+	Logd("LuaCommandManager对象已经注册完成")
+end
+
+

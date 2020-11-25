@@ -1,0 +1,489 @@
+
+Import("grid.dsf")
+Import("stack.dsf")
+Import("floodfill.dsf")
+Import("utf8.dsf")
+
+function RGBToGrey(r, g, b)
+    return (0.299 * (r) + 0.587 * (g) + 0.114 * (b))
+end
+
+function GetGreyColor(x, y)
+    local r, g, b = GetRGBColor(x, y)
+    local grey = RGBToGrey(r, g, b)
+    -- Logm("[%d, %d] RGB[%d,%d,%d] grey[%d]", x, y, r, g, b, grey)
+    return grey
+end
+
+function FindGreyColor(greyMin, greyMax, topLeftX, topLeftY, bottomRightX, bottomRightY)
+    -- Logm("range[%d,%d to %d,%d] for grey[%d to %d]", topLeftX, topLeftY, bottomRightX, bottomRightY, greyMin, greyMax)
+    
+    local cx = topLeftX
+    while cx < bottomRightX do
+    
+        local cy = topLeftY
+        while cy < bottomRightY do
+            
+            local grey = GetGreyColor(cx, cy)
+            if grey >= greyMin and grey <= greyMax then
+                -- Logm("Color found at %d,%d", cx, cy)
+                return cx, cy
+            end
+        
+            cy = cy + 1
+        end
+        
+        cx = cx + 1
+    end
+    return -1, -1
+    
+end
+
+function GetRectangle(self, greyMin, greyMax, topLeftX, topLeftY, bottomRightX, bottomRightY)
+
+    local ff = GetObject("LuaFloodFillFactory"):Create()
+    
+    local x, y = FindGreyColor(greyMin, greyMax, topLeftX, topLeftY, bottomRightX, bottomRightY)
+    if x == -1 or y == -1 then
+        return -1, -1, -1, -1
+    end
+        
+   if ff:Flood8Ways(x, y, function(fx, fy)
+        
+        if fx >= topLeftX and fx < bottomRightX and fy >= topLeftY and fy < bottomRightY then
+            
+            local grey = GetGreyColor(fx, fy)
+            if grey >= greyMin and grey <= greyMax then
+                -- Logm("%d, %d - %d to %d, %d matched", fx, fy, grey, greyMin, greyMax)
+                return true
+            else
+                -- Logm("%d, %d - %d to %d, %d dismatched", fx, fy, grey, greyMin, greyMax)
+                return false
+            end
+            
+        else
+            return false
+        end
+        
+    end) then
+    
+        local rect_topleftx, rect_toplefty, rect_bottomrightx, rect_bottomrighty = ff:GetRectangle()
+        return rect_topleftx, rect_toplefty, rect_bottomrightx, rect_bottomrighty
+        
+    else
+        return -1, -1, -1, -1
+    end
+        
+end
+
+function GetConnectedRectangle(self, greyMin, greyMax, topLeftX, topLeftY, bottomRightX, bottomRightY)
+
+    -- Search first rectangle
+    local rect_topleftx, rect_toplefty, rect_bottomrightx, rect_bottomrighty = self:GetRectangle(greyMin, greyMax, topLeftX, topLeftY, bottomRightX, bottomRightY)
+    if not (rect_topleftx == -1) and not (rect_toplefty == -1) and not (rect_bottomrightx == -1) and not (rect_bottomrighty == -1) then
+
+        -- Logm("   Sub rectangle found at %d, %d to %d, %d", rect_topleftx, rect_toplefty, rect_bottomrightx, rect_bottomrighty)
+        
+        local sx = nil
+        local sy = nil 
+        local ex = nil
+        local ey = nil
+
+        -- Search sub rectangles upside
+        sy = topLeftY
+        ey = rect_toplefty 
+        while sy < ey do
+            sx = rect_topleftx
+            ex = rect_bottomrightx
+            -- Search sub rectangle
+            local sub_rect_topleftx, sub_rect_toplefty, sub_rect_bottomrightx, sub_rect_bottomrighty = self:GetRectangle(greyMin, greyMax, sx, sy, ex, ey)
+            if not (sub_rect_topleftx == -1) and not (sub_rect_toplefty == -1) and not (sub_rect_bottomrightx == -1) and not (sub_rect_bottomrighty == -1) then
+            
+                if sub_rect_topleftx < rect_topleftx then
+                    rect_topleftx = sub_rect_topleftx
+                end
+                
+                if sub_rect_toplefty < rect_toplefty then
+                    rect_toplefty = sub_rect_toplefty
+                end
+                
+                if sub_rect_bottomrightx > rect_bottomrightx then
+                    rect_bottomrightx = sub_rect_bottomrightx
+                end
+                
+                if sub_rect_bottomrighty > rect_bottomrighty then
+                    rect_bottomrighty = sub_rect_bottomrighty
+                end
+            
+                -- Logm("   [UPSIDE] Sub rectangle found at %d, %d to %d, %d", sub_rect_topleftx, sub_rect_toplefty, sub_rect_bottomrightx, sub_rect_bottomrighty)
+                ey = sub_rect_toplefty 
+            else
+                break
+            end
+        end
+            
+        -- Search sub rectangles downside
+        sy = rect_bottomrighty
+        ey = bottomRightY
+        while sy < ey do
+            sx = rect_topleftx
+            ex = rect_bottomrightx
+            -- Search sub rectangle
+            local sub_rect_topleftx, sub_rect_toplefty, sub_rect_bottomrightx, sub_rect_bottomrighty = self:GetRectangle(greyMin, greyMax, sx, sy, ex, ey)
+            if not (sub_rect_topleftx == -1) and not (sub_rect_toplefty == -1) and not (sub_rect_bottomrightx == -1) and not (sub_rect_bottomrighty == -1) then
+            
+                if sub_rect_topleftx < rect_topleftx then
+                    rect_topleftx = sub_rect_topleftx
+                end
+                
+                if sub_rect_toplefty < rect_toplefty then
+                    rect_toplefty = sub_rect_toplefty
+                end
+                
+                if sub_rect_bottomrightx > rect_bottomrightx then
+                    rect_bottomrightx = sub_rect_bottomrightx
+                end
+                
+                if sub_rect_bottomrighty > rect_bottomrighty then
+                    rect_bottomrighty = sub_rect_bottomrighty
+                end
+            
+                -- Logm("   [DOWNSIDE] Sub rectangle found at %d, %d to %d, %d", sub_rect_topleftx, sub_rect_toplefty, sub_rect_bottomrightx, sub_rect_bottomrighty)
+                sy = sub_rect_bottomrighty
+            else
+                break
+            end
+        end
+            
+        -- Logm("Rectangle found at %d, %d to %d, %d", rect_topleftx, rect_toplefty, rect_bottomrightx, rect_bottomrighty)
+        -- Logm("------------------")
+        return rect_topleftx, rect_toplefty, rect_bottomrightx, rect_bottomrighty
+    else
+        return -1, -1, -1, -1
+    end
+    
+end
+
+function GetConnectedRectangles(self, greyMin, greyMax, topLeftX, topLeftY, bottomRightX, bottomRightY, callback)
+
+    local sx = topLeftX
+    local sy = topLeftY
+    local ex = bottomRightX
+    local ey = bottomRightY
+    
+    local ff = GetObject("LuaFloodFillFactory"):Create()
+    
+    while sx < ex do
+        local rect_topleftx, rect_toplefty, rect_bottomrightx, rect_bottomrighty = self:GetConnectedRectangle(greyMin, greyMax, sx, sy, ex, ey)
+        if not (rect_topleftx == -1) and not (rect_toplefty == -1) and not (rect_bottomrightx == -1) and not (rect_bottomrighty == -1) then
+    
+            if not callback(rect_topleftx, rect_toplefty, rect_bottomrightx, rect_bottomrighty) then
+                break
+            end
+            
+            -- Search next rectange
+            sx = rect_bottomrightx + 1
+        else
+            break
+        end
+    end
+    
+end
+
+function GetFontRectangles(self, greyMin, greyMax, fontSize, fontSimilarity, topLeftX, topLeftY, bottomRightX, bottomRightY)
+
+    local rectArray = {}
+    local rectCount = 0
+    
+    self:GetConnectedRectangles(greyMin, greyMax, topLeftX, topLeftY, bottomRightX, bottomRightY, function(rect_topleftx, rect_toplefty, rect_bottomrightx, rect_bottomrighty)
+        
+        if rectCount > 0 then
+        
+            if rectArray[rectCount - 1].bottomrightx - rectArray[rectCount - 1].topleftx < fontSize then
+                rectArray[rectCount - 1].bottomrightx = rect_bottomrightx
+            else    
+                rectArray[rectCount] = {}
+                rectArray[rectCount].topleftx = rect_topleftx
+                rectArray[rectCount].toplefty = rect_toplefty
+                rectArray[rectCount].bottomrightx = rect_bottomrightx
+                rectArray[rectCount].bottomrighty = rect_bottomrighty
+                rectCount = rectCount + 1
+            end
+            
+        else
+            rectArray[rectCount] = {}
+            rectArray[rectCount].topleftx = rect_topleftx
+            rectArray[rectCount].toplefty = rect_toplefty
+            rectArray[rectCount].bottomrightx = rect_bottomrightx
+            rectArray[rectCount].bottomrighty = rect_bottomrighty
+            rectCount = rectCount + 1
+        end
+        
+        return true
+    end)
+    
+    return rectArray, rectCount
+    
+end
+
+function GetText(self, colorMin, colorMax, fontSize, fontSimilarity, topLeftX, topLeftY, bottomRightX, bottomRightY)
+    return self:GetIndexedText(colorMin, colorMax, fontSize, fontSimilarity, 0, topLeftX, topLeftY, bottomRightX, bottomRightY)
+end
+
+function GetIndexedText(self, colorMin, colorMax, fontSize, fontSimilarity, fontIndex, topLeftX, topLeftY, bottomRightX, bottomRightY)
+
+    local greyMin = RGBToGrey(ColorToRGB(colorMin))
+    local greyMax = RGBToGrey(ColorToRGB(colorMax))
+    
+    local rectArray, rectCount = self:GetFontRectangles(greyMin, greyMax, fontSize, fontSimilarity, topLeftX, topLeftY, bottomRightX, bottomRightY)
+    
+    local text = ""
+    for i = 0, rectCount - 1 do
+        local matrixCode = self:GetMatrixCode(rectArray[i], greyMin, greyMax)
+        local value = self:GetMatchedTextFromMatrixCode(matrixCode, fontSimilarity, fontIndex)
+        if value == "" then
+            text = text .. "*"
+        else
+            text = text .. value
+        end
+    end
+    return text
+    
+end
+
+function CheckText(self, text)
+
+    if string.len(text) <= 0 then
+        return false
+    end
+    
+    local m = ""
+    for i = 0, string.utf8len(text) - 1 do
+        m = m .. "*"
+    end
+    Logm("%s to %s", text, m)
+    return text ~= m
+end
+
+function GetMatchedTextFromMatrixCode(self, matrixCode, matrixSimilarity, matrixIndex)
+
+    if matrixIndex == nil then
+        matrixIndex = 0
+    end
+    
+    if self.matrixCodes[matrixIndex] == nil then
+        return ""
+    end
+    
+    local matchedSimilarity = matrixSimilarity
+    local matchedText = ""
+    
+    for c = 0, self.matrixCodes[matrixIndex].count - 1 do
+        
+        local sim = self:GetMatrixCodeSimilarity(matrixCode, self.matrixCodes[matrixIndex].codes[c].code)
+        if sim >= matchedSimilarity then
+           matchedSimilarity = sim
+           matchedText = self.matrixCodes[matrixIndex].codes[c].text
+        end
+        
+    end
+    
+    return matchedText
+    
+end
+
+function Add(self, matrixCode, matrixText, matrixIndex)
+    
+    if matrixIndex == nil then
+        matrixIndex = 0
+    end
+    
+    if self.matrixCodes[matrixIndex] == nil then
+        self.matrixCodes[matrixIndex] = {}
+        self.matrixCodes[matrixIndex].codes = {}
+        self.matrixCodes[matrixIndex].count = 0
+    end
+    
+    local index = self.matrixCodes[matrixIndex].count
+    self.matrixCodes[matrixIndex].codes[index] = {}
+    self.matrixCodes[matrixIndex].codes[index].code = matrixCode
+    self.matrixCodes[matrixIndex].codes[index].text = matrixText
+    self.matrixCodes[matrixIndex].count = index + 1
+end
+
+MATRIX_FALSE = 0
+MATRIX_TRUE  = 1
+MATRIX_NONE = 2
+
+function GetMatrixCode(self, rect, greyMin, greyMax)
+
+    local matrixCode = ""
+
+    local width = rect.bottomrightx - rect.topleftx
+    local height = rect.bottomrighty - rect.toplefty
+    -- Logm("Size %d, %d", width, height)
+    
+    local subWidth = math.floor(width / self.matrixWidthCount)
+    if subWidth <= 0 then
+        subWidth = 1
+    end
+    local subHeight = math.floor(height / self.matrixHeightCount)
+    if subHeight <= 0 then
+        subHeight = 1
+    end
+    -- Logm("Sub width: %d height: %d", subWidth, subHeight)
+    
+    local offsetWidth = math.floor((width % subWidth) / 2)
+    local offsetHeight = math.floor((height % subHeight) / 2)
+    -- Logm("Offset width: %d height: %d", offsetWidth, offsetHeight)
+    
+    local baseX = rect.topleftx + offsetWidth
+    local baseY = rect.toplefty + offsetHeight
+    for j = 0, self.matrixHeightCount - 1 do
+    
+        -- local fmt = ""
+        
+        for i = 0, self.matrixWidthCount - 1 do
+        
+            local x = baseX + j * subWidth
+            local y = baseY + i * subHeight
+            
+            if x >= rect.bottomrightx or y >= rect.bottomrighty then
+                matrixCode = matrixCode .. MATRIX_NONE
+                -- fmt = fmt .. string.format("[%0.4d, %0.4d] %s ", x, y, "none")
+            else
+                if self:IsColorBlock(x, y, subWidth, subHeight, greyMin, greyMax) then
+                    matrixCode = matrixCode .. MATRIX_TRUE
+                    -- mt = fmt .. string.format("[%0.4d, %0.4d] %s ", x, y, "true")
+                else
+                    matrixCode = matrixCode .. MATRIX_FALSE
+                    -- fmt = fmt .. string.format("[%0.4d, %0.4d] %s ", x, y, "false")
+                end
+            end
+
+        end
+        
+        -- Logm(fmt)
+    
+    end
+
+    return matrixCode
+    
+end
+
+function GetMatrixCodeSimilarity(self, matrixCode1, matrixCode2)
+
+    local matc = 0
+    local maxc, minc
+    if string.len(matrixCode1) > string.len(matrixCode2) then
+        maxc = string.len(matrixCode1)
+        minc = string.len(matrixCode2)
+    else
+        maxc = string.len(matrixCode2)
+        minc = string.len(matrixCode1)
+    end
+    
+    for i = 1, minc do
+    
+        local c1 = string.sub(matrixCode1, i, i)
+        local c2 = string.sub(matrixCode2, i, i)
+        if c1 == c2 then
+            matc = matc  + 1
+        end
+        
+    end
+    
+    local result = (matc / maxc) * 100
+    -- Logm("Similarity %f with %s to %s", result, matrixCode1, matrixCode2)
+    return result
+    
+end
+
+function IsColorBlock(self, x, y, width, height, greyMin, greyMax)
+
+    --[[
+    local yesc = 0
+    local noc = 0
+    local totalc = (width * height) / 2
+    ]]--
+    
+    for j = 0, height - 1 do
+        for i = 0,width - 1 do 
+            --[[
+            local grey = GetGreyColor(x + i, y + j)
+            if grey >= greyMin and grey <= greyMax then
+                yesc = yesc + 1
+            else
+                noc = noc + 1
+            end
+            if yesc >= totalc then
+                return true
+            end
+            if noc >= totalc then
+                return false
+            end
+            ]]--
+            local grey = GetGreyColor(x + i, y + j)
+            if grey >= greyMin and grey <= greyMax then
+                return true
+            end
+        end
+    end
+    
+    return false
+    
+end
+
+function Print(self, colorMin, colorMax, fontSize, fontSimilarity, topLeftX, topLeftY, bottomRightX, bottomRightY)
+
+    local greyMin = RGBToGrey(ColorToRGB(colorMin))
+    local greyMax = RGBToGrey(ColorToRGB(colorMax))
+    
+    local rectArray, rectCount = self:GetFontRectangles(greyMin, greyMax, fontSize, fontSimilarity, topLeftX, topLeftY, bottomRightX, bottomRightY)
+    
+    local text = ""
+    for i = 0, rectCount - 1 do
+        Logm("-----> [%d] Rectangle %d, %d to %d, %d", i, rectArray[i].topleftx, rectArray[i].toplefty, rectArray[i].bottomrightx, rectArray[i].bottomrighty)
+        local matrixCode = self:GetMatrixCode(rectArray[i], greyMin, greyMax)
+        Logm(matrixCode)
+    end
+    return text
+    
+end
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.Create = function(self, matrixWidthCount, matrixHeightCount)
+        local obj = {}
+        
+        obj.matrixWidthCount = matrixWidthCount
+        obj.matrixHeightCount = matrixHeightCount
+        
+        obj.matrixCodes = {}
+        
+        obj.GetFontRectangles = GetFontRectangles
+        obj.GetConnectedRectangles = GetConnectedRectangles
+        obj.GetConnectedRectangle = GetConnectedRectangle
+        obj.GetRectangle = GetRectangle
+        
+        obj.GetText = GetText
+        obj.GetIndexedText = GetIndexedText
+        obj.CheckText = CheckText
+        
+        obj.Add = Add
+
+        obj.GetMatchedTextFromMatrixCode = GetMatchedTextFromMatrixCode
+        obj.GetMatrixCode = GetMatrixCode
+        obj.GetMatrixCodeSimilarity = GetMatrixCodeSimilarity
+        
+        obj.IsColorBlock = IsColorBlock
+
+        obj.Print = Print
+
+        return obj
+    end
+
+	SetObject("LuaFocrFactory", obj)
+	Logd("LuaFocrFactory has been registered")
+end

@@ -1,0 +1,29 @@
+﻿
+function RegisterObject()
+
+    local obj = {}
+    
+    obj.tm = CreateObject("LuaTimer")
+    
+    obj.Start = function(self, ms, onshortcut)
+        Logm("Start shortcut")
+        self.tm:SetTimer(ms, function()
+        
+            --Logm("Shortcut timer")
+            ListenShortcut(onshortcut)
+            
+        end)
+        
+    end
+    
+    obj.Stop = function(self, ms)
+        Logm("Stop shortcut")
+        self.tm:KillTimer()
+        CancelShortcut()
+    end
+	
+	SetObject("LuaShortcutlUtil", obj)
+	Logd("LuaShortcutlUtil has been registered")
+    
+end
+

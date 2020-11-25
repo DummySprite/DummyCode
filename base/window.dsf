@@ -1,0 +1,197 @@
+﻿
+Import("windowbase.dsf")
+
+g_index = 0
+
+function ClaimId()
+    g_index = g_index + 1
+    return string.format("window_%d", g_index)
+end
+
+function RegisterObject()
+
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = GetObject("LuaWindowBaseFactory"):Create()
+        
+        obj.m_onConfirmListener = nil
+        obj.m_onCancelListener = nil
+        
+        obj.m_langListener = nil
+        obj.m_configListener = nil
+        obj.m_configTag = ""
+        obj.m_configIndex = 0
+        
+        obj.options = GetObject("LuaOptionFactory"):Create()
+        
+        obj.m_width = -1
+        obj.m_height = -1
+        
+        self.m_winMain = nil
+        
+        obj.GetWidth = function(self)
+            return self.m_width
+        end
+        
+        obj.GetHeight = function(self)
+            return self.m_height
+        end
+        
+        obj.GetWindow = function(self)
+            return self.m_winMain
+        end
+        
+        obj.Show = function(self, title, x, y, width, height, callback)
+        
+            self.m_width = width
+            self.m_height = height
+        
+            if x == "center" then
+                x = GetDisplayWidth() / 2 - width / 2
+            end
+
+            if y == "center" then
+                y = GetDisplayHeight() * 0.2
+                if y + height >= GetDisplayHeight() then
+                    y = DpToPixel(5)
+                end
+            end
+            
+            Logm("window pos %d, %d(%d, %d)", x, y, GetDisplayWidth(), GetDisplayHeight())
+            
+            self.m_winMain = CreateFrame(ClaimId(), title,  x,  y,  width, height)    
+            if GetSystemName() == "windows" then    
+                self.m_winMain:SetStyle("no_taskbar|stay_on_top")
+            else
+                self.m_winMain:EnableActionBar(false)
+                self.m_winMain:EnableMovable(false)
+            end
+            
+            self.m_layoutMain =  CreateLinearLayout("layoutMain", "vertical", "match_parent", "match_parent")
+            self.m_layoutMain:SetBackgroundColor(RGBAToColor(255, 255, 255, 255))
+            self.m_winMain:Attach(self.m_layoutMain)
+            --
+                local layoutTop =  CreateLinearLayout("layoutTop", "horizontal", "match_parent", "wrap_content")
+                layoutTop:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+                layoutTop:SetGravity("right")
+                --
+                    local tviewTitle = CreateTextView("tviewTitle", title, "wrap_content", "match_parent")
+                    tviewTitle:SetLayoutGravity("left")
+                    layoutTop:AddControl(tviewTitle)
+      
+                    local iviewClose = CreateImageView("iviewClose", DpToPixel(28), DpToPixel(28))
+                    iviewClose:SetBackgroundImage("touchwindow_close.png")
+                    iviewClose:SetLayoutGravity("right")
+                    iviewClose:SetOnClickListener(function()
+                        self:OnCancel()
+                    end)
+                    layoutTop:AddControl(iviewClose)
+                --
+                layoutTop:SetLayoutMarginBottom(DpToPixel(4))
+                
+                self.layoutContent =  CreateLinearLayout("layoutContent", "vertical", "match_parent", "match_parent")
+                self.layoutContent:SetWeight(1)
+
+                self.layoutBottom =  CreateLinearLayout("layoutBottom", "horizontal", "match_parent", "wrap_content")
+                --
+                    local btnConfirm = CreateButton("btnConfirm", "OK", "match_parent",  DpToPixel(36))
+                    btnConfirm:SetWeight(1)
+                    btnConfirm:SetGravity("center")
+                    btnConfirm:SetLayoutMarginRight(DpToPixel(1))
+                    btnConfirm:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+                    btnConfirm:SetOnClickListener(function()
+                        self:OnConfirm()
+                    end)
+                    self.layoutBottom:AddControl(btnConfirm)
+                        
+                    if self:IsCancelEnable() then
+                        local btnCancel = CreateButton("btnCancel", "NO", "match_parent",  DpToPixel(36))
+                        btnCancel:SetWeight(1)
+                        btnCancel:SetGravity("center")
+                        btnCancel:SetLayoutMarginLeft(DpToPixel(1))
+                        btnCancel:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+                        btnCancel:SetOnClickListener(function()
+                            self:OnCancel()
+                        end)
+                        self.layoutBottom:AddControl(btnCancel)
+                    end
+                --
+                
+                self.m_layoutMain:AddControl(layoutTop)
+                self.m_layoutMain:AddControl(self.layoutContent)
+                callback(self.layoutContent)
+                self.m_layoutMain:AddControl(self.layoutBottom)
+            --
+            self.m_winMain:Show()
+        end
+        
+        obj.GetBottom = function(self)
+            return self.layoutBottom
+        end
+        
+        obj.Close = function(self)
+            self.m_winMain:Close()
+        end
+        
+        obj.SetStyle = function(self, style)
+            self.style = style
+        end
+        obj.GetStyle = function(self)
+            return self.style
+        end
+
+        obj.GetOptions = function(self)
+            return self.options
+        end
+        obj.AddOption = function(self, option)
+            self.options:Add(option)
+        end
+        
+        obj.OnConfirm = function(self)
+            Logm("OnConfirm")
+            if self.m_onConfirmListener ~= nil then
+                if self.m_onConfirmListener() == true then
+                    self.m_winMain:Close()
+                end
+            else
+                self.m_winMain:Close()
+            end
+            
+        end
+        
+        obj.OnCancel = function(self)
+            Logm("OnCancel")
+            if self.m_onCancelListener ~= nil then
+                if self.m_onCancelListener() == true then
+                    self.m_winMain:Close()
+                end
+            else
+                self.m_winMain:Close()
+            end
+        end
+
+        obj.SetOnConfirmListener = function(self, listener)
+            self.m_onConfirmListener = listener
+        end
+        obj.SetOnCancelListener = function(self, listener)
+            self.m_onCancelListener = listener
+        end
+        obj.SetOnCloseListener = function(self, listener)
+            self.m_onCancelListener = listener
+        end
+        
+        -- Style handlers
+        
+        obj.IsCancelEnable = function(self)
+            return true
+        end
+        
+        return obj
+    end
+	
+	SetObject("LuaWindowFactory", obj)
+	Logd("LuaWindowFactory has been registered")
+end
+

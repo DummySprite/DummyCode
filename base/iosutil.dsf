@@ -1,0 +1,54 @@
+﻿
+Import("stringutil.dsf")
+
+g_system = GetSystemName()
+g_systemVersion = GetSystemVersion()
+
+function IsIOS(self)
+    return g_system == "ios"
+end
+
+function GetDisplayLogicalWidth(self)
+    return PixelToDp(GetDisplayWidth())
+end
+
+function GetDisplayLogicalHeight(self)
+    return PixelToDp(GetDisplayHeight())
+end
+
+function GetPatchedCenterPosition(self, width)
+
+    if g_system ~= "ios" then
+        return "center"
+    end
+    
+    -- works for IOS 11 or above
+    if g_systemVersion >= 12 then
+        -- ...
+    else
+        return "center"
+    end
+    
+    local window_x = "center"
+    local rotation = GetDisplayRotation()
+    if rotation == 1 then
+        window_x = GetDisplayLogicalWidth() / 2 - (width)
+    elseif rotation == 3 then
+        window_x = GetDisplayLogicalWidth() / 2
+    end
+    
+    return window_x
+    
+end
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.IsIOS = IsIOS
+    obj.GetDisplayLogicalWidth = GetDisplayLogicalWidth
+    obj.GetDisplayLogicalHeight = GetDisplayLogicalHeight
+    obj.GetPatchedCenterPosition = GetPatchedCenterPosition
+    
+	SetObject("LuaIOSUtil", obj)
+	Logd("LuaIOSUtil has been registered")
+end

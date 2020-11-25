@@ -1,0 +1,68 @@
+﻿
+function StartApp(self, name)
+    RunApp(name)
+end
+
+function RestartApp(self, name)
+
+    pid = FindProcess(name)
+    if pid ~= -1 then
+        KillProcess(pid)
+        -- 等待3秒
+        Sleep(3000)
+    end
+    -- 启动
+    RunApp(name)
+
+end
+
+function KillApp(self, name)
+    pid = FindProcess(name)
+    if pid ~= -1 then
+        KillProcess(pid)
+    end
+end
+
+function CheckLowMemory(self, mb)
+
+	if GetSDKVersion() >= 2100 then
+		
+		-- 忽略无法获取到内存的设备
+		if GetTotalMemory() <= 0 then
+			return false
+		end
+		
+		-- Logd("总运存 %fm", GetTotalMemory() / 1024 / 1024)
+		
+		availMem = GetAvailableMemory()
+		availMb   = availMem / 1024 / 1024
+        -- Logd("剩余可用运存 %fm", availMb)
+		return mb > availMb
+	else
+		return false
+	end
+	
+end
+
+function RelativeCoords(self, res_x, res_y, res_display_width, res_display_height)
+    local display_width =GetDisplayWidth()
+    local display_height =GetDisplayHeight()
+    Logm("display=%d, %d", display_width, display_height)
+    local x = display_width * (res_x / res_display_width)
+    local y = display_height * (res_y / res_display_height)
+    return x, y
+end
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.StartApp = StartApp
+	obj.RestartApp = RestartApp
+	obj.KillApp = KillApp
+    obj.RelativeCoords = RelativeCoords
+    
+    obj.CheckLowMemory = CheckLowMemory
+    
+	SetObject("LuaShellUtil", obj)
+	Logd("ShellUtil has been registered")
+end

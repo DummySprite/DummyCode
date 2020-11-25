@@ -1,0 +1,66 @@
+
+Import("grid.dsf")
+Import("stack.dsf")
+Import("floodfill.dsf")
+
+function GetNumberConf(self, colorMin, colorMax, topLeftX, topLeftY, bottomRightX, bottomRightY, fsize)
+	local result = -1
+	local result_conf = -1
+	
+	-- 识别数字,返回准确度,number_conf为0-100的值
+	OcrGetNumber(colorMin, colorMax,  topLeftX,  topLeftY,  bottomRightX, bottomRightY, fsize, function(number, number_conf)
+        result = number
+        result_conf = number_conf
+	end)
+	
+	return result, result_conf
+end
+
+function GetNumberConfBest(self, colorArray, topLeftX, topLeftY, bottomRightX, bottomRightY, fsize, conf)
+	local result_best      = -1
+	local result_conf_best = -1
+    
+	-- 从数组范围颜色中获取匹配度最高或大于conf匹配度的数字
+	--
+    for i, v in pairs(colorArray) do
+          
+        if v ~= nil then
+            
+            number, number_conf = self:GetNumberConf(v["min"], v["max"], topLeftX, topLeftY, bottomRightX, bottomRightY, fsize)
+            if number ~= -1 then
+            
+                -- 是否找到想要的结果?
+                if number_conf >= conf then
+                    return number, number_conf
+                end
+                
+                -- 是否是更好的结果？
+                if number_conf > result_conf_best then
+                    result_best = number
+                    result_conf_best = number_conf
+                end
+                
+            end
+            
+        end
+		
+	end
+
+	return result_best, result_conf_best
+end
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.Create = function(self)
+        local obj = {}
+        
+        obj.GetNumberConfBest = GetNumberConfBest
+        obj.GetNumberConf = GetNumberConf
+        
+        return obj
+    end
+
+	SetObject("LuaOcrFactory", obj)
+	Logd("LuaOcrFactory has been registered")
+end

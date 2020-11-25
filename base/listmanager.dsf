@@ -1,0 +1,133 @@
+﻿
+function GetId(obj)
+    return tostring(obj)
+end
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.Create = function(self)
+    
+        local obj = {}
+        
+        obj.m_items = GetObject("LuaListFactory"):Create()
+        
+        obj.Append = function(self, item)
+            self.m_items:Append(item)
+        end
+        
+        obj.Bind = function(self, item, view)
+            item.view = view
+        end
+        
+        obj.Count = function(self)
+            return self.m_items:Count()
+        end
+        
+        obj.Sort = function(self, cmp)
+            self.m_items:Sort(cmp)
+        end
+        
+        obj.Remove = function(self, item)
+            local index = self:GetItemIndex(item)
+            if index == -1 then
+                Logm("Unable to find item")
+                return
+            end
+            self.m_items:Remove(index)
+        end
+        
+        obj.Up = function(self, item)
+        
+            local index = self:GetItemIndex(item)
+     
+            local prev_index = index - 1
+            local prev_item = self.m_items:GetItem(prev_index)
+            
+            -- Switch view
+            local view = item.view
+            item.view = prev_item.view
+            prev_item.view = view
+            
+            --Switch item
+            self.m_items:SetItem(prev_index, item)
+            self.m_items:SetItem(index, prev_item)
+            
+            self.m_items:Print()
+            
+            return item, prev_item
+            
+        end
+        
+        obj.Foreach = function(self, getitem)
+            self.m_items:Foreach(getitem)
+        end
+        
+        obj.GetItems = function(self)
+            return self.m_items:GetItems()
+        end
+        
+        obj.GetView = function(self, item)
+            return item.view
+        end
+        
+        obj.GetItemByView = function(self, view)
+        
+            local found_item = nil
+            --local view_id = GetId(view)
+            
+            self.m_items:Foreach(function(item)
+            
+                --local _view_id = GetId(item.view)
+                --Logm("Comparing %s to %s", view_id, _view_id)
+                
+                if view == item.view then
+                    found_item = item
+                    return false
+                end
+                
+                return true
+                
+            end)
+            
+            return found_item
+            
+        end
+        
+        obj.GetItemIndex = function(self, item)
+               
+            local found_index = -1
+            --local item_id = GetId(item)
+            
+            self.m_items:ForeachEx(function(index, _item)
+            
+                --local _item_id = GetId(_item)
+                --Logm("Comparing %s to %s", item_id, _item_id)
+                
+                if item == _item then
+                    found_index = index
+                    return false
+                end
+                
+                return true
+                
+            end)
+            
+            return found_index
+            
+        end
+        
+        obj.Print = function(self)
+            self.m_items:Print()
+        end
+        
+        
+        return obj
+        
+    end
+
+	SetObject("LuaListManagerFactory", obj)
+	Logd("LuaListManagerFactory has been registered")
+    
+end
+

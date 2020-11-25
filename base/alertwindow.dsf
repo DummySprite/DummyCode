@@ -1,0 +1,134 @@
+﻿
+g_index = 0
+
+function ClaimId()
+    g_index = g_index + 1
+    return string.format("alertwindow_%d", g_index)
+end
+
+function ShowControl(self, tittle, control, x, y)
+
+    self.winAlert = CreateFrame(ClaimId(), tittle,  x,  y,   self.width, self.height)
+    self.winAlert:EnableActionBar(false)
+
+    layoutAlert =  CreateLinearLayout("layoutFit", "vertical", "match_parent", "match_parent")
+    layoutAlert:SetBackgroundColor(RGBAToColor(255, 255, 255, 255))
+    self.winAlert:Attach(layoutAlert)
+    --
+        local layoutTop =  CreateLinearLayout("layoutTop", "horizontal", "match_parent", "wrap_content")
+        layoutTop:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+        layoutTop:SetGravity("right")
+        --
+            local tviewTitle = CreateTextView("tviewTitle", tittle, "wrap_content",  DpToPixel(24))
+            tviewTitle:SetLayoutGravity("left")
+            tviewTitle:SetLabel(tittle)
+            layoutTop:AddControl(tviewTitle)
+        --
+        layoutTop:SetLayoutMarginBottom(DpToPixel(4))
+        layoutAlert:AddControl(layoutTop)
+         
+        layoutAlert:AddControl(control)
+
+        layoutButton =  CreateLinearLayout("layoutButton", "horizontal", "match_parent")
+        --
+            if self.style == "CONFIRM" or self.style == "CONFIRM_CANCEL" then
+                btnConfirm = CreateButton("btnConfirm", "OK", "match_parent",  DpToPixel(38))
+                btnConfirm:SetWeight(1)
+                btnConfirm:SetGravity("center")
+                btnConfirm:SetLayoutMarginRight(DpToPixel(1))
+                btnConfirm:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+                btnConfirm:SetOnClickListener(function()
+                    if self.onConfirmListener ~= nil then
+                        self.onConfirmListener()
+                    else
+                        self.winAlert:Close()
+                    end
+                end)
+                layoutButton:AddControl(btnConfirm)
+            end
+                
+            if self.style == "CONFIRM_CANCEL" then
+                btnCancel = CreateButton("btnCancel", "NO", "match_parent",  DpToPixel(38))
+                btnCancel:SetWeight(1)
+                btnCancel:SetGravity("center")
+                btnCancel:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+                btnCancel:SetLayoutMarginLeft(DpToPixel(1))
+                btnCancel:SetOnClickListener(function()
+                    if self.onCancelListener ~= nil then
+                        self.onCancelListener()
+                    else
+                        self.winAlert:Close()
+                    end
+                end)
+                layoutButton:AddControl(btnCancel)
+            end
+        --
+        layoutAlert:AddControl(layoutButton)
+    --
+    self.winAlert:Show()
+end
+
+function Show(self, title, message, x, y)
+
+    tviewMessage = CreateTextView("tviewMessage", "",  "match_parent", "match_parent")
+    tviewMessage:SetGravity("center")
+    tviewMessage:SetWeight(1)
+    tviewMessage:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+    tviewMessage:SetLayoutMargin(10)
+    tviewMessage:SetLabel(message)
+    
+    self:ShowControl(title, tviewMessage, x, y)
+        
+end
+
+function Close(self)
+    self.winAlert:Close()
+end
+
+function SetStyle(self, style)
+    self.style = style
+end
+
+function SetSize(self, width, height)
+    self.width = width
+    self.height = height
+end
+
+function SetOnConfirmListener(self, listener)
+    self.onConfirmListener = listener
+end
+
+function SetOnCancelListener(self, listener)
+    self.onCancelListener = listener
+end
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+        local obj = {}
+        
+        obj.Show = Show
+        obj.ShowControl = ShowControl
+        obj.Close = Close
+        
+        obj.SetStyle = SetStyle
+        -- Variables
+        obj.style = "CONFIRM"
+        obj.width = "wrap_content"
+        obj.height = "wrap_content"
+        
+        obj.onConfirmListener = nil
+        obj.onCancelListener = nil
+        obj.SetOnConfirmListener = SetOnConfirmListener
+        obj.SetOnCancelListener = SetOnCancelListener
+        
+        obj.SetSize = SetSize
+        
+        return obj
+    end
+
+	SetObject("LuaAlertWindowFactory", obj)
+	Logd("LuaAlertWindowFactory has been registered")
+end
+

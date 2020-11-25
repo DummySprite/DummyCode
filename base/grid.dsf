@@ -1,0 +1,43 @@
+﻿
+function Set(self, x, y, value)
+    if self.grid[x] == nil then
+        self.grid[x] = {}
+    end
+    self.grid[x][y] = value
+end
+
+function Get(self, x, y, defaultValue)
+    if self.grid[x] == nil then
+        return defaultValue
+    end
+    
+    if self.grid[x][y] == nil then
+        return defaultValue
+    else
+        return self.grid[x][y]
+    end
+end
+
+function Clear(self)
+	self.grid = {}
+end
+
+function RegisterObject()
+	local obj = {}
+    
+    obj.Create = function(self)
+        local obj = {}
+        
+        obj.grid = {}
+        
+        obj.Set = Set
+        obj.Get = Get
+        obj.Clear = Clear
+        
+        return obj
+    end
+
+	SetObject("LuaGridFactory", obj)
+	Logd("LuaGridFactory has been registered")
+end
+

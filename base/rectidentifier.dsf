@@ -1,0 +1,139 @@
+﻿
+
+function ForeachRect(self, x, y, x_limit, y_limit, x_move, y_move, horizontal_scan, callback)
+
+    if horizontal_scan then
+        
+        local _y = y
+        while _y < y_limit do
+                
+            local _x = x
+            while _x < x_limit do
+                
+                if callback(_x, _y) == false then
+                    return false
+                end
+                
+                _x = _x + x_move
+            end
+            
+            _y = _y + y_move
+        end
+
+    end
+    
+end
+
+function IdentifyRects(self, rects, callback)
+  
+    for key, rect in pairs(rects) do  
+        
+        -- Logm("Identifying rect %d, %d", rect.x, rect.y)
+        rect.ident = callback(rect)
+        
+    end 
+    
+end
+
+function FindRects(self)
+
+    --[[
+    local test_x_move = 384 - 310
+    local test_y_move = 669 - 568
+    local test_x_move_dp = PixelToDp(test_x_move)
+    local test_y_move_dp = PixelToDp(test_y_move)
+    Logm("DP %d, %d", test_x_move_dp, test_y_move_dp)
+    ]]--
+    
+    local x_move = 32 -- DpToPixel(66)
+    local y_move = 32 -- DpToPixel(90)
+    
+    Logm("rect %d, %d", x_move, y_move)
+    local width = GetDisplayWidth()
+    local height = GetDisplayHeight()
+    Logm("%d, %d", width, height)
+
+    local block = 4
+    local blocks = block * block
+    
+    local rects = {}
+    
+    self:ForeachRect(0, 0, width, height, x_move, y_move, true, function(x, y)
+    
+        local sub_x_move = x_move / block
+        local sub_y_move = y_move / block
+        
+        sub_x_limit = x + x_move
+        if sub_x_limit > width then
+            sub_x_limit = width
+        end
+        sub_y_limit = y + y_move
+        if sub_y_limit > height then
+            sub_y_limit = height
+        end
+        
+        -- Logm("%d, %d (%d, %d)", x, y, sub_x_limit, sub_y_limit)
+        -- Sleep(10)
+        
+        local diff = {}
+     
+        self:ForeachRect(x, y,  sub_x_limit, sub_y_limit, sub_x_move, sub_y_move, true, function(x, y)
+        
+            local color = GetColor(x, y)
+            
+            local index = 0
+            index = BitLShift(x, 16)
+            index = BitOr(index, y)
+            
+            for key, value in pairs(diff) do  
+            
+                sim = ColorDiff(color, value.color)
+                if sim >= 95.0 then
+                    value.count = value.count + 1
+                    -- Logm("  matched to %s(%x - %d, %d)", key, index, x, y)
+                    return true
+                end
+                
+            end 
+
+            if diff[index] == nil then
+                diff[index] = {}
+                diff[index].count = 0
+            end
+            diff[index].color = color
+            return true
+            
+        end)
+        
+        local rect = {}
+        rect.diff = diff
+        rect.x = x
+        rect.y = y
+        rect.block = block
+        table.insert(rects, rect)
+        
+        return true
+        
+    end)
+
+    return rects
+    
+end
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create =  function(self)
+        local obj = {}
+        
+        obj.ForeachRect = ForeachRect
+        obj.IdentifyRects = IdentifyRects
+        obj.FindRects = FindRects
+        
+        return obj
+    end
+	
+	SetObject("LuaRectIdentifierFactory", obj)
+	Logd("LuaRectIdentifierFactory has been registered")
+end
+

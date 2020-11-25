@@ -1,0 +1,72 @@
+﻿
+Import("androidutil.dsf")
+g_androidUtil = GetObject("LuaAndroidUtil")
+
+Import("keymapping.dsf")
+g_keyMapping = GetObject("LuaKeyMapping")
+
+function SendKey(self, keyName)
+
+    if g_androidUtil:IsAndroid() then
+        
+        local keyCode = g_keyMapping:GetAkcCode(keyName)
+        if keyCode == -1 then
+            Logm("Invalid keyName %s", keyName)
+            return
+        end
+        
+        local cmd = string.format("input keyevent %d", keyCode)
+        Shell(cmd)
+        
+    else
+        InputKey(keyName)
+    end
+    
+end
+
+function Home(self)
+	self:SendKey("HOME")
+end
+
+function Power(self)
+	self:SendKey("POWER")
+end
+
+function Enter(self)
+	self:SendKey("ENTER")
+end
+
+function Esc(self)
+	self:SendKey("ESCAPE")
+end
+
+function Menu(self)
+	self:SendKey("MENU")
+end
+
+function CapsLock(self)
+	self:SendKey("CAPS_LOCK")
+end
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.Create = function(self)
+        
+        local obj = {}
+        
+        obj.Home = Home
+        obj.Power = Power
+        obj.Enter = Enter
+        obj.Esc = Esc
+        obj.Menu = Menu
+        obj.CapsLock = CapsLock
+        obj.SendKey = SendKey
+        
+        return obj
+        
+    end
+    
+	SetObject("LuaKeyEventFactory", obj)
+	Logd("LuaKeyEventFactory has been registered")
+end

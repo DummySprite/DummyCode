@@ -1,0 +1,26 @@
+﻿
+
+function Set(self, tag)
+    self.tag = tag
+    self.timestamp = GetSystemTime()
+end
+
+function Print(self)
+    Logd("[%s] 时间消耗 : %d毫秒", self.tag, GetSystemTime() - self.timestamp)
+end
+
+function RegisterObject()
+	local obj = {}
+    
+	obj.Create = function(self)
+        local obj = {}
+        
+        obj.Set = Set
+        obj.Print =Print
+        
+        return obj
+    end
+
+	SetObject("LuaPerformanceFactory", obj)
+	Logd("LuaPerformanceUtil has been registered")
+end

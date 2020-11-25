@@ -1,0 +1,537 @@
+﻿
+AKC_MAPPING = {}
+AKC_MAPPING["AKC_A"] = 0x001d 
+AKC_MAPPING["AKC_B"] = 0x001e 
+AKC_MAPPING["AKC_C"] = 0x001f 
+AKC_MAPPING["AKC_D"] = 0x0020 
+AKC_MAPPING["AKC_E"] = 0x0021 
+AKC_MAPPING["AKC_F"] = 0x0022 
+AKC_MAPPING["AKC_G"] = 0x0023 
+AKC_MAPPING["AKC_H"] = 0x0024 
+AKC_MAPPING["AKC_I"] = 0x0025 
+AKC_MAPPING["AKC_J"] = 0x0026 
+AKC_MAPPING["AKC_K"] = 0x0027 
+AKC_MAPPING["AKC_L"] = 0x0028 
+AKC_MAPPING["AKC_M"] = 0x0029 
+AKC_MAPPING["AKC_N"] = 0x002a 
+AKC_MAPPING["AKC_O"] = 0x002b 
+AKC_MAPPING["AKC_P"] = 0x002c 
+AKC_MAPPING["AKC_Q"] = 0x002d 
+AKC_MAPPING["AKC_R"] = 0x002e 
+AKC_MAPPING["AKC_S"] = 0x002f 
+AKC_MAPPING["AKC_T"] = 0x0030 
+AKC_MAPPING["AKC_U"] = 0x0031 
+AKC_MAPPING["AKC_V"] = 0x0032 
+AKC_MAPPING["AKC_W"] = 0x0033 
+AKC_MAPPING["AKC_X"] = 0x0034 
+AKC_MAPPING["AKC_Y"] = 0x0035 
+AKC_MAPPING["AKC_Z"] = 0x0036 
+AKC_MAPPING["AKC_1"] = 0x0008 
+AKC_MAPPING["AKC_2"] = 0x0009 
+AKC_MAPPING["AKC_3"] = 0x000a 
+AKC_MAPPING["AKC_4"] = 0x000b 
+AKC_MAPPING["AKC_5"] = 0x000c 
+AKC_MAPPING["AKC_6"] = 0x000d 
+AKC_MAPPING["AKC_7"] = 0x000e 
+AKC_MAPPING["AKC_8"] = 0x000f 
+AKC_MAPPING["AKC_9"] = 0x0010 
+AKC_MAPPING["AKC_0"] = 0x0007 
+AKC_MAPPING["AKC_ENTER"] = 0x0042 
+AKC_MAPPING["AKC_ESCAPE"] = 0x006f 
+AKC_MAPPING["AKC_BACK"] = 0x0004 
+AKC_MAPPING["AKC_DEL"] = 0x0043 
+AKC_MAPPING["AKC_TAB"] = 0x003d 
+AKC_MAPPING["AKC_SPACE"] = 0x003e 
+AKC_MAPPING["AKC_MINUS"] = 0x0045 
+AKC_MAPPING["AKC_EQUALS"] = 0x0046 
+AKC_MAPPING["AKC_LEFT_BRACKET"] = 0x0047 
+AKC_MAPPING["AKC_RIGHT_BRACKET"] = 0x0048 
+AKC_MAPPING["AKC_BACKSLASH"] = 0x0049 
+AKC_MAPPING["AKC_SEMICOLON"] = 0x004a 
+AKC_MAPPING["AKC_APOSTROPHE"] = 0x004b 
+AKC_MAPPING["AKC_GRAVE"] = 0x0044 
+AKC_MAPPING["AKC_COMMA"] = 0x0037 
+AKC_MAPPING["AKC_PERIOD"] = 0x0038 
+AKC_MAPPING["AKC_SLASH"] = 0x004c 
+AKC_MAPPING["AKC_CAPS_LOCK"] = 0x0073 
+AKC_MAPPING["AKC_F1"] = 0x0083 
+AKC_MAPPING["AKC_MENU"] = 0x0052 
+AKC_MAPPING["AKC_F2"] = 0x0084 
+AKC_MAPPING["AKC_SOFT_RIGHT"] = 0x0002 
+AKC_MAPPING["AKC_F3"] = 0x0085 
+AKC_MAPPING["AKC_CALL"] = 0x0005 
+AKC_MAPPING["AKC_F4"] = 0x0086 
+AKC_MAPPING["AKC_ENDCALL"] = 0x0006  
+AKC_MAPPING["AKC_F5"] = 0x0087 
+AKC_MAPPING["AKC_F6"] = 0x0088  
+AKC_MAPPING["AKC_F7"] = 0x0089 
+AKC_MAPPING["AKC_F8"] = 0x008a 
+AKC_MAPPING["AKC_F9"] = 0x008b 
+AKC_MAPPING["AKC_F10"] = 0x008c 
+AKC_MAPPING["AKC_F11"] = 0x008d  
+AKC_MAPPING["AKC_F12"] = 0x008e 
+AKC_MAPPING["AKC_SYSRQ"] = 0x0078 
+AKC_MAPPING["AKC_SCROLL_LOCK"] = 0x0074 
+AKC_MAPPING["AKC_BREAK"] = 0x0079 
+AKC_MAPPING["AKC_INSERT"] = 0x007c 
+AKC_MAPPING["AKC_MOVE_HOME"] = 0x007a 
+AKC_MAPPING["AKC_HOME"] = 0x0003  
+AKC_MAPPING["AKC_PAGE_UP"] = 0x005c 
+AKC_MAPPING["AKC_FORWARD_DEL"] = 0x0070 
+AKC_MAPPING["AKC_MOVE_END"] = 0x007b 
+AKC_MAPPING["AKC_PAGE_DOWN"] = 0x005d 
+AKC_MAPPING["AKC_DPAD_RIGHT"] = 0x0016 
+AKC_MAPPING["AKC_DPAD_LEFT"] = 0x0015 
+AKC_MAPPING["AKC_DPAD_DOWN"] = 0x0014 
+AKC_MAPPING["AKC_DPAD_UP"] = 0x0013 
+AKC_MAPPING["AKC_NUM_LOCK"] = 0x008f 
+AKC_MAPPING["AKC_NUMPAD_DIVIDE"] = 0x009a 
+AKC_MAPPING["AKC_NUMPAD_MULTIPLY"] = 0x009b 
+AKC_MAPPING["AKC_NUMPAD_SUBTRACT"] = 0x009c 
+AKC_MAPPING["AKC_NUMPAD_ADD"] = 0x009d 
+AKC_MAPPING["AKC_NUMPAD_ENTER"] = 0x00a0 
+AKC_MAPPING["AKC_NUMPAD_1"] = 0x0091 
+AKC_MAPPING["AKC_NUMPAD_2"] = 0x0092 
+AKC_MAPPING["AKC_NUMPAD_3"] = 0x0093 
+AKC_MAPPING["AKC_NUMPAD_4"] = 0x0094 
+AKC_MAPPING["AKC_NUMPAD_5"] = 0x0095 
+AKC_MAPPING["AKC_NUMPAD_6"] = 0x0096 
+AKC_MAPPING["AKC_NUMPAD_7"] = 0x0097 
+AKC_MAPPING["AKC_NUMPAD_8"] = 0x0098 
+AKC_MAPPING["AKC_NUMPAD_9"] = 0x0099 
+AKC_MAPPING["AKC_NUMPAD_0"] = 0x0090 
+AKC_MAPPING["AKC_NUMPAD_DOT"] = 0x009e 
+AKC_MAPPING["AKC_BACKSLASH"] = 0x0049 
+AKC_MAPPING["AKC_SEARCH"] = 0x0054 
+AKC_MAPPING["AKC_POWER"] = 0x001a  
+AKC_MAPPING["AKC_NUMPAD_EQUALS"] = 0x00a1 
+AKC_MAPPING["AKC_VOLUME_MUTE"] = 0x00a4 
+AKC_MAPPING["AKC_VOLUME_UP"] = 0x0018 
+AKC_MAPPING["AKC_VOLUME_DOWN"] = 0x0019 
+AKC_MAPPING["AKC_NUMPAD_COMMA"] = 0x009f 
+AKC_MAPPING["AKC_NUMPAD_LEFT_PAREN"] = 0x00a2 
+AKC_MAPPING["AKC_NUMPAD_RIGHT_PAREN"] = 0x00a3 
+AKC_MAPPING["AKC_CTRL_LEFT"] = 0x0071 
+AKC_MAPPING["AKC_SHIFT_LEFT"] = 0x003b 
+AKC_MAPPING["AKC_ALT_LEFT"] = 0x0039 
+AKC_MAPPING["AKC_META_LEFT"] = 0x0075  
+AKC_MAPPING["AKC_CTRL_RIGHT"] = 0x0072 
+AKC_MAPPING["AKC_SHIFT_RIGHT"] = 0x003c 
+AKC_MAPPING["AKC_ALT_RIGHT"] = 0x003a 
+AKC_MAPPING["AKC_META_RIGHT"] = 0x0076 
+AKC_MAPPING["AKC_MEDIA_PLAY_PAUSE"] = 0x0055 
+AKC_MAPPING["AKC_MEDIA_STOP"] = 0x0056 
+AKC_MAPPING["AKC_MEDIA_PREVIOUS"] = 0x0058 
+AKC_MAPPING["AKC_MEDIA_NEXT"] = 0x0057 
+AKC_MAPPING["AKC_MEDIA_EJECT"] = 0x0081 
+AKC_MAPPING["AKC_EXPLORER"] = 0x0040 
+AKC_MAPPING["AKC_BACK"] = 0x0004  
+AKC_MAPPING["AKC_FORWARD"] = 0x007d 
+AKC_MAPPING["AKC_PAGE_UP"] = 0x005c 
+AKC_MAPPING["AKC_PAGE_DOWN"] = 0x005d 
+AKC_MAPPING["AKC_CALCULATOR"] = 0x00d2
+
+WKC_MAPPING = {
+    "NULL",
+    "VK_LBUTTON",
+    "VK_RBUTTON",
+    "VK_CANCEL",
+    "VK_MBUTTON",
+    "VK_XBUTTON1",
+    "VK_XBUTTON2",
+    "0x07",
+    "VK_BACK",
+    "VK_TAB",
+    "0x0A",
+    "0x0B",
+    "VK_CLEAR",
+    "VK_RETURN",
+    "0x0E",
+    "0x0F",
+
+    "VK_SHIFT",
+    "VK_CONTROL",
+    "VK_MENU",
+    "VK_PAUSE",
+    "VK_CAPITAL",
+    "VK_KANA, VK_HANGUL",
+    "0x16",
+    "VK_JUNJA",
+    "VK_FINAL",
+    "VK_HANJA, VK_KANJI",
+    "0x1A",
+    "VK_ESCAPE",
+    "VK_CONVERT",
+    "VK_NONCONVERT",
+    "VK_ACCEPT",
+    "VK_MODECHANGE",
+
+    "VK_SPACE",
+    "VK_PRIOR",
+    "VK_NEXT",
+    "VK_END",
+    "VK_HOME",
+    "VK_LEFT",
+    "VK_UP",
+    "VK_RIGHT",
+    "VK_DOWN",
+    "VK_SELECT",
+    "VK_PRINT",
+    "VK_EXECUTE",
+    "VK_SNAPSHOT",
+    "VK_INSERT",
+    "VK_DELETE",
+    "VK_HELP",
+
+    "VK_0",
+    "VK_1",
+    "VK_2",
+    "VK_3",
+    "VK_4",
+    "VK_5",
+    "VK_6",
+    "VK_7",
+    "VK_8",
+    "VK_9",
+    "0x3A",
+    "0x3B",
+    "0x3C",
+    "0x3D",
+    "0x3E",
+    "0x3F",
+
+    "0x40",
+    "VK_A",
+    "VK_B",
+    "VK_C",
+    "VK_D",
+    "VK_E",
+    "VK_F",
+    "VK_G",
+    "VK_H",
+    "VK_I",
+    "VK_J",
+    "VK_K",
+    "VK_L",
+    "VK_M",
+    "VK_N",
+    "VK_O",
+
+    "VK_P",
+    "VK_Q",
+    "VK_R",
+    "VK_S",
+    "VK_T",
+    "VK_U",
+    "VK_V",
+    "VK_W",
+    "VK_X",
+    "VK_Y",
+    "VK_Z",
+    "VK_LWIN",
+    "VK_RWIN",
+    "VK_APPS",
+    "0x5E",
+    "VK_SLEEP",
+
+    "VK_NUMPAD0",
+    "VK_NUMPAD1",
+    "VK_NUMPAD2",
+    "VK_NUMPAD3",
+    "VK_NUMPAD4",
+    "VK_NUMPAD5",
+    "VK_NUMPAD6",
+    "VK_NUMPAD7",
+    "VK_NUMPAD8",
+    "VK_NUMPAD9",
+    "VK_MULTIPLY",
+    "VK_ADD",
+    "VK_SEPARATOR",
+    "VK_SUBTRACT",
+    "VK_DECIMAL",
+    "VK_DIVIDE",
+
+    "VK_F1",
+    "VK_F2",
+    "VK_F3",
+    "VK_F4",
+    "VK_F5",
+    "VK_F6",
+    "VK_F7",
+    "VK_F8",
+    "VK_F9",
+    "VK_F10",
+    "VK_F11",
+    "VK_F12",
+    "VK_F13",
+    "VK_F14",
+    "VK_F15",
+    "VK_F16",
+
+    "VK_F17",
+    "VK_F18",
+    "VK_F19",
+    "VK_F20",
+    "VK_F21",
+    "VK_F22",
+    "VK_F23",
+    "VK_F24",
+    "0x88",
+    "0x89",
+    "0x8A",
+    "0x8B",
+    "0x8C",
+    "0x8D",
+    "0x8E",
+    "0x8F",
+
+    "VK_NUMLOCK",
+    "VK_SCROLL",
+    "VK_OEM_NEC_EQUAL, VK_OEM_FJ_JISHO",
+    "VK_OEM_FJ_MASSHOU",
+    "VK_OEM_FJ_TOUROKU",
+    "VK_OEM_FJ_LOYA",
+    "VK_OEM_FJ_ROYA",
+    "0x97",
+    "0x98",
+    "0x99",
+    "0x9A",
+    "0x9B",
+    "0x9C",
+    "0x9D",
+    "0x9E",
+    "0x9F",
+
+    "VK_LSHIFT",
+    "VK_RSHIFT",
+    "VK_LCONTROL",
+    "VK_RCONTROL",
+    "VK_LMENU",
+    "VK_RMENU",
+    "VK_BROWSER_BACK",
+    "VK_BROWSER_FORWARD",
+    "VK_BROWSER_REFRESH",
+    "VK_BROWSER_STOP",
+    "VK_BROWSER_SEARCH",
+    "VK_BROWSER_FAVORITES",
+    "VK_BROWSER_HOME",
+    "VK_VOLUME_MUTE",
+    "VK_VOLUME_DOWN",
+    "VK_VOLUME_UP",
+
+    "VK_MEDIA_NEXT_TRACK",
+    "VK_MEDIA_PREV_TRACK",
+    "VK_MEDIA_STOP",
+    "VK_MEDIA_PLAY_PAUSE",
+    "VK_LAUNCH_MAIL",
+    "VK_LAUNCH_MEDIA_SELECT",
+    "VK_LAUNCH_APP1",
+    "VK_LAUNCH_APP2",
+    "0xB8",
+    "0xB9",
+    "VK_OEM_1",
+    "VK_OEM_PLUS",
+    "VK_OEM_COMMA",
+    "VK_OEM_MINUS",
+    "VK_OEM_PERIOD",
+    "VK_OEM_2",
+
+    "VK_OEM_3",
+    "VK_ABNT_C1",
+    "VK_ABNT_C2",
+    "0xC3",
+    "0xC4",
+    "0xC5",
+    "0xC6",
+    "0xC7",
+    "0xC8",
+    "0xC9",
+    "0xCA",
+    "0xCB",
+    "0xCC",
+    "0xCD",
+    "0xCE",
+    "0xCF",
+
+    "0xD0",
+    "0xD1",
+    "0xD2",
+    "0xD3",
+    "0xD4",
+    "0xD5",
+    "0xD6",
+    "0xD7",
+    "0xD8",
+    "0xD9",
+    "0xDA",
+    "VK_OEM_4",
+    "VK_OEM_5",
+    "VK_OEM_6",
+    "VK_OEM_7",
+    "VK_OEM_8",
+
+    "0xE0",
+    "VK_OEM_AX",
+    "VK_OEM_102",
+    "VK_ICO_HELP",
+    "VK_ICO_00",
+    "VK_PROCESSKEY",
+    "VK_ICO_CLEAR",
+    "VK_PACKET",
+    "0xE8",
+    "VK_OEM_RESET",
+    "VK_OEM_JUMP",
+    "VK_OEM_PA1",
+    "VK_OEM_PA2",
+    "VK_OEM_PA3",
+    "VK_OEM_WSCTRL",
+    "VK_OEM_CUSEL",
+
+    "VK_OEM_ATTN",
+    "VK_OEM_FINISH",
+    "VK_OEM_COPY",
+    "VK_OEM_AUTO",
+    "VK_OEM_ENLW",
+    "VK_OEM_BACKTAB",
+    "VK_ATTN",
+    "VK_CRSEL",
+    "VK_EXSEL",
+    "VK_EREOF",
+    "VK_PLAY",
+    "VK_ZOOM",
+    "VK_NONAME",
+    "VK_PA1",
+    "VK_OEM_CLEAR",
+    "0xFF" 
+}
+
+function RegisterObject()
+	local obj = {}
+	
+        
+    -- Android virtual key code
+
+    obj.GetAkcCode = function(self, keyName)  
+
+        local akc_key_name = "AKC_" .. string.upper(keyName)
+        for name, code in pairs(AKC_MAPPING) do
+            --Logm("%s : %d", name, code)
+            if name == akc_key_name then
+                return code
+            end
+        end
+        
+        return -1
+
+    end
+
+    obj.GetAkcName = function(self, keyCode)  
+
+        for name, code in pairs(AKC_MAPPING) do
+            if code == keyCode then
+                if string.len(name) >= 5 then
+                    return string.sub(name, 5)
+                else
+                    return ""
+                end
+            end
+        end
+        
+        return ""
+
+    end
+
+    -- Windows virtual key code
+
+    obj.GetWkcCode = function(self, keyName)
+
+        local wkc_key_name = "VK_" .. string.upper(keyName)
+        for code, name in pairs(WKC_MAPPING) do
+            --Logm("%s : %d", name, code)
+            if name == wkc_key_name then
+                -- lua array is index 1-based
+                return code - 1
+            end
+        end
+        
+        return -1
+        
+    end
+
+    obj.GetWkcName = function(self, keyCode)  
+        keyCode = keyCode + 1
+        
+        if keyCode > #WKC_MAPPING then
+            return ""
+        end
+        
+        name = WKC_MAPPING[keyCode]
+        if string.len(name) >= 4 then
+            return string.sub(name, 4)
+        else
+            return ""
+        end
+
+    end
+
+    obj.GetCode = function(self, keyName)
+    
+        if GetSystemName() == "android" then
+            return self:GetAkcCode(keyName)
+        elseif GetSystemName() == "windows" then
+            return self:GetWkcCode(keyName)
+        else
+            return -1
+        end
+        
+    end
+    
+    obj.GetName = function(self, keyCodde)
+    
+        if GetSystemName() == "android" then
+            return self:GetAkcName(keyName)
+        elseif GetSystemName() == "windows" then
+            return self:GetWkcName(keyName)
+        else
+            return ""
+        end
+        
+    end
+    
+    obj.Enumerate = function(self, callback)
+        
+        if GetSystemName() == "android" then
+        
+            for name, code in pairs(AKC_MAPPING) do
+                
+                if string.len(name) >= 5 then
+                    if string.sub(name, 1, 4) == "AKC_" then
+                        callback(string.sub(name, 5), code)
+                    end
+                else
+                    -- Skip
+                end
+                
+            end
+            
+        elseif GetSystemName() == "windows" then
+        
+            for code, name in pairs(WKC_MAPPING) do
+                
+                if string.len(name) >= 4 then
+                    if string.sub(name, 1, 3) == "VK_" then
+                        callback(string.sub(name, 4), code - 1)
+                    end
+                else
+                    -- Skip
+                end
+                
+            end
+                
+        end
+        
+    end
+    
+	SetObject("LuaKeyMapping", obj)
+	Logd("LuaKeyMapping has been registered")
+end

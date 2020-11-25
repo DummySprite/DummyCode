@@ -1,0 +1,250 @@
+﻿
+function CreateComboBoxMenu()
+    local layout = CreateLinearLayout("viewpagermenu_layout", "vertical", "mach_parent", "wrap_content")
+    --
+        local menu = CreateComboBox("viewpagermenu")
+        menu:SetLayoutMargin(10)
+        menu:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        
+        local divider = CreateDivider("divider", "match_parent", 2)
+        divider:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+        
+        layout:AddControl(menu)
+        layout:AddControl(divider)
+    --
+    return menu, layout
+end
+
+function CreateButtonMenu()
+	local layout = CreateScrollView("viewpagermenu_scroll", "horizontal", "match_parent", "wrap_content") 
+    local layout_internal = CreateLinearLayout("viewpagermenu_layout", "vertical", "wrap_content", "wrap_content")
+    --
+        local menu = CreateLinearLayout("viewpagermenu", "horizontal")
+        
+        local divider = CreateDivider("divider", "match_parent", 5)
+        divider:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+        
+        layout_internal:AddControl(menu)
+        layout_internal:AddControl(divider)
+    -- 
+	layout:AddControl(layout_internal)
+    return menu, layout
+end
+
+function ButtonMenu_Select(self, position)
+    if (position < 0 or position >= self.pagesCount) then
+        return
+    end
+        
+    for i = 0, self.pagesCount - 1 do
+        if i ~= position then
+            self.pages[i].button:SetBackgroundColor(RGBAToColor(255,255, 255, 255))
+        end
+    end
+    
+    self.pages[position].button:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+    
+    for i = 0, self.pagesCount - 1 do
+        if i == position then
+            self.pages[i].view:SetVisibility(true)
+        else
+            self.pages[i].view:SetVisibility(false)
+        end
+    end
+  
+    if self.onSelectListener ~= nil then
+        self.onSelectListener(position)
+    end
+end
+
+function ComboBox_Select(self, position)
+    if(position < 0 or position >= self.pagesCount) then
+        return
+    end
+    
+    for i = 0, self.pagesCount - 1 do
+        if i == position then
+            self.pages[i].view:SetVisibility(true)
+        else
+            self.pages[i].view:SetVisibility(false)
+        end
+    end
+    
+    if self.onSelectListener ~= nil then
+        self.onSelectListener(position)
+    end
+end
+
+function CreateMemu(self, style)
+    
+    --Logm("Creating menu ...")
+    
+    if style == "dropdown" then
+    
+        local menu, layout = CreateComboBoxMenu()
+        
+        for i = 0, self.pagesCount - 1 do
+            menu:Add(self.pages[i].name)
+        end
+        
+        menu:SetOnSelectListener(function(position)
+            --Logm("On selected dropdown page %d", position)
+            self.selection = position
+            ComboBox_Select(self, position)
+        end)
+        
+        return menu, layout
+        
+    elseif style == "option" then
+    
+        local menu, layout = CreateButtonMenu()
+        
+        for i = 0, self.pagesCount - 1 do
+            button = CreateButton("viewpagerbutton", self.pages[i].name, "wrap_content", DpToPixel(40))
+            self.pages[i].button = button
+            button:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            button:SetBackgroundColor(RGBAToColor(255, 255, 255, 255))
+            button:SetLayoutMarginLeft(5)
+            button:SetLayoutMarginRight(5)
+            button:SetLayoutMarginTop(5)
+            button:SetOnClickListener(function()
+                --Logm("On selected option page %d", i)
+                self.selection = i
+                ButtonMenu_Select(self, i)
+            end)
+            menu:AddControl(button)
+        end
+        
+        return menu, layout
+        
+    else
+        return nil, nil
+    end
+    
+end
+
+----------------------------------------
+
+function GetSelection(self)
+    return self.selection
+end
+function SetSelection(self, selection)
+    self:SelectPage(selection)
+    self.selection = selection
+end
+
+function GetPage(self, position)
+    return self.pages[position]
+end
+
+function GetStyle(self, position)
+    return self.pages[position].style
+end
+
+function SelectPage(self, position)
+    if self.style == "dropdown" then
+        self.menu:SetSelection(position)
+    elseif self.style == "option" then
+        ButtonMenu_Select(self, position)
+    end
+end
+
+function GetCount(self)
+    return self.pagesCount
+end
+
+function AddPage(self, name, view, style)
+    index = self.pagesCount
+    self.pages[index] = {}
+    self.pages[index].name = name
+    self.pages[index].view = view
+    self.pages[index].style = style
+    self.pagesCount = index+ 1
+    return index
+end
+
+function AddScrollPage(self, orientation, size, name, view, style)
+    if orientation == "horizontal" then
+        sv = CreateScrollView("viewpagerscrollview", "horizontal", size, "wrap_content")
+        svl = CreateLinearLayout("viewpagerscrollviewlayout", "horizontal")
+        sv:AddControl(svl)
+    else
+        sv = CreateScrollView("viewpagerscrollview", "vertical", "match_parent", size)
+        svl = CreateLinearLayout("viewpagerscrollviewlayout", "vertical")
+        sv:AddControl(svl)
+    end
+    svl:AddControl(view)
+    
+    index = self.pagesCount
+    self.pages[index] = {}
+    self.pages[index].name = name
+    self.pages[index].view = sv
+    self.pages[index].style = style
+    self.pagesCount = index+ 1
+    return index
+end
+
+function DeletePage(self, position)
+end
+
+function CreateView(self, style)
+
+    self.layoutPager = CreateLinearLayout("layoutView", "vertical")
+    self.layoutPager:SetBackgroundColor(RGBAToColor(255, 255, 255, 255))
+    --
+        self.style = style
+        self.selection = 0
+        self.menu, layout = CreateMemu(self, style)
+        self.layoutPager:AddControl(layout)
+        
+        for i = 0, self.pagesCount - 1 do
+            self.pages[i].view:SetVisibility(false)
+            self.layoutPager:AddControl(self.pages[i].view)
+        end
+        
+        if self.pagesCount > 0 then
+            SelectPage(self, 0)
+        end
+    --
+    return self.layoutPager
+    
+end
+
+function SetOnSelectListener(self, listener)
+    self.onSelectListener = listener
+end
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = {}
+        
+        obj.pages = {}
+        obj.pagesCount = 0
+        
+        obj.GetSelection = GetSelection
+        obj.SetSelection = SetSelection
+        obj.GetPage = GetPage
+        obj.GetStyle = GetStyle
+        obj.SelectPage = SelectPage
+        obj.GetCount = GetCount
+        obj.AddPage = AddPage
+        obj.AddScrollPage = AddScrollPage
+        obj.DeletePage = DeletePage
+        obj.CreateView = CreateView
+        obj.SetOnSelectListener  = SetOnSelectListener
+
+        obj.menu = nil
+        obj.selection = -1
+        
+        obj.onSelectListener = nil
+        
+        return obj
+        
+    end
+	
+	SetObject("LuaViewPagerFactory", obj)
+	Logd("LuaViewPagerFactory has been registered")
+end

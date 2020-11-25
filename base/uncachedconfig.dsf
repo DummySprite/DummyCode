@@ -1,0 +1,85 @@
+﻿
+function LoadConfig(self, path, openonly)
+    return self.doc:LoadConfig(path, openonly)
+end
+
+function SaveConfig(self)
+    return self.doc:SaveConfig()
+end
+
+function GetValue(self, tag, defaultValue)
+    value =  self.doc:GetValue(tag, defaultValue)
+    if type(defaultValue) == type(value) then
+        return value
+    else
+        
+        if type(defaultValue) == "string" then
+            return tostring(value)
+        elseif type(defaultValue) == "number" then
+            return tonumber(value)
+        else
+            return value
+        end
+        
+    end
+end
+
+function SetValue(self, tag, value)
+    self.doc:SetValue(tag, value)
+end
+
+-- sdk >= 16000
+function Add(self, tag)
+    self.doc:Add(tag)
+end
+function Remove(self, tag, which)
+    self.doc:Remove(tag, which)
+end
+
+function Push(self, tag, which)
+    self.doc:Push(tag, which)
+end
+function Pop(self)
+    self.doc:Pop()
+end
+
+function GetTagCount(self, tag)
+    return self.doc:GetTagCount(tag)
+end
+
+function EnumerateChilds(self, listener)
+    return self.doc:EnumerateChilds(listener)
+end
+
+function RegisterObject()
+	local obj = { }  
+
+	obj.Create = function(self)
+    
+        local obj = { }
+        
+        obj.LoadConfig = LoadConfig
+        obj.SaveConfig = SaveConfig
+        obj.GetValue = GetValue
+        obj.SetValue = SetValue
+        
+        obj.Add = Add
+        obj.Remove = Remove
+        obj.Push = Push
+        obj.Pop = Pop
+        obj.GetTagCount = GetTagCount
+        
+        obj.EnumerateChilds = EnumerateChilds
+       
+        obj.doc = CreateObject("LuaConfig")
+        
+        return obj
+        
+    end
+
+
+	SetObject("LuaUncachedConfig", obj)
+	Logd("LuaUncachedConfig对象已经注册完成")
+end
+
+

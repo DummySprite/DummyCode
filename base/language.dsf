@@ -1,0 +1,133 @@
+﻿
+function Init(self, path)
+    ret = self.config:LoadConfig(path, false)
+    SetLang(self, "auto")
+    return ret
+end
+
+function GetValue(self, tag)
+    tag = self.prefix .. ":" .. tag
+    value = self.config:GetValue(tag, "") 
+    if value == "" then
+        return tag
+    end
+    return value
+end
+
+function GetPrefix(self)
+    return self.prefix
+end
+
+function GetLang(self)
+    return self.lang
+end
+
+function SetLang(self, lang)
+
+    if lang == "auto" then
+        self.lang = GetLanguage()
+    else
+        self.lang = lang
+    end
+    
+    Logm("Lang %s", self.lang)
+    
+    -- Chinese
+    if string.find(self.lang, "zh", 0, true) ~= nil or string.find(self.lang, "ZH", 0, true) ~= nil then
+        self.prefix = "lang:zh"
+    -- France
+    elseif string.find(self.lang, "fr", 0, true) ~= nil or string.find(self.lang, "FR", 0, true) ~= nil then
+        self.prefix = "lang:fr"
+     -- Germany
+    elseif string.find(self.lang, "de", 0, true) ~= nil or string.find(self.lang, "DE", 0, true) ~= nil then
+        self.prefix = "lang:de"
+    -- Italy
+    elseif string.find(self.lang, "it", 0, true) ~= nil or string.find(self.lang, "IT", 0, true) ~= nil then
+        self.prefix = "lang:it"
+    -- Japan
+    elseif string.find(self.lang, "ja", 0, true) ~= nil or string.find(self.lang, "ja", 0, true) ~= nil or string.find(self.lang, "jp", 0, true) ~= nil or string.find(self.lang, "jp", 0, true) ~= nil  then
+        self.prefix = "lang:ja"
+    -- Korea
+    elseif string.find(self.lang, "kr", 0, true) ~= nil or string.find(self.lang, "KR", 0, true) ~= nil or string.find(self.lang, "ko", 0, true) ~= nil or string.find(self.lang, "KO", 0, true) ~= nil then
+        self.prefix = "lang:ko"
+    -- Spain
+    elseif string.find(self.lang, "es", 0, true) ~= nil or string.find(self.lang, "ES", 0, true) ~= nil then
+        self.prefix = "lang:es"
+   -- Portuguese
+    elseif string.find(self.lang, "pt", 0, true) ~= nil or string.find(self.lang, "PT", 0, true) ~= nil then
+        self.prefix = "lang:pt"
+    -- Russian
+    elseif string.find(self.lang, "ru", 0, true) ~= nil or string.find(self.lang, "RU", 0, true) ~= nil then
+        self.prefix = "lang:ru"
+    -- Vietnamese
+    elseif string.find(self.lang, "vi", 0, true) ~= nil or string.find(self.lang, "VI", 0, true) ~= nil or string.find(self.lang, "vn", 0, true) ~= nil or string.find(self.lang, "VN", 0, true) ~= nil then
+        self.prefix = "lang:vi"
+    -- Arabic
+    elseif string.find(self.lang, "ar", 0, true) ~= nil or string.find(self.lang, "AR", 0, true) ~= nil then
+        self.prefix = "lang:ar"
+    -- Dutch
+    elseif string.find(self.lang, "nl", 0, true) ~= nil or string.find(self.lang, "NL", 0, true) ~= nil then
+        self.prefix = "lang:nl"
+    -- English
+    else
+        Logm("%s language is not existed,try en", self.lang)
+        self.prefix = "lang:en"
+    end
+    
+    Logm("Try %s prefix ...", self.prefix)
+
+    -- Use en as default if no language found
+    --
+    if self.config:GetTagCount(self.prefix) > 0 then
+        
+    else
+        Logm("%s prefix is not existed", self.prefix)
+        
+        if self.prefix == "lang:zh" then
+        
+            if self.config:GetTagCount("lang:cn") > 0 then
+                self.prefix = "lang:cn"
+            else
+                self.prefix = "lang:en"
+            end
+            
+        else
+            self.prefix = "lang:en"
+        end
+        
+    end
+
+    Logm("------------------")
+    Logm("Lang  %s", self.lang)
+    Logm("Prefix %s", self.prefix)
+end
+
+function IsZh(self)
+    if string.find(self.lang, "zh", 0, true) ~= nil or string.find(self.lang, "ZH", 0, true) ~= nil then
+        return true
+    else
+        return false
+    end
+end
+
+function RegisterObject()
+	local obj = { }  
+    
+	obj.Create = function()
+        local obj = { }
+        obj.config = CreateObject("LuaConfig")
+        obj.lang = ""
+        
+        obj.Init = Init
+        obj.GetLang = GetLang
+        obj.SetLang = SetLang
+        obj.GetValue = GetValue
+        obj.GetPrefix = GetPrefix
+        obj.IsZh = IsZh
+        
+        return obj
+    end
+
+	SetObject("LuaLanguageFactory", obj)
+	Logd("LuaLanguageFactory has been registered")
+end

@@ -1,0 +1,64 @@
+
+function PushLeft (self, value)
+  local first = self.first - 1
+  self.first = first
+  self[first] = value
+end
+
+function PushRight (self, value)
+  local last = self.last + 1
+  self.last = last
+  self[last] = value
+end
+
+function PopLeft (self)
+  local first = self.first
+  if first > self.last then error("list is empty") end
+  local value = self[first]
+  self[first] = nil        -- to allow garbage collection
+  self.first = first + 1
+  return value
+end
+
+function PopRight (self)
+  local last = self.last
+  if self.first > last then error("list is empty") end
+  local value = self[last]
+  self[last] = nil         -- to allow garbage co llection
+  self.last = last - 1
+  return value
+end
+
+function Size(self)
+	if self.first > self.last then
+		return 0
+	else 
+		return self.last - self.first + 1
+	end
+end
+
+function Clear(self)
+	self.first = 0
+	self.last = -1
+end
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = {first = 0, last = -1}
+        obj.PushLeft = PushLeft
+        obj.PushRight = PushRight
+        obj.PopLeft = PopLeft
+        obj.PopRight = PopRight
+        obj.Size = Size
+        obj.Clear = Clear
+        return obj
+        
+    end
+
+	SetObject("LuaQueueFactory", obj)
+	Logd("LuaQueueFactory has been registered")
+end
+

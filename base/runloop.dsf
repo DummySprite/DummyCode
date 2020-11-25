@@ -1,0 +1,120 @@
+﻿
+function Post(self, object, privilege, callback)
+   
+   task = {}
+   task.object = object
+   task.callback = callback
+   task.privilege = privilege
+   
+   self.tasks[self.tasksCount] = task
+   self.tasksCount = self.tasksCount + 1
+   
+   Sort(self)
+end
+
+function Sort(self)
+    -- Bubble algorithm
+    count = self.tasksCount
+    
+    i = 0
+    while i < count do
+        
+        j = 0
+        while j < count - i - 1 do
+            
+            if self.tasks[j].privilege < self.tasks[j + 1].privilege then
+                -- Switch them
+                tmp = self.tasks[j]
+                self.tasks[j] = self.tasks[j + 1]
+                self.tasks[j + 1] = tmp
+            end
+            
+            j = j + 1
+        end
+        
+        i = i + 1
+    end
+end
+
+function Print(self)
+    count = self.tasksCount
+    
+    i = 0
+    while i < count do
+        Logd("%d", self.tasks[i].privilege)
+        i = i + 1
+    end
+end
+
+function Run(self)
+    
+    -- Loop till all tasks had been done
+    --
+
+    count = self.tasksCount
+    
+    i = 0
+    while i < count do
+        if not self.tasks[i].callback(self.tasks[i].object) then
+            break
+        end
+        i = i + 1
+    end
+end
+
+function TimedRun(self, ms)
+    
+    timedout = GetSystemTime() + ms
+ 
+    -- Loop till all tasks had been done or timed out
+    --
+    
+    count = self.tasksCount
+    
+    if self.tasksIndex >= count then
+        self.tasksIndex  = 0
+    end
+    
+    -- Run from the previous unfinished task 
+    i = self.tasksIndex
+    while i < count do
+    
+        if GetSystemTime() > timedout then
+            -- Keep the current running task index
+            self.tasksIndex = i
+            return
+        end
+        
+        if not self.tasks[i].callback(self.tasks[i].object) then
+            break
+        end
+        i = i + 1
+    end
+    
+    -- Reset 
+    self.tasksIndex = 0
+    return
+end
+
+function RegisterObject()
+	local obj = {}
+	
+	obj. Create = function()
+    
+        local obj = {}
+
+        obj.Post = Post
+        obj.Run =Run
+        obj.TimedRun =TimedRun
+        obj.Print =Print
+        -- Variables 
+        obj.tasks = {}
+        obj.tasksCount = 0
+        obj.tasksIndex    = 0
+        return obj
+        
+    end
+
+    SetObject("LuaRunLoopFactory", obj)
+	Logd("LuaRunLoopFactory has been registered")
+end

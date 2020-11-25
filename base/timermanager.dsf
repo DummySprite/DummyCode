@@ -1,0 +1,125 @@
+﻿
+Import("list.dsf")
+
+function CreateTimer(self, delay, param, method)
+
+    local item = {}
+    
+    item.delay = delay
+    item.timer = CreateObject("LuaTimer")
+    
+    item.method = method
+    item.param = param
+    
+    item.id = self.timers:Append(item)
+    
+    return item.id
+    
+end
+
+function DeleteTimer(self, id)
+
+    self.timers:Remove(id)
+    
+end
+
+function StartTimer(self, id)
+
+    local item = self.timers:GetItem(id)
+    if item == nil then
+        return false
+    end
+    
+    item.timer:SetTimer(item.delay, function()
+        item.method(item.param)
+    end)
+    
+    return true
+    
+end
+
+function StopTimer(self, id)
+    
+    local item = self.timers:GetItem(id)
+    if item == nil then
+        return false
+    end
+    
+    item.timer:KillTimer()
+    return true
+    
+end
+
+function SetTimerInterval(self, id, ms)
+
+    local item = self.timers:GetItem(id)
+    if item == nil then
+        return false
+    end
+    
+    item.timer:SetInternal(ms)
+    return true
+    
+end
+
+function StartTimers(self)
+
+    self.timers:Foreach(function(item)
+    
+        item.timer:SetTimer(item.delay, function()
+            item.method(item.param)
+        end)
+        
+    end)
+    
+end
+
+function StopTimers(self)
+    
+    self.timers:Foreach(function(item)
+    
+        item.timer:KillTimer()
+        
+    end)
+    
+end
+
+function Clear(self)
+
+    self.timers:Clear()
+    
+end
+
+function Count(self)
+    return self.timers:Count()
+end
+
+function RegisterObject()
+	local obj = {}
+    
+    obj.Create =  function(self)
+    
+        local obj = {}
+        
+        obj.CreateTimer = CreateTimer
+        obj.DeleteTimer = DeleteTimer
+        obj.StartTimer = StartTimer
+        obj.StopTimer = StopTimer
+        obj.StartTimers = StartTimers
+        obj.StopTimers = StopTimers
+        obj.Clear = Clear
+        obj.Count = Count
+        obj.SetTimerInterval = SetTimerInterval
+        
+        obj.timers = GetObject("LuaListFactory"):Create()
+        
+        return obj
+        
+    end
+
+
+
+	SetObject("LuaTimerManagerFactory", obj)
+	Logd("LuaTimerManagerFactory has been registered")
+end
+

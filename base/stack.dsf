@@ -1,0 +1,51 @@
+﻿
+function Push(self, item)
+	self.pointer = self.pointer + 1
+	self.stack[self.pointer] = item
+end
+
+function Pop(self)
+	local item = self.stack[self.pointer]
+    self.stack[self.pointer] = nil
+	self.pointer = self.pointer - 1
+	return item
+end
+
+function Clear(self)
+	self.stack = {}
+	self.pointer = 0
+end
+
+function Size(self)
+    return self.pointer
+end
+
+function IsEmpty(self, x, y)
+    return self.pointer <= 0
+end
+
+
+function RegisterObject()
+	local obj = {}
+    
+    obj.Create = function(self)
+    
+        local obj = {}
+        
+        obj.stack = {}
+        obj.pointer = 0
+        
+        obj.Push = Push
+        obj.Pop = Pop
+        obj.Clear = Clear
+        obj.Size = Size
+        obj.IsEmpty = IsEmpty
+        
+        return obj
+        
+    end
+	
+	SetObject("LuaStackFactory", obj)
+	Logd("LuaStackFactory has been registered")
+end
+

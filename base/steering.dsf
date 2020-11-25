@@ -1,0 +1,213 @@
+﻿
+Import("touchutil.dsf")
+Import("keyutil.dsf")
+
+function SetCenter(self, x, y)
+    self.center_x = x
+    self.center_y = y
+end
+
+function SetSize(self, size)
+   self.size = size 
+end
+
+function GetCenterPosition(self, size)
+    return math.floor(size * size / 2)
+end
+
+function GetPosition(self, x, y, size)
+
+    local width = GetDisplayWidth()
+    local height = GetDisplayHeight()
+    
+    local x_index = math.floor(x / (width / size))
+    local y_index = math.floor(y / (height / size))
+        
+    return y_index * size + x_index
+    
+end
+
+function GetCenterDirection(self)
+    return self.DIRECTION_CENTER
+end
+
+function GetDirection(self, current_pos, target_pos, size)
+
+    if current_pos == target_pos then
+        return self.DIRECTION_CENTER
+    end
+    
+    local current_pos_line = math.floor(current_pos / size)
+    local current_pos_col = math.floor(current_pos % size)
+    
+    local target_pos_line = math.floor(target_pos / size)
+    local target_pos_col = math.floor(target_pos % size)
+    
+    if target_pos_line == current_pos_line then
+    
+        if target_pos_col == current_pos_col then
+            return self.DIRECTION_CENTER
+        elseif target_pos_col < current_pos_col then
+            return self.DIRECTION_LEFT
+        else
+            return self.DIRECTION_RIGHT
+        end
+        
+    elseif target_pos_line < current_pos_line then
+    
+        if target_pos_col == current_pos_col then
+            return self.DIRECTION_TOP
+        elseif target_pos_col < current_pos_col then
+            return self.DIRECTION_TOPLEFT
+        else
+            return self.DIRECTION_TOPRIGHT
+        end
+    
+    else
+    
+        if target_pos_col == current_pos_col then
+            return self.DIRECTION_BOTTOM
+        elseif target_pos_col < current_pos_col then
+            return self.DIRECTION_BOTTOMLEFT
+        else
+            return self.DIRECTION_BOTTOMRIGHT
+        end
+        
+    end
+
+end
+
+function TimedoutMove(self, direction, id, ms)
+
+    if GetSystemTime() >= self.timedout then
+        
+        -- Logm("New move")
+        
+        self.toucEvent:Up(id)
+        
+        self:Move(direction, id)
+        
+        self.timedout = GetSystemTime() + ms
+        
+    else
+    
+        -- Logm("Ignore move")
+        
+    end
+
+end
+
+function Move(self, direction, id)
+    
+    if id == nil then
+        id = 3
+    end
+    
+    local target_x 
+    local target_y 
+    
+    if direction == self.DIRECTION_TOPLEFT then
+        target_x = self.center_x - self.size
+        target_y = self.center_y - self.size
+    elseif direction == self.DIRECTION_TOP then
+        target_x = self.center_x 
+        target_y = self.center_y - self.size
+    elseif direction == self.DIRECTION_TOPRIGHT then
+        target_x = self.center_x + self.size
+        target_y = self.center_y - self.size
+    elseif direction == self.DIRECTION_LEFT then
+        target_x = self.center_x - self.size
+        target_y = self.center_y 
+        
+    --
+    -- self.DIRECTION_CENTER
+    --
+    
+    elseif direction == self.DIRECTION_RIGHT then
+        target_x = self.center_x + self.size
+        target_y = self.center_y 
+    elseif direction == self.DIRECTION_BOTTOMLEFT then
+        target_x = self.center_x - self.size
+        target_y = self.center_y + self.size
+    elseif direction == self.DIRECTION_BOTTOM then
+        target_x = self.center_x 
+        target_y = self.center_y + self.size
+    elseif direction == self.DIRECTION_BOTTOMRIGHT then
+        target_x = self.center_x + self.size
+        target_y = self.center_y + self.size
+        
+    else
+        Logm("Ignore direction %d", direction)
+        return
+    end
+    
+    -- Logm("%d, %d to %d, %d", self.center_x, self.center_y, target_x, target_y)
+    self.toucEvent:Swipe(id, self.center_x, self.center_y, target_x, target_y, false, true, false)
+    -- Logm("end")
+    
+end
+
+function End(self, id)
+    self.timedout = 0
+end
+
+function GetMode(self)
+    return self.toucEvent:GetMode()
+end
+
+function RegisterObject()
+	local obj = {}
+    
+    obj.Create = function(self)
+    
+        local obj = {}
+            
+        --
+        -- 8 directions 
+        --
+        -- 0    1   2
+        -- 3    4   5
+        -- 6    7   8
+        --
+        obj.DIRECTION_TOPLEFT = 0
+        obj.DIRECTION_TOP = 1
+        obj.DIRECTION_TOPRIGHT = 2
+        obj.DIRECTION_LEFT = 3
+        obj.DIRECTION_CENTER = 4   
+        obj.DIRECTION_RIGHT = 5
+        obj.DIRECTION_BOTTOMLEFT = 6
+        obj.DIRECTION_BOTTOM = 7
+        obj.DIRECTION_BOTTOMRIGHT = 8
+
+        obj.timedout = 0
+        
+        obj.toucEvent = GetObject("LuaTouchEventFactory"):Create()
+        if obj.toucEvent:GetMode() == "shell_event" then
+            obj.toucEvent:SetFactor(DpToPixel(32), 0)
+        else
+            obj.toucEvent:SetFactor(DpToPixel(2), 10)
+        end
+        
+        obj.SetCenter = SetCenter
+        obj.SetSize = SetSize
+        
+        obj.TimedoutMove = TimedoutMove
+        obj.Move = Move
+        obj.End = End
+        
+        obj.GetMode = GetMode
+        
+        obj.GetPosition = GetPosition
+        obj.GetCenterPosition = GetCenterPosition
+        
+        obj.GetDirection = GetDirection
+        obj.GetCenterDirection = GetCenterDirection
+        
+        return obj
+        
+    end
+    
+	SetObject("LuaSteeringFactory", obj)
+	Logd("LuaSteeringFactory has been registered")
+end
+

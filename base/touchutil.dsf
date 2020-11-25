@@ -1,0 +1,9 @@
+﻿
+Import("touchevent.dsf")
+g_touchUtil = GetObject("LuaTouchEventFactory"):Create()
+
+function RegisterObject()
+	SetObject("LuaTouchUtil", g_touchUtil)
+	Logd("LuaTouchUtil has been registered")
+end
+

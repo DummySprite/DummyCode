@@ -1,0 +1,157 @@
+﻿
+
+-- 0 base index
+
+function CheckIndex(self, index)
+
+    if index >= 0 and index < #self.m_items then
+        return true
+    else
+        return false
+    end
+
+end
+
+function Append(self, item)
+    table.insert(self.m_items, item) 
+    local count = #self.m_items
+    return count - 1
+end
+
+function Remove(self, index)
+    
+    if self:CheckIndex(index) == false then
+        return false
+    end
+    
+    table.remove(self.m_items, index + 1)
+    return true
+    
+end
+
+function Clear(self)
+    local count = self:Count()
+    for i = 1, count do
+        table.remove(self.m_items)
+    end
+end
+
+function Count(self)
+    return #self.m_items
+end
+
+function GetItem(self, index)
+    
+    if self:CheckIndex(index) == false then
+        return nil
+    end
+    
+    return self.m_items[index + 1]
+end
+
+function SetItem(self, index, item)
+    
+    if self:CheckIndex(index) == false then
+        return
+    end
+    
+    self.m_items[index + 1] = item
+end
+
+function GetItems(self)
+    return self.m_items
+end
+
+function Foreach(self, method)
+    
+    for i = 1, #self.m_items do
+    
+        if method(self.m_items[i]) == false then
+            break
+        end
+        
+    end
+    
+end
+
+function ForeachEx(self, method)
+    
+    for index, value in pairs(self.m_items) do
+    
+        if method(index - 1, value) == false then
+            break
+        end
+        
+    end
+    
+end
+
+function Bubbling(t, cmp)
+
+    local index = 0
+    for i = 1, #t - 1 do
+        for j = #t - 1, i, -1 do
+            if cmp(t[j], t[j + 1]) then
+                t[j], t[j + 1] = t[j+1], t[j]
+            end
+            index = index + 1
+        end
+    end
+    
+end
+
+function Sort(self, cmp)
+    Bubbling(self.m_items, cmp)
+end
+
+function Print(self)
+
+    Logm("-----------------------------------")
+    
+    for i = 1, #self.m_items do
+    
+        local name 
+        if self.m_items[i].name ~= nil then
+            name = self.m_items[i].name 
+        else
+            name = ""
+        end
+        
+        Logm("[%d] %s", i - 1, name)
+    
+    end
+    
+end
+
+function RegisterObject()
+	local obj = {}
+    
+    obj.Create = function(self)
+        local obj = {}
+        
+        obj.CheckIndex = CheckIndex
+            
+        obj.Append = Append
+        obj.Remove = Remove
+        obj.Clear = Clear
+        obj.Sort = Sort
+
+        obj.Count = Count
+        
+        obj.GetItem = GetItem
+        obj.SetItem = SetItem
+        
+        obj.GetItems = GetItems
+        
+        obj.Foreach = Foreach
+        obj.ForeachEx = ForeachEx
+        obj.Print = Print
+
+        obj.m_items = {}
+        
+        return obj
+    end
+
+	SetObject("LuaListFactory", obj)
+	Logd("LuaListFactory has been registered")
+end

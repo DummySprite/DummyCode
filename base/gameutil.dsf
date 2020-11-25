@@ -1,0 +1,125 @@
+﻿
+Import("touchutil.dsf")
+
+-- 触摸功能
+g_touchUtil = GetObject("LuaTouchUtil")
+-- 配置
+g_swipeConfig = {}
+
+function Config(self, leftx, lefty, rightx, righty, topx, topy, bottomx, bottomy)
+    
+    g_swipeConfig.leftx = leftx
+    g_swipeConfig.lefty = lefty
+    g_swipeConfig.rightx = rightx
+    g_swipeConfig.righty = righty
+    g_swipeConfig.topx = topx
+    g_swipeConfig.topy = topy
+    g_swipeConfig.bottomx = bottomx
+    g_swipeConfig.bottomy = bottomy
+    
+    g_swipeConfig.centerx = g_swipeConfig.leftx + (g_swipeConfig.rightx - g_swipeConfig.leftx) / 2
+    g_swipeConfig.centery = g_swipeConfig.lefty
+  
+end
+
+function ZoomIn(self)
+    
+    g_touchUtil:DoubleSwipe(
+        0,  g_swipeConfig.leftx, g_swipeConfig.lefty, g_swipeConfig.centerx, g_swipeConfig.lefty, 
+        1,  g_swipeConfig.rightx, g_swipeConfig.righty, g_swipeConfig.centery, g_swipeConfig.righty
+    )
+    
+end
+
+function Move(self, begin_x, begin_y, end_x, end_y)
+
+    local offset_x = end_x - begin_x
+    local offset_y = end_y - begin_y
+
+    if offset_x < 0 then
+        
+        local cur_x = begin_x
+        while cur_x ~= end_x do
+            MoveLeft()
+            Sleep(1000)
+            cur_x = cur_x - 1
+        end
+        
+    elseif offset_x > 0 then
+    
+        local cur_x = begin_x
+        while cur_x ~= end_x do
+            MoveRight()
+            Sleep(1000)
+            cur_x = cur_x + 1
+        end
+        
+    end
+    
+    if offset_y < 0 then
+        
+        local cur_y = begin_y
+        while cur_y ~= end_y do
+            MoveUp()
+            Sleep(1000)
+            cur_y = cur_y - 1
+        end
+        
+    elseif offset_y > 0 then
+    
+        local cur_y = begin_y
+        while cur_y ~= end_y do
+            MoveDown()
+            Sleep(1000)
+            cur_y = cur_y+ 1
+        end
+        
+    end
+    
+end
+
+function MoveLeft(self)
+    Logm("Moving left ...")
+    g_touchUtil:Swipe(
+        0,  g_swipeConfig.centerx, g_swipeConfig.centery, g_swipeConfig.rightx, g_swipeConfig.righty
+    )
+end
+
+function MoveRight(self)
+    Logm("Moving right ...")
+    g_touchUtil:Swipe(
+        0,  g_swipeConfig.rightx, g_swipeConfig.righty, g_swipeConfig.centerx, g_swipeConfig.centery
+    )
+end
+
+function MoveUp(self)
+    Logm("Moving up ...")
+    g_touchUtil:Swipe(
+        0,  g_swipeConfig.topx, g_swipeConfig.topy, g_swipeConfig.centerx, g_swipeConfig.centery
+    )
+end
+
+function MoveDown(self)
+    Logm("Moving down ...")
+    g_touchUtil:Swipe(
+        0,  g_swipeConfig.centerx, g_swipeConfig.centery, g_swipeConfig.topx, g_swipeConfig.topy
+    )
+end
+
+function RegisterObject()
+	local obj = {}
+    
+    obj.Move = Move
+     
+    obj.MoveLeft = MoveLeft
+    obj.MoveRight = MoveRight
+    obj.MoveUp = MoveUp
+    obj.MoveDown = MoveDown
+    
+    obj.ZoomIn = ZoomIn
+    
+    obj.Config = Config
+	
+	SetObject("LuaGameUtil", obj)
+	Logd("LuaGameUtil has been registered")
+end

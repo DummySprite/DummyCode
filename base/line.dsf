@@ -1,0 +1,63 @@
+﻿
+function GetX(self, y)
+    return (y - self.point.y) / self.k + self.point.x
+end
+
+function GetY(self, x)
+    return self.k * (x - self.point.x) + self.point.y
+end
+
+function CreateFromPoint(self, point, k)
+    local obj = {}
+	
+    obj.point = {}
+    obj.point.x = point.x
+    obj.point.y = point.y
+    obj.k = k
+    
+    obj.Interact = Interact
+    obj.GetY = GetY
+    obj.GetX = GetX
+    
+    return obj
+end
+
+function Interact(line1, line2)
+    a1 = line1.k -- (line1.point1.y - line1.point2.y) / (line1.point1.x - line1.point2.x)
+    b1 = line1.point.y - a1 * (line1.point.x)
+    Logm("%d %d %f", line1.point.x, line1.point.y, line1.k)
+    
+    a2 = line2.k -- (line2.point1.y - line2.point2.y) / (line2.point1.x - line2.point2.x)
+    b2 = line2.point.y - a2 * (line2.point.x)
+    Logm("%d %d %f", line2.point.x, line2.point.y, line2.k)
+    
+    Logm("%f %f %f %f", a1, b1, a2, b2)
+    
+    x = (b1 - b2) / (a2 - a1)
+    y = a1 * x + b1
+    return x, y
+end
+
+function RegisterObject()
+	local obj = {}
+    
+	obj.CreateFromPoints = function(self, point1, point2)
+        local obj = {}
+        
+        obj.point = {}
+        obj.point.x = point1.x
+        obj.point.y = point1.y
+        obj.k = (point2.y - point1.y) / (point2.x - point1.x)
+        
+        obj.Interact = Interact
+        obj.GetY = GetY
+        obj.GetX = GetX
+        
+        return obj
+    end
+    obj.CreateFromPoints = obj.CreateFromPoint
+	
+	SetObject("LuaLineFactory", obj)
+	Logd("LuaLineFactory has been registered")
+end
+

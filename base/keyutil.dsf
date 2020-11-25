@@ -1,0 +1,8 @@
+﻿
+Import("keyevent.dsf")
+g_keyUtil = GetObject("LuaKeyEventFactory"):Create()
+
+function RegisterObject()
+	SetObject("LuaKeyUtil", g_keyUtil)
+	Logd("LuaKeyUtil has been registered")
+end

@@ -1,0 +1,235 @@
+﻿
+function Push(self, item)
+	self.pointer = self.pointer + 1
+	self.stack[self.pointer] = item
+end
+
+function Pop(self)
+	local item = self.stack[self.pointer]
+    self.stack[self.pointer] = nil
+	self.pointer = self.pointer - 1
+	return item
+end
+
+function Clear(self)
+	self.stack = {}
+	self.pointer = 0
+end
+
+function Size(self)
+    return self.pointer
+end
+
+function Flood4Ways(self, x, y, callback)
+   
+    self.stack:Clear()
+    self.grid:Clear()
+   
+    self.range.topleftx = nil
+    self.range.toplefty = nil
+    self.range.bottomrightx = nil
+    self.range.bottomrighty = nil
+
+    local fx, fy
+    
+    fx = x
+    fy = y
+    self.grid:Set(fx, fy, 1)
+    self.stack:Push({ x = fx, y = fy })
+    
+	while not self.stack:IsEmpty() do
+		local p = self.stack:Pop()
+		x, y = p.x, p.y
+        
+        if self.range.topleftx == nil or x < self.range.topleftx then
+            self.range.topleftx = x
+        end
+        if self.range.toplefty == nil or y < self.range.toplefty then
+            self.range.toplefty = y
+        end
+        
+        if self.range.bottomrightx == nil or x > self.range.bottomrightx then
+            self.range.bottomrightx = x
+        end
+        if self.range.bottomrighty == nil or y > self.range.bottomrighty then
+            self.range.bottomrighty = y
+        end
+        
+        -- Logm("Flooding %d, %d", x, y)
+
+        fx = x + 1
+        fy = y
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+        fx = x - 1
+        fy = y 
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+        fx = x 
+        fy = y + 1
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+        fx = x 
+        fy = y - 1
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+	end
+    
+    if not (self.range.topleftx == nil) and not (self.range.toplefty == nil) and not (self.range.bottomrightx == nil) and not (self.range.bottomrighty == nil) then
+        return true
+    else
+        return false
+    end
+    
+end
+
+function Flood8Ways(self, x, y, callback)
+   
+    self.stack:Clear()
+    self.grid:Clear()
+   
+    self.range.topleftx = nil
+    self.range.toplefty = nil
+    self.range.bottomrightx = nil
+    self.range.bottomrighty = nil
+
+    local fx, fy
+    
+    fx = x
+    fy = y
+    self.grid:Set(fx, fy, 1)
+    self.stack:Push({ x = fx, y = fy })
+    
+	while not self.stack:IsEmpty() do
+		local p = self.stack:Pop()
+		x, y = p.x, p.y
+        
+        if self.range.topleftx == nil or x < self.range.topleftx then
+            self.range.topleftx = x
+        end
+        if self.range.toplefty == nil or y < self.range.toplefty then
+            self.range.toplefty = y
+        end
+        
+        if self.range.bottomrightx == nil or x > self.range.bottomrightx then
+            self.range.bottomrightx = x
+        end
+        if self.range.bottomrighty == nil or y > self.range.bottomrighty then
+            self.range.bottomrighty = y
+        end
+        
+        -- Logm("Flooding %d, %d", x, y)
+
+        fx = x + 1
+        fy = y
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+        fx = x - 1
+        fy = y 
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+        fx = x 
+        fy = y + 1
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+        fx = x 
+        fy = y - 1
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+        fx = x + 1
+        fy = y + 1
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+        fx = x + 1
+        fy = y - 1
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+        fx = x - 1
+        fy = y + 1
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+        fx = x - 1
+        fy = y - 1
+        if self.grid:Get(fx, fy, 0) == 0 and callback(fx, fy) then
+            self.grid:Set(fx, fy, 1)
+            self.stack:Push({ x = fx, y = fy })
+        end
+        
+	end
+    
+    if not (self.range.topleftx == nil) and not (self.range.toplefty == nil) and not (self.range.bottomrightx == nil) and not (self.range.bottomrighty == nil) then
+        return true
+    else
+        return false
+    end
+    
+end
+
+function GetRectangle(self)
+    if not (self.range.bottomrightx == nil) and not (self.range.bottomrighty == nil) then
+        return self.range.topleftx, self.range.toplefty, self.range.bottomrightx + 1, self.range.bottomrighty + 1
+    else
+        return -1, -1, -1, -1
+    end
+end
+
+function RegisterObject()
+	local obj = {}
+    
+    obj.Create = function(self)
+        local obj = {}
+        
+        obj.stack = GetObject("LuaStackFactory"):Create()
+        obj.grid = GetObject("LuaGridFactory"):Create()
+        
+        obj.range = {}
+        obj.range.topleftx = nil
+        obj.range.toplefty = nil
+        obj.range.bottomrightx = nil
+        obj.range.bottomrighty = nil
+        
+        obj.Flood4Ways = Flood4Ways
+        obj.Flood8Ways = Flood8Ways
+        
+        obj.GetRectangle = GetRectangle
+        
+        return obj
+    end
+
+	SetObject("LuaFloodFillFactory", obj)
+	Logd("LuaFloodFillFactory has been registered")
+end
+

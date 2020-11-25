@@ -1,0 +1,38 @@
+﻿
+function Add(self, option)
+    local value = option .. ";"
+    self.options = self.options .. value
+end
+
+function Has(self, option)
+
+    local value = option .. ";"
+    local res = string.find(self.options, value)
+    if res == nil then
+        return false
+    else
+        return true
+    end
+    
+end
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.Create = function(self)
+    
+        obj = {}
+        
+        obj.Add = Add
+        obj.Has = Has
+    
+        obj.options = ""
+        
+        return obj
+    
+    end
+    
+	SetObject("LuaOptionFactory", obj)
+	Logd("LuaOptionFactory has been registered")
+end
+

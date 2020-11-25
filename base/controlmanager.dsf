@@ -1,0 +1,82 @@
+﻿
+
+function MakeComboBox(self, tag, items, config, default_value)
+
+    local combobox = CreateComboBox(tag, "match_parent", "wrap_content")
+    combobox:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+    for key, item in pairs(items) do
+        combobox:Add(item)
+    end
+    onSelect = function(position)
+        Logm("[%s] Select %d:%s", tag, position, combobox:GetLabel(position))
+        config:SetValue(tag, position) 
+    end
+    position = config:GetValue(tag, default_value) 
+    combobox:SetSelection(position)
+    onSelect(position)
+    combobox:SetOnSelectListener(onSelect)
+    
+    return combobox
+    
+end
+
+function MakeCheckButton(self, tag, config, lang, default_value)
+
+    local checkbox = CreateCheckButton(tag, lang:GetValue(tag), "wrap_content",  DpToPixel(33))
+    checkbox:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+    if config:GetValue(tag, default_value) == "yes" then
+        checkbox:SetCheck(true)
+    end
+    checkbox:SetOnCheckListener(function(check)
+        if check then
+            config:SetValue(tag, "yes")
+        else
+            config:SetValue(tag, "no")
+        end
+    end)
+    
+    return checkbox
+    
+end
+
+function MakeTextCtrl(self, tag, default_value)
+    local textctrl = CreateTextCtrl(tag, default_value, "match_parent",  "wrap_content")
+    textctrl:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+    textctrl:SetBackgroundColor(RGBAToColor(0, 50, 0, 35))
+    self.textctrls[tag] = textctrl
+    return textctrl
+end
+
+function Save(self, config)
+
+    for key, value in pairs(self.textctrls) do
+    
+        config:SetValue(key, value:GetLabel())
+    
+    end
+
+end
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.Create = function(self)
+
+        local obj = {}
+        
+        obj.Save = Save
+        
+        obj.MakeTextCtrl = MakeTextCtrl
+        obj.MakeComboBox = MakeComboBox
+        obj.MakeCheckButton = MakeCheckButton
+        
+        obj.textctrls = {}
+        
+        return obj
+        
+    end
+
+	SetObject("LuaControlManagerFactory", obj)
+	Logd("LuaControlManagerFactory has been registered")
+end
+

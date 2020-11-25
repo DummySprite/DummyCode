@@ -1,0 +1,343 @@
+﻿
+Import("listview.dsf")
+Import("listmanager.dsf")
+Import("window.dsf")
+
+function RegisterObject()
+
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = GetObject("LuaWindowFactory"):Create()
+            
+        obj.m_items = GetObject("LuaListManagerFactory"):Create() 
+
+        -- Override parent methods
+        obj.Show_LuaWindow = obj.Show
+        
+        obj.OnConfirm_LuaWindow = obj.OnConfirm
+        obj.OnCancel_LuaWindow = obj.OnCancel
+        
+        obj.Items = function(self)
+            return self.m_items
+        end
+        
+        -- Window methods
+        obj.Show = function(self, title, x, y, width, height)
+        
+            if title == nil then
+                title = ""
+            end
+            
+            if x == nil then
+                x = "center"
+            end
+            
+            if y == nil then
+                y = "center"
+            end
+        
+            if width == nil then
+                width = DpToPixel(300)
+            end
+            if height == nil then
+                height = DpToPixel(280)
+            end
+            
+            self:Show_LuaWindow(title,  x,  y, width, height, function(layoutMain)
+            
+                local layoutOp =  CreateLinearLayout("layoutOp", "horizontal", "match_parent", "wrap_content")
+                --
+                    local btnAdd = CreateButton("btnAdd", self:GetLang("add"), "match_parent",  DpToPixel(30))
+                    btnAdd:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+                    btnAdd:SetWeight(1)
+                    btnAdd:SetGravity("center")
+                    btnAdd:SetLayoutMarginLeft(DpToPixel(1))
+                    btnAdd:SetOnClickListener(function()
+                    
+                        local view, item = self:AddItem()
+                        self.m_items:Append(item)
+                        self.m_items:Bind(item, view)
+                        
+                    end)
+                    layoutOp:AddControl(btnAdd)
+                --
+                layoutOp:SetLayoutMargin(5)
+                layoutMain:AddControl(layoutOp)
+                
+                local divider = CreateDivider("divider", "match_parent", 1)
+                divider:SetBackgroundColor(RGBAToColor(155, 155, 155, 155))
+                layoutMain:AddControl(divider)
+                
+                self.m_lviewList = GetObject("LuaListViewFactory"):Create()
+                local lviewListView = self.m_lviewList:Create("match_parent", "match_parent")
+                lviewListView:SetWeight(1)
+                layoutMain:AddControl(lviewListView)
+
+                -- Load and bind items
+                self:LoadItems()
+                
+                self.m_items:Foreach(function(item)
+                
+                    local view, item = obj:AddItem(item)
+                    self.m_items:Bind(item, view)
+                    
+                    return true
+                    
+                end)
+                
+            end)
+            
+        end
+        
+        obj.OnConfirm = function(self)
+        
+            self.m_items:Print()
+            self:SaveItems()
+            
+            self:OnConfirm_LuaWindow()
+            
+        end
+        
+        obj.OnCancel = function(self)
+        
+            self.m_items:Print()
+            self:SaveItems()
+            
+            self:OnCancel_LuaWindow()
+            
+        end
+        
+        obj.AssignName = function(self, prefix)
+        
+            local order = self:AssignOrder()
+            local name = string.format("%s_%d", prefix, order)
+            return name, order
+            
+        end
+        
+        obj.AssignOrder = function(self)
+        
+            local max = 0
+            
+            self.m_items:Foreach(function(item)
+                
+                if item.order > max then
+                    max = item.order
+                end
+                
+                return true
+            
+            end)
+            
+            return max + 1
+            
+        end
+        
+        obj.GetItemByView = function(self, view)
+            local item = self.m_items:GetItemByView(view)
+            return item
+        end
+        
+        obj.MoveView = function(self, view, direction)
+        
+            local _item = self.m_items:GetItemByView(view)
+                
+            self:SaveItems()
+            
+            Logm("Move %s", direction)
+            if direction == "up" then
+            
+                local item1, item2 = self.m_items:Up(_item)
+                if item1 ~= nil and item2 ~= nil then
+                    -- Update views
+                    self:SwapItems(item1, item2)
+                end
+                
+            else
+            
+            end
+            
+        end
+        
+        obj.SwapItems = function(self, item1, item2)
+            local view1 = self.m_items:GetView(item1)
+            local view2 = self.m_items:GetView(item2)
+            self:UpdateItem(view1, item1)
+            self:UpdateItem(view2, item2)
+        end
+        
+        obj.AddItem = function(self, item)
+        
+            local view = {}
+            
+            local layout =  CreateLinearLayout("layout", "vertical", "match_parent", "wrap_content")
+            layout:SetLayoutMargin(DpToPixel(2))
+             
+            local index
+            if item == nil then
+                index = self.m_items:Count()
+            else
+                index = self.m_items:GetItemIndex(item)
+            end
+            
+            if self:IsUpEnabled(index) or self:IsDeleteEnabled(index) or self:IsQuestionEnabled(index) then
+                
+                local layoutTop =  CreateLinearLayout("layoutLine", "horizontal", "match_parent", "wrap_content")
+                --
+                    local margin = 0
+                    
+                    if self:IsUpEnabled(index) then
+                        
+                        local iviewUp = CreateImageView("iviewUp", DpToPixel(18),  DpToPixel(18))
+                        iviewUp :SetBackgroundImage("up.png")
+                        iviewUp :SetOnClickListener(function()
+                            self:MoveView(view, "up")
+                        end)
+                        iviewUp:SetLayoutMarginLeft(DpToPixel(2))
+                        layoutTop:AddControl(iviewUp)
+                        
+                    else
+                        margin = DpToPixel(18)
+                    end
+                    
+                    view.tviewTitle = CreateTextView("tviewTitle", "", "wrap_content", "match_parent")
+                    view.tviewTitle:SetGravity("center")
+                    view.tviewTitle:SetLayoutMarginLeft(DpToPixel(8) + margin)
+                    layoutTop:AddControl(view.tviewTitle)
+                    
+                    local layoutRight =  CreateLinearLayout("layoutLine", "horizontal", "match_parent", "wrap_content")
+                    layoutRight:SetWeight(1)
+                    layoutRight:SetGravity("right")
+                    layoutRight:SetLayoutMarginRight(DpToPixel(16))
+                    layoutTop:AddControl(layoutRight)
+                    
+                    if self:IsDeleteEnabled(index) then
+                        
+                        local iviewDelete = CreateImageView("iviewDelete", DpToPixel(18),  DpToPixel(18))
+                        iviewDelete:SetBackgroundImage("trash.png")
+                        iviewDelete:SetLayoutGravity("right")
+                        iviewDelete:SetOnClickListener(function()
+                            local _item = self:GetItemByView(view)
+                            self:DeleteItem(view.item_view, _item)
+                        end)
+                        iviewDelete:SetLayoutMarginRight(DpToPixel(4))
+                        layoutRight:AddControl(iviewDelete)
+                    
+                    end
+                    
+                    if self:IsQuestionEnabled(index) then
+                    
+                        local iviewQuestion = CreateImageView("iviewQuestion", DpToPixel(18),  DpToPixel(18))
+                        iviewQuestion:SetBackgroundImage("question.png")
+                        iviewQuestion:SetLayoutGravity("right")
+                        iviewQuestion:SetOnClickListener(function()
+                            local _item = self:GetItemByView(view)
+                            self:OnQuestion(_item)
+                        end)
+                        iviewQuestion:SetLayoutMarginRight(DpToPixel(2))
+                        layoutRight:AddControl(iviewQuestion)
+                        
+                    end
+                --
+                layout:AddControl(layoutTop)
+            
+            end
+    
+            view.SetTitle = function(self, title)
+                if view.tviewTitle ~= nil then
+                    view.tviewTitle:SetLabel(title)
+                end
+            end
+            
+            view, item = self:CreateItem(
+                view,
+                layout,
+                item
+            )
+            
+            if self:IsDownEnabled(index) then
+                
+                local layoutBottom =  CreateLinearLayout("layoutLine", "horizontal", "match_parent", "wrap_content")
+                --
+                    if self:IsDownEnabled(index) then
+                       
+                        local iviewDown = CreateImageView("iviewDown", DpToPixel(18),  DpToPixel(18))
+                        iviewDown:SetBackgroundImage("down.png")
+                        iviewDown:SetLayoutMarginBottom(DpToPixel(2))
+                        iviewDown:SetOnClickListener(function()
+                            self:MoveView(view, "down")
+                        end)
+                        iviewDown:SetLayoutMarginLeft(DpToPixel(2))
+                        layoutBottom:AddControl(iviewDown)
+                        
+                    end
+                --
+                layout:AddControl(layoutBottom)
+                
+            end
+                
+            local divider = CreateDivider("divider", "match_parent", 1)
+            divider:SetBackgroundColor(RGBAToColor(155, 155, 155, 155))
+            layout:AddControl(divider)
+            
+            view.item_view = self.m_lviewList:AddItem("", nil, layout)
+            
+            return view, item
+        
+        end
+        
+        -- Style handlers
+        
+        obj.IsUpEnabled = function(self, index)
+            return false
+        end
+        
+        obj.IsDeleteEnabled = function(self, index)
+            return false
+        end
+        
+        obj.IsQuestionEnabled = function(self, index)
+            return false
+        end
+        
+        obj.IsDownEnabled = function(self, index)
+            return false
+        end
+        
+        obj.OnQuestion = function(self, item)
+        end
+        
+        -- Item handlers
+        
+        obj.LoadItems = function(self)
+        
+        end
+        
+        obj.SaveItems = function(self)
+        end
+        
+        obj.CreateItem = function(self, view, layout, item)
+        
+        end
+        
+        obj.DeleteItem = function(self, item_view, item)
+        
+            self.m_lviewList:DeleteItem(item_view)
+            self.m_items:Remove(item)
+            
+        end
+        
+        obj.UpdateItem = function(self, view, item)
+        end
+        
+        return obj
+        
+    end
+    
+    SetObject("LuaListWindowFactory", obj)
+	Logd("LuaListWindowFactory has been registered")
+    
+end
+

@@ -1,0 +1,44 @@
+﻿
+function Contains(self, x, y)
+
+    if x < self.x or y < self.y then
+        return false
+    end
+    
+    if x >= self.x + width or y >= self.y + height then
+        return false
+    end
+    
+    return true
+
+end
+
+function Set(self, x, y, width, height)
+    
+    self.x = x
+    self.y = y
+    self.width = width
+    self.height = height
+
+end
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = {}
+        
+        obj.x = -1
+        obj.y = -1
+        obj.width = 0
+        obj.height = 0
+        
+        return obj
+        
+    end
+
+	SetObject("LuaRectFactory", obj)
+	Logd("LuaRectFactory has been registered")
+end
+

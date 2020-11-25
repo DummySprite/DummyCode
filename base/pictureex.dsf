@@ -1,0 +1,378 @@
+﻿
+-- version : 1001
+-- date : 2014.7.9
+
+-- Supported matching methods
+-- 1 relative   : 使用相对坐标进行匹配 
+-- 2 absolute : 直接使用绝对坐标进行匹配
+-- 3 scale      : 使用fast feature对缩放的特征进行匹配
+
+-- Set debug mode
+function SetDebug(self, enable)
+    self.debug = enable;
+end
+
+function SetFactor(self, xFactor, yFactor)
+    self.xFactor = xFactor
+    self.yFactor = yFactor
+   -- Logm("Factor %f, %f", xFactor, yFactor)
+end
+
+function AddRange(self, topLeftX, topLeftY, bottomRightX, bottomRightY)
+    obj.range.ranges[obj.range.rangesCount] = {}
+    obj.range.ranges[obj.range.rangesCount].topLeftX = topLeftX
+    obj.range.ranges[obj.range.rangesCount].topLeftY = topLeftY
+    obj.range.ranges[obj.range.rangesCount].bottomRightX = bottomRightX
+    obj.range.ranges[obj.range.rangesCount].bottomRightY = bottomRightY
+    obj.range.rangesCount = obj.range.rangesCount + 1
+end
+
+function SelectRange(self, index)
+    if index < obj.range.rangesCount then
+        self:SetRange(obj.range.ranges[index].topLeftX, obj.range.ranges[index].topLeftY, obj.range.ranges[index].bottomRightX ,obj.range.ranges[index].bottomRightY)
+    end
+end
+
+function SetRange(self, topLeftX, topLeftY, bottomRightX, bottomRightY)
+    self.range.topLeftX = topLeftX
+    self.range.topLeftY = topLeftY
+    self.range.bottomRightX = bottomRightX
+    self.range.bottomRightY = bottomRightY
+end
+
+function GetRange(self)
+    return self.range.topLeftX, self.range.topLeftY, self.range.bottomRightX, self.range.bottomRightY
+end
+
+function Add(self, x, y, color)
+    return AddEx(self, x, y, color, true, nil)
+end
+-- cond : matching condition,either matched or dismatched
+-- sim    : similarity of matching this color
+function AddEx (self, x, y, color, cond, sim)
+    return DoRelativeAdd(self, x, y, color, cond, sim)
+end
+
+function DoRelativeAdd (self, x, y, color, cond, sim)
+    local numb = self.numb
+
+    if numb == 0 then
+        self.features[numb] = {}
+        self.features[numb].x = x
+        self.features[numb].y = y
+        self.features[numb].color = color
+        -- The first color is not allowed to be in dismatched mode
+        DOCHECK(cond == true)
+        self.features[numb].cond = cond
+        self.features[numb].sim = sim
+
+        self.numb= numb + 1
+    else
+        self.features[numb] = {} 
+        self.features[numb].x = x - self.features[0].x
+        self.features[numb].y = y - self.features[0].y
+        self.features[numb].color = color
+        self.features[numb].cond = cond
+        self.features[numb].sim = sim
+        
+        self.numb= numb + 1
+    end
+    
+  return self.numb
+end
+
+function Find(self, s)
+    
+    if not(self.range.topLeftX == -1) and not(self.range.topLeftY == -1) and not(self.range.bottomRightX == -1) and not(self.range.bottomRightY == -1) then
+    
+        --
+        -- Searching the specific screen range
+        --
+        self.x, self.y = DoRelativeFind(
+            self, 
+            self.range.topLeftX, 
+            self.range.topLeftY, 
+            self.range.bottomRightX,
+            self.range.bottomRightY,
+            s,
+            nil
+            )
+        
+    else
+    
+        --
+        -- Searching the entire screen
+        -- 
+        self.x, self.y = DoRelativeFind(self, 0, 0, GetDisplayWidth(), GetDisplayHeight(), s, nil)
+        
+    end
+    
+    return self.x, self.y
+end
+
+function FindEx(self, s, callback)
+    
+    if not(self.range.topLeftX == -1) and not(self.range.topLeftY == -1) and not(self.range.bottomRightX == -1) and not(self.range.bottomRightY == -1) then
+    
+        --
+        -- Searching the specific screen range
+        --
+        self.x, self.y = DoRelativeFind(self, 
+            self.range.topLeftX, 
+            self.range.topLeftY, 
+            self.range.bottomRightX,
+            self.range.bottomRightY,
+            s, callback)
+        
+    else
+    
+        --
+        -- Searching the entire screen
+        -- 
+        self.x, self.y = DoRelativeFind(self, 0, 0, GetDisplayWidth(), GetDisplayHeight(), s, callback)
+        
+    end
+        
+end
+
+function GetResult(self)
+    return self.x, self.y
+end
+
+function DoRelativeFind(self, x1, y1, x2, y2, s, callback)
+
+    DOCHECK(self.numb > 0)
+    
+    local pointX = -1
+    local pointY = -1
+    
+    --Logd("X1=%d Y2=%d ", x1, y1)
+    --Logd("X2=%d Y2=%d ", x2, y2)
+    
+    local lock
+    if GetSDKVersion() >= 6000 then 
+        lock = IsDisplayLocked() == false
+    else
+        lock = true
+    end
+    if lock then
+        LockDisplay()
+    end
+    
+    local width  = GetDisplayWidth()
+    local height = GetDisplayHeight()
+    
+    if self.features[0].sim == nil then
+        fsim = s
+    else
+        fsim = self.features[0].sim
+    end
+       
+    FindColor(self.features[0].color, x1, y1, x2, y2, fsim, function(x, y, similarity)
+        --
+        -- looping from second feature
+        --
+        
+        
+        if self.xFactor == 0 or self.yFactor == 0 then
+        
+            -- Try normal matching
+
+            for i = 1, self.numb - 1 do
+                    
+                if x + self.features[i].x < 0 or x + self.features[i].x >= width or y + self.features[i].y < 0 or y + self.features[i].y >= height then
+                    return true
+                end
+                
+                if self.features[i].sim == nil then
+                    nsim = s
+                else
+                    nsim = self.features[i].sim
+                end
+                
+                local matched = self.features[i].cond
+                if IsColor(x + self.features[i].x,  y + self.features[i].y,  self.features[i].color,  nsim) ~= matched then
+                    return true
+                end
+              
+            end
+            
+        else
+        
+            -- Try factor matching
+
+            for i = 1, self.numb - 1 do
+                    
+                local xf, yf 
+                xf = x + self.features[i].x / self.xFactor
+                yf = y + self.features[i].y / self.yFactor
+                
+                if xf < 0 or xf >= width or yf < 0 or yf >= height then
+                    return true
+                end
+                
+                if self.features[i].sim == nil then
+                    nsim = s
+                else
+                    nsim = self.features[i].sim
+                end
+                
+                local matched = self.features[i].cond
+                if IsColor(xf,  yf,  self.features[i].color,  nsim) ~= matched then
+                    return true
+                end
+                
+            end
+            
+        end
+        
+        --Logd("Matched：X=%d, Y=%d  with sim %d",  x,  y,  similarity)	
+        pointX = x
+        pointY = y
+        if callback == nil then
+            -- Only find the first matched feature
+            return false
+        else
+            return callback(x, y, s)
+        end
+	end)
+    
+    if lock then
+        UnlockDisplay()
+    end
+    
+    return pointX, pointY
+end
+
+function DoAbsoluteFind(self, s, callback)
+    --Logd("DoAbsoluteFind")
+    DOCHECK(self.numb > 0)
+    
+    local lock
+    if GetSDKVersion() >= 6000 then 
+        lock = IsDisplayLocked() == false
+    else
+        lock = true
+    end
+    if lock then
+        LockDisplay()
+    end
+    
+    local width  = GetDisplayWidth()
+    local height = GetDisplayHeight()
+    
+    for i = 0, self.numb - 1 do
+        --
+        -- looping from first feature
+        --
+        
+        if self.features[i].x < 0 or self.features[i].x >= width or self.features[i].y < 0 or self.features[i].y >= height then
+            if lock then
+                UnlockDisplay()
+            end
+            return -1, -1
+        end
+        
+        if self.features[i].sim == nil then
+            sim = s
+        else
+            sim = self.features[i].sim
+        end
+        
+        matched = self.features[i].cond
+        if IsColor(self.features[i].x,  self.features[i].y,  self.features[i].color,  sim) ~= matched then
+            if lock then
+                UnlockDisplay()
+            end
+            return -1, -1
+        end
+        
+    end
+    
+    if lock then
+        UnlockDisplay()
+    end
+    
+    if callback ~= nil then
+        callback(self.features[0].x, self.features[0].y, s)
+    end
+    
+    --Logd("Matched：X=%d, Y=%d",  self.features[0].x, self.features[0].y)
+    return self.features[0].x, self.features[0].y
+end
+
+function Msg(self)
+    Logd("-----------------------------------------------------------------------------")
+    Logd(" 此图片源包含 %d 个特征点:  ↓",  self.numb) 
+    Logd("-----------------------------------------------------------------------------")
+    if self.numb > 0 then
+        for i = 0, self.numb - 1 do
+            if self.features[i].cond then
+                matched = "dismatched"
+            else
+                matched = "matched"
+            end
+            Logd("< %d > X:%d Y:%d Color:%0.6X Cond:%s",  i + 1,  self.features[i].x,  self.features[i].y,  self.features[i].color, matched)
+        end
+    end
+    Logd("-----------------------------------------------------------------------------")
+end
+
+function GetPosition(self, index)
+    return self.features[index].x, self.features[index].y
+end
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+        obj = {}
+        -- Number of features 
+        obj.numb = 0
+        obj.features = {}
+        -- Debug mode
+        obj.debug = false
+        
+        -- The matching result
+        obj.x = -1
+        obj.y = -1
+        
+        obj.xFactor = -1
+        obj.yFactor = -1
+        
+        -- The matching range
+        obj.range = {}
+        obj.range.ranges = {}
+        obj.range.rangesCount = 0
+        obj.range.topLeftX = -1
+        obj.range.topLeftY = -1
+        obj.range.bottomRightX = -1
+        obj.range.bottomRightY = -1
+        
+        -- Methods 
+        obj.Add = Add
+        obj.AddEx = AddEx
+        obj.Find = Find
+        obj.FindEx = FindEx
+        obj.Msg = Msg
+        obj.Test = Test
+        obj.GetResult = GetResult
+        obj.SetFactor = SetFactor
+
+        obj.AddRange = AddRange
+        obj.SelectRange = SelectRange
+        
+        obj.SetRange = SetRange
+        obj.GetRange = GetRange
+        
+        obj.SetDebug = SetDebug
+        
+        obj.GetPosition = GetPosition
+        
+        return obj
+    end
+
+	SetObject("LuaPictureExFactory", obj)
+	Logd("LuaPictureExFactory has been registered")
+end
+

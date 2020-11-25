@@ -1,0 +1,262 @@
+﻿
+
+function IsVirtualKeyActive()
+    
+    local width  = GetDisplayWidth()
+    local height = GetDisplayHeight()
+    
+    local clientWidth  = GetDisplayClientWidth()
+    local clientHeight = GetDisplayClientHeight()
+    
+    Logm("width = %d height = %d", width, height)
+    Logm("clientWidth = %d clientHeight = %d", clientWidth, clientHeight)
+    
+    if width == clientWidth and height == clientHeight then
+        return false
+    else
+        return true
+    end
+    
+end
+
+function HideVirtualKey(name_of_process)
+
+    if not IsVirtualKeyActive() then
+        return false
+    end
+   
+    if GetSDKVersion() >= 3000 then
+        
+        if GetSystemVersion() < 19 then
+            
+            local pid = FindProcess(name_of_process)
+            if pid ~= -1 then
+                KillProcess(pid)
+                Sleep(1000)
+            end
+            
+            -- 隐藏虚拟按键
+            HideNavigationBar()
+            Sleep(1000)
+            
+            return true
+            
+        end
+        return false
+    else
+        return false
+    end
+
+end
+
+function Init(self, name_of_scene, scene, name_of_button, name_of_process, lang)
+    
+    local width = GetDisplayWidth()
+    local height = GetDisplayHeight()
+    local res = string.format("%dx%d", width, height)
+    Logm("Display %d, %d with DPI %d", width, height, GetDisplayDensityDpi())
+    
+    -- android
+    
+    if res == "800x600" or res == "600x800" then
+    
+            
+        local dpi = GetDisplayDensityDpi()
+        GetObject(name_of_scene):Init800x600x160(scene)
+        return GetObject(name_of_button):Init800x600x160()
+        
+    elseif res == "800x480" or res == "480x800" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 240 then
+            local msg = string.format(lang:GetValue("unsupported_dpi", ""), dpi, 240)
+            Toast(msg)
+        end
+        GetObject(name_of_scene):Init800x480x240(scene)
+        return GetObject(name_of_button):Init800x480x240()
+    
+    elseif res == "854x480" or res == "480x854" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 240 then
+            local msg = string.format(lang:GetValue("unsupported_dpi", ""), dpi, 240)
+            Toast(msg)
+        end
+        GetObject(name_of_scene):Init854x480x240(scene)
+        return GetObject(name_of_button):Init854x480x240()
+    
+    elseif res == "960x540" or res == "540x960" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 240 then
+            local msg = string.format(lang:GetValue("unsupported_dpi", ""), dpi, 240)
+            Toast(msg)
+        end
+        GetObject(name_of_scene):Init960x540x240(scene)
+        return GetObject(name_of_button):Init960x540x240()
+        
+    elseif res == "1024x600" or res == "600x1024" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 160 then
+            local msg = string.format(lang:GetValue("unsupported_dpi", ""), dpi, 160)
+            Toast(msg)
+        end
+        GetObject(name_of_scene):Init1024x600x160(scene)
+        return GetObject(name_of_button):Init1024x600x160()
+    
+    elseif res == "1280x720" or res == "720x1280" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 320 then
+            local msg = string.format(lang:GetValue("unsupported_dpi", ""), dpi, 320)
+            Toast(msg)
+        end
+        GetObject(name_of_scene):Init1280x720x320(scene)
+        return GetObject(name_of_button):Init1280x720x320()
+        
+    elseif res == "1280x800" or res == "800x1280" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        if false then -- dpi > 280 then
+            
+            if dpi ~= 320 then
+                local msg = string.format(lang:GetValue("unsupported_dpi", ""), dpi, 320)
+                Toast(msg)
+            end
+            GetObject(name_of_scene):Init1280x800x320(scene)
+            return GetObject(name_of_button):Init1280x800x320()
+            
+        else
+        
+            if dpi ~= 213 then
+                local msg = string.format(lang:GetValue("unsupported_dpi", ""), dpi, 213)
+                Toast(msg)
+            end
+            GetObject(name_of_scene):Init1280x800x213(scene)
+            return GetObject(name_of_button):Init1280x800x213()
+            
+        end
+    
+    elseif res == "1920x1080" or res == "1080x1920" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 480 then
+            local msg = string.format(lang:GetValue("unsupported_dpi", ""), dpi, 480)
+            Toast(msg)
+        end
+        GetObject(name_of_scene):Init1920x1080x480(scene)
+        return GetObject(name_of_button):Init1920x1080x480()
+        
+    elseif res == "2560x1440" or res == "1440x2560" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 640 then
+            local msg = string.format(lang:GetValue("unsupported_dpi", ""), dpi, 640)
+            Toast(msg)
+        end
+        GetObject(name_of_scene):Init2560x1440x640(scene)
+        return GetObject(name_of_button):Init2560x1440x640()
+        
+    elseif res == "2960x1440" or res == "1440x2960" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 640 then
+            local msg = string.format(lang:GetValue("unsupported_dpi", ""), dpi, 640)
+            Toast(msg)
+        end
+        GetObject(name_of_scene):Init2960x1440x640(scene)
+        return GetObject(name_of_button):Init2960x1440x640()
+        
+    -- common
+            
+    elseif res == "1024x768" or res == "768x1024" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        -- 160
+        -- 132
+        -- 163
+        GetObject(name_of_scene):Init1024x768x160(scene)
+        return GetObject(name_of_button):Init1024x768x160()
+        
+    elseif res == "2048x1536" or res == "1536x2048" then
+    
+        HideVirtualKey(name_of_process)
+    
+        local dpi = GetDisplayDensityDpi()
+        -- 320
+        GetObject(name_of_scene):Init2048x1536x320(scene)
+        return GetObject(name_of_button):Init2048x1536x320()
+        
+    -- ios
+    
+    elseif res == "960x640" or res == "640x960" then
+    
+        local dpi = GetDisplayDensityDpi()
+        GetObject(name_of_scene):Init960x640x320(scene)
+        return GetObject(name_of_button):Init960x640x320()
+        
+    elseif res == "1136x640" or res == "640x1136" then
+    
+        local dpi = GetDisplayDensityDpi()
+        GetObject(name_of_scene):Init1136x640x320(scene)
+        return GetObject(name_of_button):Init1136x640x320()
+        
+    elseif res == "1334x750" or res == "750x1334" then
+    
+        local dpi = GetDisplayDensityDpi()
+        GetObject(name_of_scene):Init1334x750x320(scene)
+        return GetObject(name_of_button):Init1334x750x320()
+        
+    elseif res == "2208x1242" or res == "1242x2208" then
+    
+        local dpi = GetDisplayDensityDpi()
+        GetObject(name_of_scene):Init2208x1242x480(scene)
+        return GetObject(name_of_button):Init2208x1242x480()
+        
+    else
+        -- Dont use local for alertmsg
+        alertMsg = GetObject("LuaAlertWindowFactory"):Create()
+        alertMsg:Show(lang:GetValue("error"), lang:GetValue("unsupported_device"), "center", "center")
+        return nil
+    end
+    
+    return nil
+end
+
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.Create = function(self)
+    
+        local obj = {}
+        obj.Init = Init
+        return obj
+        
+    end
+    
+	SetObject("LuaResolutionManagerFactory", obj)
+	Logd("LuaResolutionManagerFactory has been registered")
+end
+

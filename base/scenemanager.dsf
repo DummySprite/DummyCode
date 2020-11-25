@@ -1,0 +1,366 @@
+﻿
+Import("runloop.dsf")
+
+function DetectSceneChanged(param)
+
+    local name = param.name
+    local self = param.object
+    
+    -- 当开始检查场景前,将当前场景设置为先前场景
+    self.scenePrevious = self.sceneCurrent
+    
+    -- 是否有效场景
+    if self.sceneCurrent == "" then
+        return true
+    end
+    
+    -- 是否场景没有改变?
+    -- Logd("------------------ 尝试检测 : %s 是否改变? --------------------->>>", self.sceneCurrent)
+    x, y = self.scenes[self.sceneCurrent]:Find(self.sceneSimilarity)
+    -- Logd("%s %d.%d", self.sceneCurrent, x, y)
+    if not(x == -1) and not(y == -1) then
+        -- 场景没有改变
+        return false
+    else
+        Logm("场景已经改变: %s", name)
+        return true
+    end
+    
+end
+
+function DetectScene(param)
+
+    local name = param.name
+    local self = param.object
+    
+    -- Logd("------------------ 尝试检测 : %s --------------------->>>", name)
+    x, y = self.scenes[name]:Find(self.sceneSimilarity)
+    -- Logd("%s %d.%d", name, x, y)
+    if not(x == -1) and not(y == -1) then
+        
+        if not (self.sceneCurrent == name) then
+        
+            self:SetCurrentScene(name)
+            Logm("当前场景: %s", name)
+            
+        end
+        
+        -- 重新从第一个场景开始检测
+        -- 不在往下继续执行
+        return false
+    end
+    
+    return true
+    
+end
+
+-- 检测场景失败
+function DetectSceneFailed(param)
+
+    local name = param.name
+    local self = param.object
+    
+    if not(self.sceneCurrent == "") then
+    
+        self:SetCurrentScene("")
+		Logm("检测场景失败")
+        
+    end
+    
+end
+
+-----------------------------------------------------------------
+
+function SetCurrentScene(self, name)
+
+	self.sceneCurrent = name
+    self.sceneDuration = GetSystemTime()
+    self.sceneRetries     = nil
+
+end
+
+function SetCurrentSimilarity(self, sim)
+    self.sceneSimilarity = sim
+end
+
+function Start(self, actionMs, detectMs, listener)
+
+    self.listener = listener
+
+    -- 创建一个定时器,定时检查当前场景
+    if self.timer == nil then
+        
+        self.timer = CreateObject("LuaTimer")
+        self.timer:SetTimer(actionMs, function()
+        
+            -- 还没有开始 
+            if self.status == false then
+                return
+            end
+            
+            Detect(self, detectMs)
+            
+            if self.listener ~= nil then
+                self.listener()
+            end
+            
+        end)
+        
+    end
+    self.status = true
+    
+end
+
+function Pause(self)
+    self.status = false
+end
+
+function Resume(self)
+    self.status = true
+end
+
+function Stop(self)
+    if self.timer ~= nil then
+        self.timer:KillTimer()
+        self.timer = nil
+    end
+    self.status = false
+end
+
+function RunTarget(self, name)
+    return RunApp(name)
+end
+
+function RestartTarget(self, nameOfKill, nameOfRun)
+    Logm("Killing  %s", nameOfKill)
+    pid = FindProcess(nameOfKill)
+    if pid ~= -1 then
+        Logm("%s is found", nameOfKill)
+        KillProcess(pid)
+        Sleep(1000)
+    end
+    Logm("Running %s", nameOfRun)
+    return RunApp(nameOfRun)
+end
+
+function QuitTarget(self, nameOfKill)
+    Logm("Killing  %s", nameOfKill)
+    pid = FindProcess(nameOfKill)
+    if pid ~= -1 then
+        KillProcess(pid)
+        Logm("Process is kill")
+    else
+        Logm("Process not found")
+    end
+end
+
+function Reset(self)
+    self.sceneCurrent = ""
+    g_currentSceneX = -1
+    g_currentSceneY = -1
+
+    self.scenePrevious = ""
+    g_previousSceneX = -1
+    g_previousSceneY = -1
+
+    self.sceneDuration = GetSystemTime()
+    self.sceneRetries     = nil
+end
+
+function Detect(self, ms)
+    self.runloop:TimedRun(ms)
+end
+
+function AddScene(self, name, pic)
+    Logm("AddScene %s", name)
+    self.scenes[name] = pic
+    local param = {}
+    param.name = name
+    param.object = self
+    self.runloop:Post(param, 10,  DetectScene)
+end
+
+function GetCurrentScene(self)
+    return self.sceneCurrent
+end
+
+function GetPreviousScene(self)
+    return self.scenePrevious
+end
+
+function GetScenePosition(self, name)
+    return self.scenes[name]:GetPosition(0)
+end
+
+-- 获取当前场景持续时间
+function GetSceneDuration(self)
+    return GetSystemTime() - self.sceneDuration
+end
+
+-- 获取重试间隔
+function GetSceneRetry(self, ms, index)
+
+    if index == nil then
+        index = 0
+    end
+    
+    if self.sceneRetries == nil then
+        self.sceneRetries = {}
+    end
+    if self.sceneRetries[index] == nil then
+        self.sceneRetries[index] = 0
+    end
+    
+    if GetSystemTime() >= self.sceneRetries[index] then
+        -- 设置下次重试时间
+        self.sceneRetries[index] = GetSystemTime() + ms
+        return true
+    else
+        return false
+    end
+    
+end
+
+-- 判断是否存在虚拟按键
+function IsVirtualKeyActive(self)
+    
+    width  = GetDisplayWidth()
+    height = GetDisplayHeight()
+    
+    clientWidth  = GetDisplayClientWidth()
+    clientHeight = GetDisplayClientHeight()
+    
+    Logm("width = %d height = %d", width, height)
+    Logm("clientWidth = %d clientHeight = %d", clientWidth, clientHeight)
+    
+    if width == clientWidth and height == clientHeight then
+        return false
+    else
+        return true
+    end
+    
+end
+
+function WaitForNonScene(self, name, ms, sim, callback, callback_ms)
+    if sim == nil then
+        return self:WaitForMatching(self.scenes, name, ms, self.sceneSimilarity, callback, callback_ms, false)
+    else
+        return self:WaitForMatching(self.scenes, name, ms, sim, callback, callback_ms, false)
+    end
+end
+
+function WaitForScene(self, name, ms, sim, callback, callback_ms)
+    if sim == nil then
+        return self:WaitForMatching(self.scenes, name, ms, self.sceneSimilarity, callback, callback_ms, true)
+    else
+        return self:WaitForMatching(self.scenes, name, ms, sim, callback, callback_ms, true)
+    end
+end
+
+function WaitForMatching(self, collection, name, ms, sim, callback, callback_ms, state)
+    local callback_timedout
+    if callback ~= nil then
+       callback_timedout = GetSystemTime() + callback_ms
+    end
+    local wait_timedout = GetSystemTime() + ms
+    while GetSystemTime() < wait_timedout do
+        
+        local matched
+        local x, y = collection[name]:Find(sim)
+        if not (x == -1) and not (y == -1) then
+            matched = true
+        else
+            matched = false
+        end
+        
+        if state then
+            if matched then
+                return true
+            end
+        end
+        
+        if callback ~= nil then
+            if GetSystemTime() < callback_timedout then
+            else
+                callback()
+                callback_timedout = GetSystemTime() + callback_ms
+            end
+        end
+        
+        Sleep(500)
+        
+    end
+    
+    if state then
+        return false
+    else
+        return true
+    end
+end
+
+function RegisterObject()
+
+    local obj = {}
+    
+    obj.Create = function(self)
+
+        local obj = {}
+        
+        obj.scenes = {}
+        obj.sceneCurrent = ""
+        obj.scenePrevious = ""
+        
+        obj.sceneDuration = GetSystemTime()
+        obj.sceneSimilarity = 95
+        obj.sceneRetries = nil
+        
+        obj.listener = nil
+        obj.status = false
+        obj.timer = nil
+        
+        obj.runloop = GetObject("LuaRunLoopFactory"):Create()
+        
+        local param = {}
+        param.name = ""
+        param.object = obj
+        obj.runloop:Post(param, 20,  DetectSceneChanged)
+        obj.runloop:Post(param, 0,  DetectSceneFailed)
+        
+        obj.SetCurrentScene = SetCurrentScene
+        obj.SetCurrentSimilarity = SetCurrentSimilarity
+            
+        obj.AddScene = AddScene
+        
+        obj.GetScene = GetCurrentScene
+        obj.GetCurrentScene = GetCurrentScene
+        obj.GetPreviousScene = GetPreviousScene
+        obj.GetScenePosition = GetScenePosition
+        
+        obj.GetSceneRetry = GetSceneRetry
+        obj.GetSceneDuration = GetSceneDuration
+        obj.Detect = Detect
+        
+        obj.WaitForNonScene = WaitForNonScene
+        obj.WaitForScene = WaitForScene
+        obj.WaitForMatching = WaitForMatching
+        
+        obj.Start = Start
+        obj.Stop = Stop
+        obj.Pause = Pause
+        obj.Resume = Resume
+        obj.Reset = Reset
+        
+        obj.RunTarget = RunTarget
+        obj.QuitTarget = QuitTarget
+        obj.RestartTarget = RestartTarget
+     
+        obj.IsVirtualKeyActive = IsVirtualKeyActive
+        
+        return obj
+    end
+	
+	SetObject("LuaSceneManagerFactory", obj)
+	Logd("LuaSceneManagerFactory has been registered")
+    
+end
+

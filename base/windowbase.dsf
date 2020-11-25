@@ -1,0 +1,67 @@
+﻿
+g_index = 0
+
+function ClaimId()
+    g_index = g_index + 1
+    return string.format("window_%d", g_index)
+end
+
+function RegisterObject()
+
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = {}
+        
+        obj.m_langListener = nil
+        obj.m_configListener = nil
+        obj.m_configTag = ""
+        obj.m_configIndex = 0
+        
+        obj.SetConfigListener = function(self, configListener, configTag, configIndex)
+            self.m_configListener = configListener
+            self.m_configTag = configTag
+            if configIndex == nil then
+                self.m_configIndex = 0
+            else
+                self.m_configIndex = configIndex
+            end
+        end
+        
+        obj.GetConfigListener = function(self)
+            return self.m_configListener
+        end
+        
+        obj.GetConfigTag = function(self)
+            return self.m_configTag
+        end
+        
+        obj.GetConfigIndex = function(self)
+            return self.m_configIndex
+        end
+
+        obj.SetLangListener = function(self, langListener)
+            self.m_langListener = langListener
+        end
+        
+        obj.GetLangListener = function(self)
+            return self.m_langListener 
+        end
+        
+        obj.GetLang = function(self, tag)
+            if self.m_langListener == nil then
+                Logm("empty lang " .. tag)
+                return tag
+            else
+                return self.m_langListener:GetValue(tag)
+            end
+        end
+        
+        return obj
+    end
+	
+	SetObject("LuaWindowBaseFactory", obj)
+	Logd("LuaWindowBaseFactory has been registered")
+end
+

@@ -1,0 +1,629 @@
+﻿
+Import("windowbase.dsf")
+Import("listmanager.dsf")
+
+g_index = 0
+
+function ClaimId()
+    g_index = g_index + 1
+    return string.format("touchwindow_%d", g_index)
+end
+
+TYPE_TAP = 0
+TYPE_SWIPE = 1
+TYPE_DOUBLE_SWIPE = 2
+
+function RegisterObject()
+
+	local obj = {}
+        
+	obj.Create = function(self)
+        
+        DOCHECK(GetSdkVersion() >= 16000)
+
+        local obj = GetObject("LuaWindowBaseFactory"):Create()
+        
+        obj.m_winMain = nil
+        obj.m_layoutMain = nil
+        
+        obj.m_currentSettingItem = nil
+        obj.m_currentSettingItemView = nil
+        obj.m_currentSettingItemListener = nil
+        
+        obj.m_clientWidth = GetDisplayClientWidth()
+        obj.m_clientHeight = GetDisplayClientHeight()
+        
+        obj.m_items = GetObject("LuaListManagerFactory"):Create()
+        
+        obj.onCloseListener = nil
+        
+        obj.Items = function(self)
+            return self.m_items
+        end
+        
+        obj.LoadItemSetting = function (self, item)
+
+            Logm("Create setting ...")
+            
+            if  self.m_currentSettingItem ~= nil then
+                Logm("Setting has been loaded,Please close it first")
+                return
+            end
+            
+            local width = DpToPixel(320)
+            
+            local base_width = width / 4
+            local tview_width = base_width * 0.8
+            local tctrl_width = base_width + (base_width - tview_width)
+            
+            local layoutSetting = CreateLinearLayout("layoutItem", "vertical", width, "wrap_content")
+            layoutSetting:SetBackgroundColor(RGBAToColor(255, 255, 255, 255))
+            layoutSetting:SetOnClickListener(function()
+            end)
+            --
+                local layoutSwipeDirection =  CreateLinearLayout("layoutSwipeDirection", "horizontal", "wrap_content", "wrap_content")
+                layoutSwipeDirection:SetLayoutMarginBottom(DpToPixel(4))
+                --
+                    local tviewSwipeDirection = CreateTextView("tviewSwipeDirection", self:GetLang("swipe_direction"), tview_width, "wrap_content")
+                    layoutSwipeDirection:AddControl(tviewSwipeDirection)
+                   
+                    cboxSwipeDirection = CreateComboBox("cboxSwipeDirection", tctrl_width, "wrap_content")
+                    cboxSwipeDirection:Add(self:GetLang("left"))
+                    cboxSwipeDirection:Add(self:GetLang("right"))
+                    cboxSwipeDirection:Add(self:GetLang("up"))
+                    cboxSwipeDirection:Add(self:GetLang("down"))
+                    cboxSwipeDirection:SetOnSelectListener(function(position)
+                       
+                    end)
+                    layoutSwipeDirection:AddControl(cboxSwipeDirection)
+                    cboxSwipeDirection:SetSelection(item.setting.swipe_direction)
+                --
+                
+                local layoutDoubleSwipeDirection =  CreateLinearLayout("layoutDoubleSwipeDirection", "horizontal", "wrap_content", "wrap_content")
+                layoutDoubleSwipeDirection:SetLayoutMarginBottom(DpToPixel(4))
+                --
+                    local tviewDoubleSwipeDirection = CreateTextView("tviewDoubleSwipeDirection", self:GetLang("double_swipe_direction"), tview_width, "wrap_content")
+                    layoutDoubleSwipeDirection:AddControl(tviewDoubleSwipeDirection)
+              
+                    cboxDoubleSwipeDirection = CreateComboBox("cboxDoubleSwipeDirection", "match_parent", "wrap_content")
+                    cboxDoubleSwipeDirection:Add(self:GetLang("collapse"))
+                    cboxDoubleSwipeDirection:Add(self:GetLang("expand"))
+                    cboxDoubleSwipeDirection:SetOnSelectListener(function(position)
+                    end)
+                    layoutDoubleSwipeDirection:AddControl(cboxDoubleSwipeDirection)
+                    cboxDoubleSwipeDirection:SetSelection(item.setting.double_swipe_direction)
+                --
+                
+                local layoutScale =  CreateLinearLayout("layoutScale", "horizontal", "wrap_content", "wrap_content")
+                layoutScale:SetLayoutMarginBottom(DpToPixel(4))
+                --
+                    local tviewScale = CreateTextView("tviewScale", self:GetLang("scale"), tview_width, "wrap_content")
+                    layoutScale:AddControl(tviewScale)
+                    
+                    tctrlScale = CreateTextCtrl("tctrlScale", item.setting.scale, tctrl_width, "wrap_content")
+                    tctrlScale:SetSingleLine()
+                    layoutScale:AddControl(tctrlScale)
+                --
+
+                local OnType = function(_type)
+                    
+                    if _type == TYPE_TAP then
+                        layoutScale:SetVisibility(false)
+                    else
+                        layoutScale:SetVisibility(true)
+                    end
+                    
+                    if _type == TYPE_SWIPE or _type == TYPE_DOUBLE_SWIPE then
+                        layoutSwipeDirection:SetVisibility(true)
+                    else
+                        layoutSwipeDirection:SetVisibility(false)
+                    end
+                    
+                    if _type == TYPE_DOUBLE_SWIPE then
+                        layoutDoubleSwipeDirection:SetVisibility(true)
+                    else
+                        layoutDoubleSwipeDirection:SetVisibility(false)
+                    end
+                    
+                end
+
+                local layoutAction =  CreateLinearLayout("layoutAction", "horizontal", "match_parent", "wrap_content")
+                layoutAction:SetGravity("right")
+                layoutAction:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+                --
+                    local tviewTitle = CreateTextView("tviewTitle", string.format("X=%d, Y=%d", item.raw_x, item.raw_y), "wrap_content", "match_parent")
+                    tviewTitle:SetLayoutGravity("left")
+                    layoutAction:AddControl(tviewTitle)
+                    
+                    local itviewClose = CreateImageView("itviewClose", DpToPixel(32), DpToPixel(32))
+                    itviewClose:SetBackgroundImage("touchwindow_close.png")
+                    itviewClose:SetLayoutGravity("right")
+                    itviewClose:SetOnClickListener(function()
+                        self.m_currentSettingItemListener()
+                    
+                        self.m_layoutMain:RemoveControl(layoutSetting:GetId())
+                        self.m_currentSettingItem = nil
+                    end)
+                    layoutAction:AddControl(itviewClose)
+                --
+                layoutAction:SetLayoutMarginBottom(DpToPixel(4))
+                layoutSetting:AddControl(layoutAction)
+                
+                local cboxTypes = CreateComboBox("cboxPlayMacros", "match_parent", "wrap_content")
+                cboxTypes:Add(self:GetLang("tap"))
+                cboxTypes:Add(self:GetLang("swipe"))
+                cboxTypes:Add(self:GetLang("double_swipe"))
+                cboxTypes:SetOnSelectListener(function(position)
+                    OnType(position)
+                end)
+                Logm("type %d", item.setting.type)
+                cboxTypes:SetSelection(item.setting.type)
+                cboxTypes:SetLayoutMarginBottom(DpToPixel(2))
+                layoutSetting:AddControl(cboxTypes)
+                
+                local layoutLine1 =  CreateLinearLayout("layoutLine1", "horizontal", "match_parent", "wrap_content")
+                layoutLine1:SetLayoutMarginBottom(DpToPixel(2))
+                --
+                    local tviewDelay = CreateTextView("tviewDelay", self:GetLang("delay") .. "(ms):", tview_width, "wrap_content")
+                    layoutLine1:AddControl(tviewDelay)
+                    
+                    tctrlDelay = CreateTextCtrl("tctrlDelay", item.setting.delay, tctrl_width, "wrap_content")
+                    tctrlDelay:SetSingleLine()
+                    layoutLine1:AddControl(tctrlDelay)
+               
+                    local tviewCount = CreateTextView("tviewCount", self:GetLang("count") .. ":",  tview_width, "wrap_content")
+                    layoutLine1:AddControl(tviewCount)
+                    
+                    tctrlCount = CreateTextCtrl("tctrlCount", item.setting.count, tctrl_width, "wrap_content")
+                    tctrlCount:SetSingleLine()
+                    layoutLine1:AddControl(tctrlCount)
+                --
+                layoutSetting:AddControl(layoutLine1)
+                
+                CreateChoose = function(position, count, width, unset, name)
+            
+                    local cboxGroups = CreateComboBox("cboxGroups", width, "wrap_content")
+                    cboxGroups:Add(unset)
+                    for i = 1, count do
+                        cboxGroups:Add(string.format("%s %d", name, i))
+                    end
+                    cboxGroups:SetSelection(position)
+                    return cboxGroups
+                    
+                end
+                
+                local layoutLine2 =  CreateLinearLayout("layoutLine2", "horizontal", "match_parent", "wrap_content")
+                layoutLine2:SetLayoutMarginBottom(DpToPixel(2))
+                --
+                    local tviewGroup = CreateTextView("tviewGroup", self:GetLang("group") .. ":", tview_width, "wrap_content")
+                    layoutLine2:AddControl(tviewGroup)
+                    
+                    local cboxGroup = CreateChoose(item.setting.group_index, 15, tctrl_width, self:GetLang("unset"), self:GetLang("group_item"))
+                    cboxGroup:SetOnSelectListener(function(position)
+                        if self.m_currentSettingItem ~= nil then
+                            self.m_currentSettingItem.setting.group_index = position
+                        end
+                        Logm("Set group to %d", position)
+                    end)
+                    layoutLine2:AddControl(cboxGroup)
+                    
+                    local tviewGroupOrder = CreateTextView("tviewGroupOrder", self:GetLang("group_order") .. ":", tview_width, "wrap_content")
+                    layoutLine2:AddControl(tviewGroupOrder)
+                    
+                    local cboxGroupOrder = CreateChoose(item.setting.group_order, 30, tctrl_width, self:GetLang("unset"), "")
+                    cboxGroupOrder:SetOnSelectListener(function(position)
+                        if self.m_currentSettingItem ~= nil then
+                            self.m_currentSettingItem.setting.group_order = position
+                        end
+                        Logm("Set group order to %d", position)
+                    end)
+                    layoutLine2:AddControl(cboxGroupOrder)
+                --
+                layoutSetting:AddControl(layoutLine2)
+                
+                layoutSetting:AddControl(layoutSwipeDirection)
+                layoutSetting:AddControl(layoutDoubleSwipeDirection)
+                layoutSetting:AddControl(layoutScale)
+                OnType(cboxTypes:GetSelection())
+                
+                self.m_currentSettingItemListener =  function()
+                
+                    if self.m_currentSettingItem ~= nil then
+                    
+                        self.m_currentSettingItem.setting.type = cboxTypes:GetSelection()
+                        self.m_currentSettingItem.setting.delay = tctrlDelay:GetLabel()
+                        self.m_currentSettingItem.setting.count = tctrlCount:GetLabel()
+                        
+                        self.m_currentSettingItem.setting.swipe_direction = cboxSwipeDirection:GetSelection()
+                        self.m_currentSettingItem.setting.double_swipe_direction = cboxDoubleSwipeDirection:GetSelection()
+                        self.m_currentSettingItem.setting.scale = tctrlScale:GetLabel()
+                        
+                        --local item = self.m_currentSettingItem
+                        --Logm("type:%d delay:%d count:%d swipe_direction:%d double_swipe_direction=%d scale:%d", item.setting.type, item.setting.delay, item.setting.count, item.setting.swipe_direction, item.setting.double_swipe_direction, item.setting.scale)
+           
+                    end
+                    
+                end
+                
+                local btnOk = CreateButton("suspendStart", "OK", "match_parent",  DpToPixel(42))
+                btnOk:SetGravity("center")
+                btnOk:SetBackgroundColor(RGBAToColor(0, 170, 221, 255))
+                btnOk:SetOnClickListener(function()
+                
+                    if self.m_currentSettingItemListener ~= nil then
+                        self.m_currentSettingItemListener()
+                    end
+                    
+                    self.m_layoutMain:RemoveControl(layoutSetting:GetId())
+                    self.m_currentSettingItem = nil
+                    
+                end)
+                layoutSetting:AddControl(btnOk)
+            --
+            Logm("%d %d", self.m_clientWidth, width)
+            layoutSetting:SetLayoutX((self.m_clientWidth / 2) - (width / 2) )
+            layoutSetting:SetLayoutY(self.m_clientHeight * 0.2)
+            self.m_layoutMain:AddControl(layoutSetting)
+            
+            self.m_currentSettingItem = item
+            self.m_currentSettingItemView = layoutSetting
+
+        end
+        
+        obj.SaveItemSetting = function (self)
+
+            if self.m_currentSettingItemListener ~= nil then
+                self.m_currentSettingItemListener()
+            end
+            
+        end
+        
+        obj.CloseItemSetting = function(self)
+        
+            if self.m_currentSettingItem ~= nil then
+                --Logm("Setting not closed yet with %s to %s", self.m_currentSettingItem.id, layoutItem:GetId())
+                if self.m_currentSettingItem.id == self.m_currentSettingItemView:GetId() then
+                    --Logm("Closing setting for this item ...")
+                    self.m_layoutMain:RemoveControl(self.m_currentSettingItemView:GetId())
+                    self.m_currentSettingItem = nil
+                end
+            end
+            
+        end
+
+        obj.CreateItem = function (self, item, x, y, raw_x, raw_y)
+            
+            local view = {}
+            
+            if item == nil then
+                item = {}
+                
+                item.x = x
+                item.y = y
+                item.raw_x = raw_x
+                item.raw_y = raw_y
+                
+                item.setting = {}
+                
+                item.setting.group_index = 0
+                item.setting.group = ""
+                item.setting.group_order = 0
+
+                item.setting.type = TYPE_TAP
+                item.setting.delay = 1000
+                item.setting.count = 1
+   
+                item.setting.swipe_direction = 0
+                item.setting.double_swipe_direction = 0
+                item.setting.scale = 0
+                
+            end
+            
+            local layout_x = item.x
+            local layout_y = item.y
+            
+            if item.setting.delay < 0 then
+                item.setting.delay = 1000
+            end
+            
+            if item.setting.count < 0 then
+                item.setting.count = 1
+            end
+            
+            local layoutItem =  CreateLinearLayout("layoutItem", "horizontal", "wrap_content", "wrap_content")
+            
+            item.id = layoutItem:GetId()
+            item.view = layoutItem
+            
+            --Logm("type:%d delay:%d count:%d swipe_direction:%d double_swipe_direction=%d scale:%d", item.setting.type, item.setting.delay, item.setting.count, item.setting.swipe_direction, item.setting.double_swipe_direction, item.setting.scale)
+            
+            --
+                local item_size = DpToPixel(36) 
+                
+                local right_align = false
+                if self.m_clientWidth - item.x < (item_size * 2) * 2 then
+                    right_align = true
+                end
+                
+                local iviewItemClose = CreateImageView("iviewItemClose", item_size, item_size)
+                iviewItemClose:SetBackgroundImage("touchwindow_coords.png")
+                iviewItemClose:SetOnClickListener(function()
+                    self:CloseItemSetting()
+                    self:DeleteItem(view.item_view, item)
+                end)
+                
+                local iviewSetting = CreateImageView("iviewSetting", item_size * (2/3), item_size)
+                iviewSetting:SetBackgroundImage("touchwindow_setting.png")
+                iviewSetting:SetOnClickListener(function()
+                    self:LoadItemSetting(item)
+                end)
+                
+                if right_align then
+                    layoutItem:AddControl(iviewSetting)
+                    layoutItem:AddControl(iviewItemClose)
+                else
+                    layoutItem:AddControl(iviewItemClose)
+                    layoutItem:AddControl(iviewSetting)
+                end
+                
+                layout_x = item.x - (item_size / 2)
+                layout_y = item.y - (item_size / 2)
+                --Logm("%d, %d with %d, %d", x, y, layout_x, layout_y)
+                
+                if right_align then
+                    layout_x = layout_x - (item_size * (2/3))
+                end
+                
+                layoutItem:SetLayoutX(layout_x)
+                layoutItem:SetLayoutY(layout_y)
+                self.m_layoutMain:AddControl(layoutItem)
+            --
+            
+            view.item_view = layoutItem
+            
+            return view, item
+            
+        end
+
+        obj.DeleteItem = function (self, item_view, item)
+
+            self.m_layoutMain:RemoveControl(item_view:GetId())
+            self.m_items:Remove(item)
+            
+        end
+
+        obj.Show = function (self, path)
+
+            --Logm("Showing action window ...")
+            --Logm("%d, %d", self.m_clientWidth, self.m_clientHeight)
+            
+            self.m_winMain = CreateFrame(ClaimId(), "",  0,  0,   self.m_clientWidth, self.m_clientHeight)
+            self.m_winMain:EnableActionBar(false)
+            self.m_winMain:EnableMovable(false)
+            
+            --[[
+            path = JoinPath(GetDataPath(), "display.png")
+            Logm(path)
+            CaptureDisplay(path)
+            ]]--
+            
+            self.m_layoutMain =  CreateAbsoluteLayout("layoutMain", "mach_parent", "match_parent")
+            
+            if path ~= nil then
+                
+                Logm("Loading display from %s", path)
+                if GetSystemName() == "windows" then
+                    
+                    local darker_path = JoinPath(GetDataPath(), "darker_touch_backgorund.png")
+                    if GetObject("LuaImageUtil"):Darker(path, darker_path, 0.5) then
+                        path = darker_path
+                    end
+                    
+                    self.m_layoutMain:SetBackgroundImage(path)
+                    self.m_winMain:Attach(self.m_layoutMain)
+                    
+                else
+                    self.m_layoutMain:SetBackgroundColor(RGBAToColor(0, 0, 0, 100))
+                    local layoutMask = CreateLinearLayout("layoutMask", "horizontal", "mach_parent", "match_parent")
+                    layoutMask:SetBackgroundImage(path)
+                    self.m_winMain:Attach(layoutMask)
+                    layoutMask:AddControl(self.m_layoutMain)
+                end
+                
+            else
+                
+                if GetSystemName() == "windows" then
+                    self.m_winMain:SetBackgroundColor(RGBAToColor(0, 0, 0, 180))
+                else
+                    self.m_layoutMain:SetBackgroundColor(RGBAToColor(0, 0, 0, 100))
+                end
+                
+                self.m_winMain:Attach(self.m_layoutMain)
+            end
+
+            --
+                local iconSize = DpToPixel(30)
+               
+                local layoutClose =  CreateLinearLayout("layoutClose", "horizontal", "wrap_content", "wrap_content")
+                layoutClose:SetLayoutX((self.m_clientWidth / 2) - (iconSize / 2))
+                layoutClose:SetLayoutY(0)
+                --
+                    local iviewClose = CreateImageView("iviewClose", iconSize, iconSize)
+                    iviewClose:SetBackgroundImage("touchwindow_close_top.png")
+                    iviewClose:SetOnClickListener(function()
+                        
+                        self:SaveItemSetting()
+                    
+                        if self:GetConfigListener() ~= nil then
+                            --Logm("Saving items ...")
+                            GetObject("LuaTouchWindowFactory"):SaveItems(self.m_items:GetItems(), self:GetConfigListener(), self:GetConfigTag())
+                        end
+                        
+                        if self.onCloseListener() ~= nil then
+                            if self.onCloseListener() then
+                                self.m_winMain:Close()
+                            end
+                        else
+                            self.m_winMain:Close()
+                        end
+                        
+                    end)
+                    layoutClose:AddControl(iviewClose)
+                --
+                self.m_layoutMain:AddControl(layoutClose)
+                
+                if GetSystemName() == "android" then
+                    self.m_layoutMain:SetOnTouchListener(function(name, x, y, raw_x, raw_y)
+                    
+                        Logm("%s %d, %d - %d, %d", name, x, y, raw_x, raw_y)
+                        if name == "TOUCH_DOWN" or name == "touch_down" or name == "ACTION_DOWN" then
+                            local view, item = self:CreateItem(nil, x, y, raw_x, raw_y)
+                            self.m_items:Append(item)
+                            self.m_items:Bind(item, view)
+                        end
+                        
+                    end)
+                else
+                    self.m_layoutMain:SetOnTouchListener(function(name, x, y, raw_x, raw_y)
+                    
+                        --Logm("%s %d, %d - %d, %d", name, x, y, raw_x, raw_y)
+                        if name == "TOUCH_UP" or name == "touch_up" or name == "ACTION_UP" then
+                            local view, item = self:CreateItem(nil, x, y, raw_x, raw_y)
+                            self.m_items:Append(item)
+                            self.m_items:Bind(item, view)
+                        end
+                        
+                    end)
+                end
+                
+            --
+            if self:GetConfigListener() ~= nil then
+                GetObject("LuaTouchWindowFactory"):LoadItems(self:GetConfigListener(), self:GetConfigTag(), function(item)
+                    self.m_items:Append(item)
+                end)
+                
+                self.m_items:Foreach(function(item)
+                    local view, item = self:CreateItem(item)
+                    self.m_items:Bind(item, view)
+                end)
+                
+            end
+            self.m_winMain:Show()
+            
+        end
+
+        obj.SetOnCloseListener = SetOnCloseListener
+
+        obj.Close = function (self)
+            self.m_winMain:Close()
+        end
+
+        obj.SetOnCloseListener = function (self, listener)
+            self.onCloseListener = listener
+        end
+        
+        return obj
+    end
+    
+    ---------------------------
+    
+	obj.LoadItems = function(self, configListener, configTag, method)
+    
+        Logm("LoadItems : %s", configTag)
+        
+        local c = configListener:GetTagCount(configTag .. ":item")
+        Logm("count : %d", c)
+        
+        local index = 0
+        while index < c do
+        
+            configListener:Push(configTag .. ":item", index)
+            
+            local item = {}
+            item.id = configListener:GetValue("id", "")
+            item.raw_x = configListener:GetValue("raw_x", 0)
+            item.raw_y = configListener:GetValue("raw_y", 0)
+            item.x = configListener:GetValue("x", 0)
+            item.y = configListener:GetValue("y", 0)
+            
+            --
+            -- Settings
+            --
+            item.setting = {}
+            -- Group 
+            item.setting.group_index = configListener:GetValue("group_index", 0)
+            if item.setting.group_index == 0 then
+                item.setting.group = ""
+            else
+                item.setting.group = string.format("group_%d", item.setting.group_index)
+            end
+            item.setting.group_order = configListener:GetValue("group_order", 0)
+            -- Basic
+            item.setting.type = configListener:GetValue("type", TYPE_TAP)
+            item.setting.delay = configListener:GetValue("delay", 1000)
+            item.setting.count = configListener:GetValue("count", 1)
+            -- Swap settings
+            item.setting.swipe_direction = configListener:GetValue("swipe_direction", 0)
+            item.setting.double_swipe_direction = configListener:GetValue("double_swipe_direction", 0)
+            item.setting.scale = configListener:GetValue("scale", 0)
+            
+            method(item)
+            
+            configListener:Pop()
+            
+            index = index + 1
+        end
+        
+    end
+
+	obj.SaveItems = function(self, items, configListener, configTag)
+    
+        Logm("SaveItems : %s", configTag)
+        
+        local c = configListener:GetTagCount(configTag)
+        if c <=0 then
+        else
+            configListener:Remove(configTag)
+        end
+        configListener:Add(configTag)
+
+        local index = 0
+        for key, item in pairs(items) do
+            
+            configListener:Add(configTag .. ":item")
+            configListener:Push(configTag .. ":item", index)
+            
+            -- Internals
+            configListener:SetValue("id", item.id)
+            configListener:SetValue("x", item.x)
+            configListener:SetValue("y", item.y)
+            configListener:SetValue("raw_x", item.raw_x)
+            configListener:SetValue("raw_y", item.raw_y)
+           
+            --
+            -- Settings
+            --
+            -- Group 
+            configListener:SetValue("group_index", item.setting.group_index)
+            configListener:SetValue("group_order", item.setting.group_order)
+            -- Basic
+            configListener:SetValue("type", item.setting.type)
+            configListener:SetValue("delay", item.setting.delay)
+            configListener:SetValue("count", item.setting.count)
+            -- Swap 
+            configListener:SetValue("swipe_direction", item.setting.swipe_direction)
+            configListener:SetValue("double_swipe_direction", item.setting.double_swipe_direction)
+            configListener:SetValue("scale", item.setting.scale)
+           
+            configListener:Pop()
+            
+            index = index + 1
+        end
+        
+        configListener:SaveConfig()
+
+    end
+
+	SetObject("LuaTouchWindowFactory", obj)
+	Logd("LuaTouchWindowFactory has been registered")
+end

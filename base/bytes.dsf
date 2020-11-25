@@ -1,0 +1,208 @@
+﻿
+-- bytes encoding in little endian
+--
+
+g_sdkversion = GetSDKVersion()
+g_isArch64 = -1
+
+function ToNagativeBytes(self, value, length)
+    
+    local bit_length = length * 2
+    
+    local hex = ""
+    
+    if value == -1 then
+        
+        local i = 0
+        while i < bit_length do
+            i = i + 1
+            hex = hex .. "F"
+        end
+    
+    end
+    
+    return hex
+    
+end
+
+function IsArch64(self)
+
+    if g_isArch64 ~= -1 then
+        return g_isArch64 == 1
+    end
+    
+    local res = Shell("cat /proc/cpuinfo")
+    res = string.lower(res)
+    
+    if GetObject("LuaStringUtil"):Contains(res, "aarch64") then
+        Logm("This is aarch64")
+        g_isArch64 = 1
+        return true
+    end
+    
+    if GetObject("LuaStringUtil"):Contains(res, "arm64") then
+        Logm("This is arm64")
+        g_isArch64 = 1
+        return true
+    end
+    
+    Logm("This is not arch64")
+    g_isArch64 = 0
+    return false
+    
+end
+
+function ToBytes(self, value, length)
+
+    if value < 0 then
+        return self:ToNagativeBytes(value, length)
+    end
+    
+    -- length must equals to 1, 2, 4, 8
+    local f = "%0." .. string.format("%d", length * 2) .. "X"
+    local hex = string.format(f, value)
+    -- rotate it to little endian
+    local rotated_hex = ""
+    local s_i = string.len(hex) - 1
+    while s_i >= 1 do
+        rotated_hex = rotated_hex .. string.sub(hex, s_i, s_i + 1)
+        s_i = s_i - 2
+    end
+    return rotated_hex
+    
+end
+
+g_charTable = {
+    ["0"] = 0,
+    ["1"] = 1,
+    ["2"] = 2,
+    ["3"] = 3,
+    ["4"] = 4,
+    ["5"] = 5,
+    ["6"] = 6,
+    ["7"] = 7,
+    ["8"] = 8,
+    ["9"] = 9,
+  
+    ["A"] = 10,
+    ["B"] = 11,
+    ["C"] = 12,
+    ["D"] = 13,
+    ["E"] = 14,
+    ["F"] = 15,
+    
+    ["a"] = 10,
+    ["b"] = 11,
+    ["c"] = 12,
+    ["d"] = 13,
+    ["e"] = 14,
+    ["f"] = 15,
+}
+
+function FromBytes(self, hex)
+
+    local value = 0
+    
+    local len = string.len(hex)
+    local i = 0
+    while i < len do
+    
+        if len - i < 2 then
+            break
+        end
+    
+        local pos = i + 1
+        local c1 = string.sub(hex, pos, pos)
+        local c2 = string.sub(hex, pos  + 1, pos + 1)
+        
+        local cvalue = g_charTable[c1] * 16 + g_charTable[c2]
+        
+        --Logm("%s %s : %d", c1, c2, cvalue)
+        
+        local off = math.floor(i / 2)
+        value = value + (cvalue * math.pow(256, off))
+        
+        i = i + 2
+    end
+    
+    return value
+    
+end
+
+function GetTimevalBytes(self)
+
+    if g_sdkversion < 15000 then
+        return ""
+    end
+    
+    local timeval_hex = GetBytesOf("timeval")
+    
+    --[[
+    local hex = ""
+    
+    local bit_length = string.len(timeval_hex)
+    
+    local i = 0
+    while i < bit_length do
+        i = i + 1
+        hex = hex .. "0"
+    end
+    ]]--
+    
+    return timeval_hex
+end
+
+function GetInputEventBytes(self, type_, code, value)
+
+    local hex = ""
+    
+    if g_sdkversion >= 20000 then
+        hex = GetBytesOf("input_event", type_, code, value)
+        return hex
+    end
+
+    -- input_event { 
+    -- timeval : n bytes(8 bytes)
+    -- type : 2 bytes
+    -- code : 2 bytes
+    -- value : 4 bytes
+    -- }
+    hex = hex .. self:GetTimevalBytes()
+    hex = hex .. self:ToBytes(type_, 2)
+    hex = hex .. self:ToBytes(code, 2)
+    hex = hex .. self:ToBytes(value, 4)
+    
+    return hex
+end
+
+function GetInputEventSize(self)
+    if g_sdkversion >= 20000 then
+        return string.len(GetBytesOf("input_event", 0, 0, 0)) / 2
+    end
+    
+    return string.len(self:GetTimevalBytes()) / 2 + 2 + 2 + 4
+end
+
+function RegisterObject()
+	local obj = {}
+    
+    obj.Create = function(self)
+        local obj = {}
+        
+        obj.ToBytes = ToBytes
+        obj.ToNagativeBytes = ToNagativeBytes
+        
+        obj.FromBytes = FromBytes
+        obj.IsArch64 = IsArch64
+        
+        obj.GetTimevalBytes = GetTimevalBytes
+        obj.GetInputEventBytes = GetInputEventBytes
+        obj.GetInputEventSize = GetInputEventSize
+        
+        return obj
+    end
+
+	SetObject("LuaBytesFactory", obj)
+	Logd("LuaBytesFactory has been registered")
+end
+

@@ -1,0 +1,136 @@
+﻿
+function EqualsVersion(self, ver1, ver2)
+        
+    local sver = self:Split(ver1, ".")
+    local tver = self:Split(ver2, ".")
+    
+    local n = 0
+    if #tver > #sver then
+        n = #tver 
+    else
+        n = #sver
+    end
+    
+    for i = 0, n do
+        
+        local svalue, tvalue
+        
+        if i > #sver then
+            svalue = 0
+        else
+            if sver[i] == nil then
+                sver[i] = 0
+            else
+                svalue = tonumber(sver[i])
+            end
+        end
+        
+        if i > #tver then
+            tvalue = 0
+        else
+            if tver[i] == nil then
+                tvalue = 0
+            else
+                tvalue = tonumber(tver[i])
+            end
+        end
+        
+        if svalue > tvalue then
+            return 1
+        elseif tvalue > svalue then
+            return -1
+        end
+        
+    end
+    
+    return 0
+    
+end
+
+function Split(self, str, delim)
+  
+    local values = {}
+    local valuesCount = 0
+    
+    local size = string.len(str)
+    local current = 1
+    while current <= size do
+	
+        local pos
+		pos = string.find(str, delim, current, true);
+		if pos ~= nil then
+        
+			if pos > current then
+			
+                values[valuesCount] = string.sub(str, current, pos - 1)
+                -- Logm("[%d] %s(%d, %d)", valuesCount, values[valuesCount], current, pos - 1)
+                valuesCount = valuesCount + 1
+                
+				current = pos + 1;
+			
+			else
+				current = current  + 1
+			end
+		
+		else
+        
+            values[valuesCount] = string.sub(str, current, size)
+            -- Logm("[%d] %s(%d, %d)", valuesCount, values[valuesCount], current, size)
+            valuesCount = valuesCount + 1
+                
+			current = size + 1;
+        
+        end
+
+    end
+    
+    return values, valuesCount
+    
+end
+
+function Substring(self, str, start_str, end_str, start_pos)
+    
+    local found_spos
+    local found_epos
+    
+    found_spos, found_len = string.find(str, start_str, start_pos, true)
+    if found_spos == nil or found_len == nil then
+        return ""
+    end
+    -- Logm("%s found at %d", start_str, found_spos)
+    
+    found_epos, found_len = string.find(str, end_str, found_spos + string.len(start_str), true)
+    if found_epos == nil or found_len == nil then
+        return ""
+    end
+    -- Logm("%s found at %d", end_str, found_epos)
+    
+    return string.sub(str, found_spos + string.len(start_str), found_epos - 1)
+        
+end
+
+function Contains(self, str, substr)
+    
+    pos = string.find(str, substr)
+    if pos == nil then
+        return false
+    else
+        return true
+    end
+    
+end
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.Contains = Contains
+    
+    obj.EqualsVersion = EqualsVersion
+    obj.VersonCompares = EqualsVersion
+    
+	obj.Split = Split
+    obj.Substring = Substring
+  
+	SetObject("LuaStringUtil", obj)
+	Logd("LuaStringUtil has been registered")
+end

@@ -1,0 +1,324 @@
+﻿
+Import("stringutil.dsf")
+
+g_system = GetSystemName()
+
+g_touchEnforce = "uninitialized"
+g_touchDevice = "uninitialized"
+g_touchDeviceWidth  = 0
+g_touchDeviceHeight = 0 
+g_touchDeviceType = 0
+
+function IsAndroid(self)
+    return g_system == "android"
+end
+
+function IsSuEnabled(self)
+    local sdkversion = GetSDKVersion()
+    if sdkversion >= 15000 then
+        return CheckRoot("su")
+    end
+    return true
+end
+
+function IsAdbdEnabled(self)
+    local sdkversion = GetSDKVersion()
+    if sdkversion >= 15000 then
+        return CheckRoot("adbd")
+    end
+    return false
+end
+
+function GetTouchEnforce(self)
+
+    if g_touchEnforce ~= "uninitialized" then
+        return g_touchEnforce
+    else
+        Logm("enforce is not initialized yet")
+    end
+    
+    Logm("Deteting enforce ...")
+    
+    local name = GetSystemName()
+    Logm(name)
+    if  name == "android" then
+    
+        local sdkversion = GetSDKVersion()
+        Logm("sdk version %d", sdkversion)
+        if sdkversion >= 13000 then
+        
+            g_touchEnforce = "disabled"
+
+            local state = Shell("getenforce")
+            state = string.lower(state)
+            --Logm("getenforce : %s", state)
+
+            local pos, len
+            
+            pos, len = string.find(state, "enforcing")
+            if pos ~= nil and len ~= nil then
+                g_touchEnforce = "enforcing"
+            end
+            
+        else
+            g_touchEnforce = "outdated"
+        end
+        
+    else
+        g_touchEnforce = "disabled"
+    end
+    
+    if g_touchEnforce == "enforcing" then
+            
+        Logm("Device is under SELinux enforcing ...")
+        
+        local devName, devWidth, devHeight, devType
+        devName, devWidth, devHeight, devType = GetTouchDevice(self)
+        if devName == "" then
+            Logm("Unable to find touch device,Disable enforcing ...")
+            g_touchEnforce = "disabled"
+        
+        -- A class multitouch
+        elseif devType == 0 then
+            Logm("Doesn't support A class touch device,Disable enforcing ...")
+            g_touchEnforce = "disabled"
+            
+        else
+        
+            local file = CreateObject("LuaFile")
+            if file:Open(devName, "open_write") then
+                Logm("Open %s with read_write succeeded,Disable enforcing", devName)
+                g_touchEnforce = "disabled"
+                file:Close()
+            else
+                Logm("Unable to open %s with read_write,Using enforcing ...", devName)
+                g_touchEnforce = "enforcing"
+            end
+            
+        end
+    
+    end
+    
+    -- TEST
+    -- g_touchEnforce = "enforcing"
+    
+    Logm("Enforce初始化为 %s", g_touchEnforce)
+    return g_touchEnforce
+   
+end
+
+function GetTouchDevice(self)
+    
+    if g_touchDevice ~= "uninitialized" then
+        return g_touchDevice, g_touchDeviceWidth, g_touchDeviceHeight, g_touchDeviceType
+    else
+        Logm("touch device is not initialized yet")
+    end
+    
+    local device = FindDevice()
+    if device ~= nil then
+    
+        g_touchDevice = device.path
+        g_touchDeviceWidth  = device.abs_mt_x_max
+        g_touchDeviceHeight = device.abs_mt_y_max 
+        g_touchDeviceType = device.typeClass
+        
+        g_touchDevice = string.gsub(g_touchDevice, "\n", "")
+        g_touchDevice = string.gsub(g_touchDevice, "\r", "")
+        
+        --Logm("Touch device初始化为 %s", g_touchDevice)
+
+    else
+        Logm("Unable to find device")
+        
+        g_touchDevice = ""
+        g_touchDeviceWidth  = 0
+        g_touchDeviceHeight = 0
+        g_touchDeviceType = -1
+    end
+    
+    return g_touchDevice, g_touchDeviceWidth, g_touchDeviceHeight, g_touchDeviceType
+    
+end
+
+function FindDevice()
+    
+    local result = Shell("getevent -i")
+    -- Logging a event result will cause crash ??
+    -- Logm("getevent : %s", result)
+    
+    local devices, devicesCount = ListDevices(result)
+    
+    local device 
+    
+    device = MatchDevice(devices, devicesCount, "touchscreen", "multitouch", 1)
+    if device ~= nil then
+        return device
+    end
+    
+    device = MatchDevice(devices, devicesCount, nil, "multitouch", 1)
+    if device ~= nil then
+        return device
+    end
+    
+    return nil
+    
+end
+
+function MatchDevice(devices, devicesCount, name, type, typeClass)
+    
+    for i = 0, devicesCount - 1 do
+    
+        if name ~= nil then
+            name = string.lower(name)
+        end
+        
+        if name == nil or GetObject("LuaStringUtil"):Contains(string.lower(devices[i]. name), name) then
+        
+            if type == nil or devices[i].type == type  then
+            
+                if typeClass == nil  or devices[i].typeClass == typeClass then
+                
+                    return devices[i]
+                
+                end
+            
+            end
+            
+        end
+    
+    end
+    
+    return nil
+
+end
+
+function ListDevices(result)
+
+    local devices, devicesCount
+    devices = {}
+    devicesCount = 0
+    
+    -- List devices and initialize its desc
+    local search_pos = 0
+    while true do
+        
+        local subs
+        subs = GetObject("LuaStringUtil"):Substring(result, "add device", "input props", search_pos)
+        if subs == "" then
+            break
+        end
+        
+        devices[devicesCount] = {}
+        
+        devices[devicesCount].desc = "[/start]" .. subs .. "[/end]"
+        Logm(devices[devicesCount].desc)
+        
+        devicesCount = devicesCount + 1
+        
+        -- Search from next position
+        search_pos = search_pos + string.len(subs)
+        
+    end
+    
+    -- Initialize devices
+    for i = 0, devicesCount - 1 do
+    
+        -- default 
+        devices[i].type = "unknown"
+        devices[i].typeClass = -1
+        
+        devices[i].name = GetObject("LuaStringUtil"):Substring(devices[i].desc, "name:", "\n", 0)
+        -- Logm("name : %s", devices[i].name)
+        
+        devices[i].path = "/dev/" .. GetObject("LuaStringUtil"):Substring(devices[i].desc, "/dev/", "\n", 0)
+        -- Logm("path : %s", devices[i].path )
+        
+        devices[i].events = GetObject("LuaStringUtil"):Substring(devices[i].desc, "ABS (0003):", "[/end]", 0)
+        -- Logm("events : %s", devices[i].events)
+        
+    end
+    
+    for i = 0, devicesCount - 1 do
+        
+        if devices[i].path ~= "" and devices[i].events ~= "" then
+        
+            local lines, linesCount = GetObject("LuaStringUtil"):Split(devices[i].events, "\n")
+            for l = 0, linesCount - 1 do
+                -- Logm("[%d:%d] Line %s", l, linesCount, lines[l])
+                
+                local cells, cellsCount = GetObject("LuaStringUtil"):Split(lines[l], " ")
+                for c = 0, cellsCount - 1 do
+                    -- Logm("[%d:%d] Cell %s", c, cellsCount, cells[c])
+                end
+            
+                if cellsCount > 12 then
+                
+                    local abs = string.lower(cells[0])
+                    
+                    if abs == "002f"  then
+                    
+                        devices[i].abs_mt_slot = true
+                        
+                    elseif abs == "0039"  then
+                    
+                        devices[i].abs_mt_tracking_id = true
+                    
+                    elseif abs == "0035"  then
+                        
+                        devices[i].abs_mt_x_min = string.gsub(cells[5],",","")
+                        devices[i].abs_mt_x_max = string.gsub(cells[7],",","")
+                        
+                        Logm("devices[i].abs_mt_x_min %d", devices[i].abs_mt_x_min)
+                        Logm("devices[i].abs_mt_x_max %d", devices[i].abs_mt_x_max)
+                        
+                    elseif abs == "0036"  then
+
+                        devices[i].abs_mt_y_min = string.gsub(cells[5],",","")
+                        devices[i].abs_mt_y_max = string.gsub(cells[7],",","")
+
+                        Logm("devices[i].abs_mt_y_min %d", devices[i].abs_mt_y_min)
+                        Logm("devices[i].abs_mt_y_max %d", devices[i].abs_mt_y_max)
+                       
+                    end
+                
+                end
+                
+            end
+            
+            if devices[i].abs_mt_x_min ~= nil and devices[i].abs_mt_y_min ~= nil then
+            
+                devices[i].type = "multitouch"
+                Logm("multitouch is found %s", devices[i].path)
+            
+                if devices[i].abs_mt_slot == true and devices[i].abs_mt_tracking_id == true then
+                    Logm("This is a B class touch device")
+                    devices[i].typeClass = 1
+                else
+                    Logm("This is a A class touch device")
+                    devices[i].typeClass = 0
+                end
+                    
+            end
+            
+        end
+        
+    end
+    
+    return devices, devicesCount
+
+end
+
+function RegisterObject()
+	local obj = {}
+	
+    obj.GetTouchEnforce = GetTouchEnforce
+    obj.GetTouchDevice = GetTouchDevice
+    
+    obj.IsSuEnabled = IsSuEnabled
+    obj.IsAdbdEnabled = IsAdbdEnabled
+    obj.IsAndroid = IsAndroid
+   
+	SetObject("LuaAndroidUtil", obj)
+	Logd("LuaAndroidUtil has been registered")
+end

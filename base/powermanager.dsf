@@ -1,0 +1,152 @@
+﻿
+Import("keyutil.dsf")
+g_keyUtil = GetObject("LuaKeyUtil")
+
+POWER_FULL = 0
+POWER_SAVING = 1
+
+function EnterSaving(self)
+
+    self:ScreenOff()
+    
+    self.power_state = POWER_SAVING
+    
+    self.power_full_timedout = GetSystemTime() + self.power_full_timedout_ms
+    self.power_saving_timedout = GetSystemTime() + self.power_saving_timedout_ms
+    
+    if self.onEnterSaving ~= nil then
+        self.onEnterSaving()
+    end
+    
+end
+
+function LeaveSaving(self)
+    
+    self:ScreenOn()
+    
+    self.power_state = POWER_FULL
+    
+    self.power_full_timedout = GetSystemTime() + self.power_full_timedout_ms
+    self.power_saving_timedout = GetSystemTime() + self.power_saving_timedout_ms
+    
+    if self.onLeaveSaving ~= nil then
+        self.onLeaveSaving()
+    end
+    
+end
+
+function SetTimedout(self, full_timedout_ms, saving_timedout_ms)
+    self.power_full_timedout_ms = full_timedout_ms
+    self.power_saving_timedout_ms = saving_timedout_ms
+    
+    self.power_full_timedout = GetSystemTime() + self.power_full_timedout_ms
+    self.power_saving_timedout = GetSystemTime() + self.power_saving_timedout_ms
+end
+
+function Reset(self)
+    self.power_state = POWER_FULL
+end
+
+function Action(self)
+    
+    -- Logm("%d ", self.power_full_timedout - GetSystemTime())
+    -- Logm("%d ", self.power_saving_timedout - GetSystemTime())
+    
+    if self.power_state == POWER_FULL then
+    
+        if GetSystemTime() >= self.power_full_timedout then
+            Logm("进入节能状态")
+            self:EnterSaving()
+            return true
+        else
+            return false
+        end
+        
+    elseif self.power_state == POWER_SAVING then
+    
+        if GetSystemTime() >= self.power_saving_timedout then
+            Logm("Leaving power saving")
+            self:LeaveSaving()
+            return false
+        else
+            Sleep(10 * 1000)
+            return true
+        end
+        
+    else
+        return false
+    end
+    
+end
+
+function SetListener(self, onEnterSaving, onLeaveSaving)
+    self.onEnterSaving = onEnterSaving
+    self.onLeaveSaving = onLeaveSaving
+end
+
+function ScreenOn(self)
+    if IsScreenOn() then
+        Logm("Screen was turn on")
+    else
+        Logm("POWER turn on")
+        g_keyUtil:Power()
+        
+        -- Logm("WakeUpScreen")
+        -- WakeUpScreen()
+        
+        if IsKeyguardEnabled() then
+            Logm("Disable Keyguard")
+            DisableKeyguard()
+        end
+    end
+end
+
+function ScreenOff(self)
+    if IsScreenOn() then
+        Logm("POWER turn off ")
+        g_keyUtil:Power()
+        
+        -- Logm("TurnOffScreen")
+        -- TurnOffScreen()
+    else
+        Logm("Screen was turn off")
+    end
+end
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = {}
+        
+        obj.power_state = POWER_FULL
+        
+        obj.power_full_timedout_ms = 30 * 60 * 1000
+        obj.power_saving_timedout_ms = 20 * 60 * 1000
+        obj.power_full_timedout = GetSystemTime() + obj.power_full_timedout_ms
+        obj.power_saving_timedout = GetSystemTime() + obj.power_saving_timedout_ms
+        
+        obj.onEnterSaving = nil
+        obj.onLeaveSaving = nil
+        
+        obj.ScreenOn = ScreenOn
+        obj.ScreenOff = ScreenOff
+        
+        obj.EnterSaving = EnterSaving
+        obj.LeaveSaving = LeaveSaving
+        
+        obj.SetTimedout = SetTimedout
+        obj.SetListener = SetListener
+        obj.Reset = Reset
+       
+        obj.Loop = Action
+        obj.Action = Action
+        
+        return obj
+        
+    end
+
+	SetObject("LuaPowerManagerFactory", obj)
+	Logd("LuaPowerManagerFactory has been registered")
+end

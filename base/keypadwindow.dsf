@@ -1,0 +1,280 @@
+﻿
+Import("window.dsf")
+Import("listview.dsf")
+Import("listwindow.dsf")
+
+Import("keymapping.dsf")
+g_keyMapping = GetObject("LuaKeyMapping")
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = GetObject("LuaListWindowFactory"):Create()
+        
+        obj.DeleteItem_LuaListWindow = obj.DeleteItem
+        
+        obj.LoadItems = function(self)
+        
+           GetObject("LuaKeypadWindowFactory"):LoadItems(self:GetConfigListener(), self:GetConfigTag(), function(item)
+                self:Items():Append(item)
+            end)
+            
+        end
+        
+        obj.SaveItems = function(self)
+        
+            self:Items():Foreach(function(item)
+                
+                -- Do not use them as integer after GetLabel
+                -- Note : labels are only used as xml config parameters
+                
+                local selection = item.view.key_view:GetSelection()
+                item.setting.key = item.view.key_view:GetLabel(selection)
+                
+                item.setting.delay = item.view.tctrlDelay:GetLabel()
+                item.setting.count = item.view.tctrlCount:GetLabel()
+                
+            end)
+        
+            if self:GetConfigListener() ~= nil then
+                GetObject("LuaKeypadWindowFactory"):SaveItems(self:Items():GetItems(), self:GetConfigListener(), self:GetConfigTag())
+            end
+            
+        end
+        
+        obj.LoadKeys = function(self, cboxKeys, key)
+        
+            local selection = -1
+            g_keyMapping:Enumerate(function(name, code)
+                -- Logm("%s %0.2x(%d)", name, code, code)
+                if name == key then
+                    selection = cboxKeys:Add(name)
+                else
+                    cboxKeys:Add(name)
+                end
+            end)
+            
+            if selection ~= -1 then
+                cboxKeys:SetSelection(selection)
+            end
+            
+        end
+        
+        obj.CreateItem = function(self, view, layout, item)
+        
+            if item == nil then
+                item = {}
+                item.setting = {}
+                item.setting.key = ""
+                
+                item.setting.group_index = 0
+                item.setting.group = "" 
+                item.setting.group_order = 0
+                
+                item.setting.delay = 1000
+                item.setting.count = 1
+                item.setting.duration = 0
+                
+            end
+            
+            if item.setting.count < 0 then
+                item.setting.count = 0
+            elseif item.setting.count > 1000 then
+                item.setting.count = 1000
+            end
+            
+            if item.setting.duration < 0 then
+                item.setting.duration = 0
+            end
+            
+            local width = self:GetWidth()
+            
+            local base_width = width / 4
+            local tview_width = base_width * 0.8
+            local tctrl_width = base_width + (base_width - tview_width)
+        
+            local layoutCols =  CreateLinearLayout("layoutCols", "horizontal", "match_parent", "wrap_content")
+            --
+                local tviewKeys = CreateTextView("tviewKeys", self:GetLang("select_key") .. " : ", tview_width, "wrap_content")
+                layoutCols:AddControl(tviewKeys)
+                    
+                local cboxKeys = CreateComboBox("cboxKeys", DpToPixel(120), "wrap_content")
+                self:LoadKeys(cboxKeys, item.setting.key)
+                cboxKeys:SetOnSelectListener(function(position)
+                    local _item = self:GetItemByView(view)
+                    _item.setting.key = cboxKeys:GetLabel(position)
+                end)
+                layoutCols:AddControl(cboxKeys)
+                view.key_view = cboxKeys
+            --
+            layoutCols:SetLayoutMargin(5)
+            layout:AddControl(layoutCols)
+            
+            local layoutLine1 =  CreateLinearLayout("layoutLine1", "horizontal", "match_parent", "wrap_content")
+            --
+                local layoutDelay =  CreateLinearLayout("layoutDelay", "horizontal", "wrap_content", "wrap_content")
+                --
+                    local tviewDelay = CreateTextView("tviewDelay", self:GetLang("delay") .. "(ms):", tview_width, "wrap_content")
+                    layoutDelay:AddControl(tviewDelay)
+                    
+                    local tctrlDelay = CreateTextCtrl("tctrlDelay", item.setting.delay, tctrl_width, "wrap_content")
+                    tctrlDelay:SetSingleLine()
+                    layoutDelay:AddControl(tctrlDelay)
+                    view.tctrlDelay = tctrlDelay
+                --
+                layoutLine1:AddControl(layoutDelay)
+                
+                local layoutCount =  CreateLinearLayout("layoutCount", "horizontal", "wrap_content", "wrap_content")
+                --
+                    local tviewCount = CreateTextView("tviewCount", self:GetLang("count") .. ":",  tview_width, "wrap_content")
+                    layoutCount:AddControl(tviewCount)
+                    
+                    local tctrlCount = CreateTextCtrl("tctrlCount", item.setting.count, tctrl_width, "wrap_content")
+                    tctrlCount:SetSingleLine()
+                    layoutCount:AddControl(tctrlCount)
+                    view.tctrlCount = tctrlCount
+                --
+                layoutLine1:AddControl(layoutCount)
+            --
+            layoutLine1:SetLayoutMargin(5)
+            layout:AddControl(layoutLine1)
+            
+            CreateChoose = function(position, count, width, unset, name)
+            
+                local cboxGroups = CreateComboBox("cboxGroups", width, "wrap_content")
+                cboxGroups:Add(unset)
+                for i = 1, count do
+                    cboxGroups:Add(string.format("%s %d", name, i))
+                end
+                cboxGroups:SetSelection(position)
+                return cboxGroups
+                
+            end
+            
+            local layoutLine4 =  CreateLinearLayout("layoutLine4", "horizontal", "match_parent", "wrap_content")
+            --
+                local tviewGroup = CreateTextView("tviewGroup", self:GetLang("group_name") .. ":", tview_width, "wrap_content")
+                layoutLine4:AddControl(tviewGroup)
+                
+                local cboxGroup = CreateChoose(item.setting.group_index, 15, tctrl_width, self:GetLang("unset"), self:GetLang("group_item"))
+                cboxGroup:SetOnSelectListener(function(position)
+                    local _item = self:GetItemByView(view)
+                    _item.setting.group_index = position
+                    Logm("Set group to %d", position)
+                end)
+                layoutLine4:AddControl(cboxGroup)
+            
+                local tviewGroupOrder = CreateTextView("tviewGroupOrder", self:GetLang("group_order") .. ":", tview_width, "wrap_content")
+                layoutLine4:AddControl(tviewGroupOrder)
+                
+                local cboxGroupOrder = CreateChoose(item.setting.group_order, 30, tctrl_width, self:GetLang("unset"), "")
+                cboxGroupOrder:SetOnSelectListener(function(position)
+                    local _item = self:GetItemByView(view)
+                    _item.setting.group_order = position
+                    Logm("Set group order to %d", position)
+                end)
+                layoutLine4:AddControl(cboxGroupOrder)
+            --
+            layoutLine4:SetLayoutMargin(5)
+            layout:AddControl(layoutLine4)
+            
+            return view, item
+            
+        end
+        
+        obj.DeleteItem = function(self, item)
+        
+            obj:DeleteItem_LuaListWindow(view, item)
+            
+        end
+        
+        return obj
+    end
+        
+    ---------------------------
+    
+    obj.LoadItems = function(self, configListener, configTag, method)
+        
+        Logm("LoadItems : %s", configTag)
+        
+        local c = configListener:GetTagCount(configTag .. ":item")
+        Logm("count : %d", c)
+        
+        local index = 0
+        while index < c do
+        
+            configListener:Push(configTag .. ":item", index)
+            
+            local item = {}
+            
+            --
+            -- Settings
+            --
+            item.setting = {}
+            item.setting.key = configListener:GetValue("key", "")
+            -- Group 
+            item.setting.group_index = configListener:GetValue("group_index", 0)
+            if item.setting.group_index == 0 then
+                item.setting.group = ""
+            else
+                item.setting.group = string.format("group_%d", item.setting.group_index)
+            end
+            item.setting.group_order = configListener:GetValue("group_order", 0)
+            -- Basic
+            item.setting.delay = configListener:GetValue("delay", 1000)
+            item.setting.count = configListener:GetValue("count", 1)
+            item.setting.duration = configListener:GetValue("duration", 0)
+            
+            method(item)
+            
+            configListener:Pop()
+            
+            index = index + 1
+        end
+        
+    end
+
+	obj.SaveItems = function(self, items, configListener, configTag)
+
+        Logm("SaveItems : %s", configTag)
+        
+        local c = configListener:GetTagCount(configTag)
+        if c <=0 then
+        else
+            configListener:Remove(configTag)
+        end
+        configListener:Add(configTag)
+
+        local index = 0
+        for key, item in pairs(items) do
+            
+            configListener:Add(configTag .. ":item")
+            configListener:Push(configTag .. ":item", index)
+            
+            --
+            -- Settings
+            --
+            configListener:SetValue("key", item.setting.key)
+            -- Group 
+            configListener:SetValue("group_index", item.setting.group_index)
+            configListener:SetValue("group_order", item.setting.group_order)
+            -- Basic
+            configListener:SetValue("delay", item.setting.delay)
+            configListener:SetValue("count", item.setting.count)
+            configListener:SetValue("duration", item.setting.duration)
+           
+            configListener:Pop()
+            
+            index = index + 1
+        end
+        
+        configListener:SaveConfig()
+
+    end
+	
+	SetObject("LuaKeypadWindowFactory", obj)
+	Logd("LuaKeypadWindowFactory has been registered")
+end
+

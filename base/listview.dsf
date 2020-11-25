@@ -1,0 +1,200 @@
+﻿
+Import("list.dsf")
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = {}
+        
+        -- Vars
+        obj.m_items = GetObject("LuaListFactory"):Create()
+        obj.m_selection = nil
+        
+        obj.onSelectedListener = nil
+
+        -- Methods
+        obj.Create = function (self, width, height)
+
+            self.scrollWrapper = CreateLinearLayout("scrollWrapper", "vertical", width, height)
+            --
+                self.scrollList = CreateScrollView("layoutList", "vertical","match_parent", "match_parent")
+                --
+                    self.scrollListLayout = CreateLinearLayout("scrollListLayout", "vertical", "match_parent", "wrap_content")
+                    self.scrollList:AddControl(self.scrollListLayout)
+                --
+                self.scrollWrapper:AddControl(self.scrollList)
+            --
+            
+            return self.scrollWrapper
+            
+        end
+
+        obj.GetItemIndex = function (self, item)
+
+            local found_index = -1
+            
+            self.m_items:ForeachEx(function(index, item_)
+            
+                if item_.item_id == item.item_id then
+                    found_index = index
+                    return false
+                end
+                
+                return true
+            
+            end)
+            
+            return found_index
+            
+        end
+
+        obj.GetItemById = function (self, item_id)
+
+            local index = self:GetItemIndex(item_id)
+            if index == - 1 then
+                return nil
+            end
+            
+            return self.m_items:GetItemById(index)
+
+        end
+
+        obj.AddItemView = function (self, item)
+            
+            if item.view == nil then
+            
+                --Logm("Creating text view ...")
+                
+                item.view = CreateTextView("tviewPlayMacros", item.name, "match_parent", DpToPixel(32))
+                item.view:SetOnClickListener(function()
+                    Logm("OnClick")
+                    
+                    if self.m_selection == nil then
+                    else
+                        --self.m_selection.view:SetBackgroundColor(RGBAToColor(0, 0, 0, 0))
+                    end
+                    self.m_selection = item
+                    
+                    --item.view:SetBackgroundColor(RGBAToColor(0, 0, 125, 40))
+                    
+                    if self.onSelectedListener ~= nil then
+                        self.onSelectedListener(item)
+                    end
+                    
+                end)
+                --item.view:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            
+            else
+                -- Use custom view
+            end
+            item.item_id = item.view:GetId()
+            
+            Logm("Add control to layout ...")
+            self.scrollListLayout:AddControl(item.view)
+            
+        end
+
+        obj.AddItem = function (self, name, param, view)
+
+            --Logm("Add item %s", name)
+            
+            local item = {}
+            item.name = name
+            item.param = param
+            if view == nil then
+                item.view = nil
+            else
+                item.view = view
+            end
+            
+            self:AddItemView(item)
+            self.m_items:Append(item)
+            
+            return item
+
+        end
+
+        obj.DeleteItem = function (self, item)
+
+            local index = self:GetItemIndex(item)
+            if index == - 1 then
+                Logm("item(item_id) %s not existed", item.item_id)
+                return nil
+            end
+            
+            Logm("Remove view %s", item.item_id)
+            self.scrollListLayout:RemoveControl(item.item_id)
+
+            self.m_items:Remove(index)
+        end
+
+        obj.ClearItems = function (self)
+            
+            self.m_items:ForeachEx(function(index, item)
+            
+                Logm("Remove control %s", item.item_id)
+                self.scrollListLayout:RemoveControl(item.item_id)
+                return true
+            
+            end)
+            
+            self.m_items:Clear()
+            self.m_selection = nil
+            
+        end
+
+        obj.ForeachItems = function (self, callback)
+
+            self.m_items:ForeachEx(function(index, item)
+            
+                callback(item)
+                return true
+            
+            end)
+            
+        end
+
+        obj.GetSelection = function (self)
+
+            if self.m_selection == nil then
+                return nil
+            end
+            
+            return self.m_selection
+            
+        end
+
+        obj.SetSelection = function (self, item)
+            self.m_selection = item
+        end
+
+        obj.GetItemName = function (self , item)
+            return item.name
+        end
+
+        obj.GetItemParam = function (self ,item)
+            return item.param
+        end
+
+        obj.SetOnSelectedListener = function (self, listener)
+            self.onSelectedListener = listener
+        end 
+
+        obj.GetItemParams = function (self)
+
+            local params = {}
+            self:ForeachItems(function(item)
+                table.insert(params, item.param) 
+            end)
+            return params
+            
+        end
+
+        return obj
+    end
+
+	SetObject("LuaListViewFactory", obj)
+	Logd("LuaListViewFactory has been registered")
+end

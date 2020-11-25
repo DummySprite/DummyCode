@@ -1,0 +1,75 @@
+﻿
+Import("stringutil.dsf")
+
+function FromString(self, s)
+
+    local spliter = GetObject("LuaStringUtil")
+    
+    local groups = spliter:Split(s, ";")
+    for i, v in pairs(groups) do
+        
+        if v ~= nil then
+            items = spliter:Split(v, "=")
+            if #items >= 1 then
+                self.items[items[0]] = items[1]
+            end
+        end
+            
+    end
+    
+end
+
+function ToString(self)
+    local s = ""
+    for i, v in pairs(self.items) do
+        if v ~= nil then
+            s = s .. string.format("%s=%s;", i, v)
+        end
+    end
+    return s
+end
+
+function Print(self)
+    
+    Logm("--------------------")
+    for i, v in pairs(self.items) do
+        if v ~= nil then
+            Logm ("%s=%s", i, v) 
+        end
+    end
+    
+end
+
+function GetValue(self, name, defaultValue)
+    if self.items[name] == nil then
+        return defaultValue
+    else
+        return self.items[name]
+    end
+end
+
+function SetVlaue(self, name, value)
+    self.items[name] = value
+end
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create =  function(self)
+        local obj = {}
+        obj.items = {}
+        
+        obj.FromString = FromString
+        obj.ToString = ToString
+        
+        obj.GetValue = GetValue
+        obj.SetVlaue = SetVlaue
+                    
+        obj.Print = Print
+
+        return obj
+    end
+
+	SetObject("LuaPortableStringFactory", obj)
+	Logd("LuaPortableStringFactory has been registered")
+end

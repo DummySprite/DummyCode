@@ -1,0 +1,61 @@
+﻿
+Import("window.dsf")
+Import("listview.dsf")
+
+Import("keymapping.dsf")
+g_keyMapping = GetObject("LuaKeyMapping")
+
+function RegisterObject()
+	local obj = {}
+	
+	obj.Create = function(self)
+    
+        local obj = GetObject("LuaWindowFactory"):Create()
+        
+        -- Override parent methods
+        obj.Show_LuaWindow = obj.Show
+        
+        -- Window methods
+        obj.Show = function(self, title, x, y, desc)
+
+            local width = DpToPixel(300)
+            local height = DpToPixel(280)
+            if desc == nil then
+                desc = ""
+            end
+            
+            self:Show_LuaWindow(title,  x,  y, width, height, function(layoutMain)
+            
+                local sviewDesc = CreateScrollView("sviewDesc", "vertical",  width, height)
+                --
+                    local layoutDesc = CreateLinearLayout("layoutDesc", "vertical", "match_parent", "wrap_content")
+                    --
+                        local tviewDesc = CreateTextView("tviewDesc", desc, "match_parent", "wrap_content")
+                        tviewDesc:SetLayoutMarginTop(DpToPixel(64))
+                        tviewDesc:SetLayoutGravity("left")
+                        layoutDesc:AddControl(tviewDesc)
+                    --
+                    sviewDesc:AddControl(layoutDesc)
+                --
+                layoutMain:AddControl(sviewDesc)
+                
+            end)
+            
+        end
+        
+        obj.OnConfirm_LuaWindow = obj.OnConfirm
+        obj.OnCancel_LuaWindow = obj.OnCancel
+        
+        -- Style handlers
+        
+        obj.IsCancelEnable = function(self)
+            return false
+        end
+        
+        return obj
+    end
+    
+	SetObject("LuaDescWindowFactory", obj)
+	Logd("LuaDescWindowFactory has been registered")
+end
+

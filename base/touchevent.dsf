@@ -1,0 +1,1115 @@
+﻿
+Import("androidutil.dsf")
+Import("stringutil.dsf")
+
+g_androidUtil = GetObject("LuaAndroidUtil")
+g_stringUtil = GetObject("LuaStringUtil")
+
+Import("bytes.dsf")
+g_bytes = GetObject("LuaBytesFactory"):Create()
+
+g_sdkversion = GetSDKVersion()
+
+------------------- Slots ----------------------------------------
+
+function SlotFind(self, id)
+    
+   local c = self.slotsSize
+   local i = 0 
+   while i < c do
+   
+    if id == -1 then
+        if self.slots[i] == nil then
+            return i
+        end
+    else
+        if self.slots[i] == nil then
+        else
+            if self.slots[i].id == id then
+                return i
+            end
+        end
+    end
+   
+        i = i + 1
+   end
+   
+   return -1
+   
+end
+
+function SlotAlloc(self, id)
+
+   local i = self:SlotFind(-1)
+   if i == -1 then
+        Logm("Unable to find a nil slot")
+        return -1
+   end
+   
+   self.slots[i] = {}
+   self.slots[i].id = id
+   
+   return i
+   
+end
+
+function SlotDealloc(self, id)
+
+    local i = self:SlotFind(id)
+    if i == -1 then
+        -- Logm("Unable to find a slot for id %d", id)
+        return -1
+   end
+   
+   self.slots[i] = nil
+   return i
+   
+end
+
+g_slot = {}
+g_slot.SlotFind = SlotFind
+g_slot.SlotDealloc = SlotDealloc
+g_slot.SlotAlloc = SlotAlloc
+
+g_slot.slots = {}
+g_slot.slotsSize = 32
+
+-------------------- Android shell event --------------------
+
+function ShellCmd(cmd)
+    -- Logm("SHELL : " .. cmd)
+    ret = Shell(cmd)
+    -- Logm("RET : " .. ret)
+end
+
+function ShellDdFormatEvent(type_, code, value)
+    
+    --Logm("Generating bytes for %d %d %d...", type_, code, value)
+    local bytes = g_bytes:GetInputEventBytes(type_, code, value)
+    --Logm("%s", bytes)
+    
+    return bytes
+    
+end
+
+function ShellDdEvent(bytes)
+
+    if g_sdkversion < 15000 then
+        return
+    end
+    
+    -- Only works for android
+
+    local devName, devWidth, devHeight
+    devName, devWidth, devHeight, devType = g_androidUtil:GetTouchDevice()
+    if devName == nil or devName == "" then
+        return
+    end
+    
+    --[[
+    Logm("current path : %s", GetCurrentPath())
+    Logm("data path : %s", GetDataPath())
+    Logm("root path : %s", GetRootPath())
+    ]]--
+    
+    local file_path = JoinPath(Adb_GetDataPath(), "input_cache")
+    local shell_file_path = Adb_GetShellPath(file_path)
+    --Logm("file path : %s - %s", file_path, shell_file_path)
+    
+    local file = CreateObject("LuaFile")
+    if file:Open(file_path, "open_write_new") then
+        
+        -- Logm("Writing bytes %s:%d to %s", bytes, string.len(bytes) / 2, file_path)
+        file:WriteHex(bytes)
+        file:Close()
+        file = nil
+        
+    else
+        Logd("Unable to open %s", file_path)
+        return
+    end
+    
+    local cmd = "dd if=" .. shell_file_path .. " of=" .. devName 
+    ShellCmd(cmd)
+    
+end
+
+function ShellEvent(event, type, value)
+
+    local devName, devWidth, devHeight
+    devName, devWidth, devHeight, devType = g_androidUtil:GetTouchDevice()
+    if devName == nil or devName == "" then
+        return
+    end
+    
+    local cmd = string.format("sendevent %s %d %d %d;", devName, event, type, value)
+    ShellCmd(cmd)
+end
+
+function ShellFormatTouchEvent(event, type, value)
+
+    local devName, devWidth, devHeight, devType
+    devName, devWidth, devHeight, devType = g_androidUtil:GetTouchDevice()
+    if devName == nil or devName == "" then
+        return
+    end
+    
+    return string.format("sendevent %s %d %d %d;", devName, event, type, value)
+end
+
+function ShellGetPhysicalSize()
+    result = Shell("wm size")
+    if result == nil or result == "" then
+        return nil, nil
+    end
+    result = string.lower(result)
+    Logd(result)
+    
+    local resolution = string.match(result, "physical size: [0-9]*x[0-9]*")
+    if resolution == nil then
+        return nil, nil
+    end
+    Logd(resolution)
+    resolution = string.sub(resolution, string.len("physical size: ") + 1)
+    Logd(resolution)
+    
+    values, count = g_stringUtil:Split(resolution, "x")
+    if count ~= 2 then
+        return nil, nil
+    end
+    
+    return tonumber(values[0]), tonumber(values[1])
+    
+end
+
+g_physicalWidth = -1
+g_physicalHeight = -1
+
+function GetDisplaySize()
+
+    local rotation = GetDisplayRotation()
+    displayWidth = GetDisplayWidth()
+    displayHeight = GetDisplayHeight()
+    
+    if true then
+        return displayWidth, displayHeight
+    end
+    
+    -- Werid problem after overrun size dismatchs physical size
+    
+    Logd("Display size : %d, %d", displayWidth, displayHeight)
+    
+    if GetSystemVersion() >= 21 then
+        
+        if g_physicalWidth == -1 or g_physicalHeight == -1 then
+            -- Initialize physical size
+            g_physicalWidth, g_physicalHeight = ShellGetPhysicalSize()
+        end
+        
+        if g_physicalWidth == nil or g_physicalHeight == nil then
+            -- Invalid physical size
+            return displayWidth, displayHeight
+        end
+        
+        Logd("Physical size : %d, %d", g_physicalWidth, g_physicalHeight)
+        if rotation == 0 or rotation == 2 then
+            -- portrait(0, 180)
+            return g_physicalWidth, g_physicalHeight
+        else
+            -- landscope(90, 270)
+            return g_physicalHeight, g_physicalWidth
+        end
+        
+    else
+        return displayWidth, displayHeight
+    end
+    
+end
+
+EV_KEY = 0x01
+EV_ABS = 0x03
+EV_SYN = 0x00
+
+BTN_TOUCH = 0x14a
+
+ABS_MT_SLOT = 0x2f
+ABS_MT_TRACKING_ID = 0x39
+
+ABS_MT_POSITION_X =	0x35
+ABS_MT_POSITION_Y	= 0x36
+
+SYN_REPORT		= 0x00
+SYN_MT_REPORT = 0x02
+
+ACTION_DOWN = 0
+ACTION_MOVE = 1
+ACTION_UP = 2
+
+g_atouches = {}
+
+-- android
+-- width/height : depends on su screecap(or adb) and update per
+-- refresh rate(SetDisplayRefreshRate)
+-- rotation : depends on system rotation
+-- Note : rotation and width/height re not matched very accurately
+
+function ToDeviceTouch(x, y, devWidth, devHeight, devType)
+
+    local rotation = GetDisplayRotation()
+    local width, height
+    width = GetDisplayWidth()
+    height = GetDisplayHeight()
+      
+    local devX, devY
+
+    -- degree 0
+    if rotation == 0 then
+        local devWeightX = devWidth / width
+		local devWeightY = devHeight / height
+		devX = x
+		devY = y
+		devX = math.floor(devX * devWeightX)
+		devY = math.floor(devY * devWeightY)
+   
+    -- degree 90
+    elseif rotation == 1 then
+        local devWeightX = devWidth / height
+		local devWeightY = devHeight / width
+        devX = height - y
+		devY = x
+        devX = math.floor(devX * devWeightX)
+		devY = math.floor(devY * devWeightY)
+   
+    -- degree 180
+    elseif rotation == 2 then
+        local devWeightX = devWidth / width
+		local devWeightY = devHeight / height
+        devX = width - x
+		devY = height - y
+        devX = math.floor(devX * devWeightX)
+		devY = math.floor(devY * devWeightY)
+        
+    -- degree 270
+    elseif rotation == 3 then
+        local devWeightX = devWidth / height
+		local devWeightY = devHeight / width
+        devX = y
+		devY = width - x
+        devX = math.floor(devX * devWeightX)
+		devY = math.floor(devY * devWeightY)
+        
+    end
+    
+    --Logm("rotation:%d width:%d, height:%d", rotation, width, height)
+    --Logm("x:%d, y:%d devX:%d, devY:%d", x, y, devX, devY)
+    
+    return devX, devY
+end
+
+-- A class multitouch
+function TouchAShell(action, x, y, id)
+
+    if id == nil then
+        id = 0
+    end
+    
+    if action == ACTION_DOWN then
+
+        g_atouches[id] = {}
+        g_atouches[id].x = x
+        g_atouches[id].y = y
+        
+    elseif action == ACTION_MOVE then
+    
+        g_atouches[id] = {}
+        g_atouches[id].x = x
+        g_atouches[id].y = y
+        
+    elseif action == ACTION_UP then
+    
+        -- Logm("Removing touch %d", id)
+        g_atouches[id] = nil
+        
+    end
+    
+    if g_sdkversion < 15000 then
+        
+        local format = ""
+        
+        for i, v in pairs(g_atouches) do
+        
+            if v ~= nil then
+                
+                --Logm("Adding touch %d %d, %d", i, v.x, v.y)
+                
+                format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_POSITION_X, v.x)
+                format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_POSITION_Y, v.y)
+                
+                format = format .. ShellFormatTouchEvent(EV_KEY, BTN_TOUCH, 1)
+                
+                format = format .. ShellFormatTouchEvent(EV_SYN, SYN_MT_REPORT, 0)
+                
+            end
+            
+        end
+        
+        format = format .. ShellFormatTouchEvent(EV_SYN, SYN_REPORT, 0)
+        ShellCmd(format)
+
+    else
+        
+        local format = ""
+        
+        for i, v in pairs(g_atouches) do
+        
+            if v ~= nil then
+                
+                -- Logm("Adding touch %d %d, %d", i, v.x, v.y)
+                
+                format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_POSITION_X, v.x)
+                format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_POSITION_Y, v.y)
+                
+                format = format .. ShellDdFormatEvent(EV_KEY, BTN_TOUCH, 1)
+                
+                format = format .. ShellDdFormatEvent(EV_SYN, SYN_MT_REPORT, 0)
+                
+            end
+            
+        end
+        
+        format = format .. ShellDdFormatEvent(EV_SYN, SYN_REPORT, 0)
+        ShellDdEvent(format)
+    
+    end
+    
+end
+
+-- B class multitouch
+function TouchBShell(action, x, y, id)
+    
+    if id == nil then
+        id = 0
+    end
+    
+    if g_sdkversion < 15000 then
+        
+        local format = ""
+        
+        if action == ACTION_DOWN then
+
+            local slot = g_slot:SlotAlloc(id)
+            if slot == -1 then
+                return
+            end
+            
+            format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_SLOT, slot)
+            format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_TRACKING_ID, id)
+        
+            format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_POSITION_X, x)
+            format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_POSITION_Y, y)
+            
+            format = format .. ShellFormatTouchEvent(EV_KEY, BTN_TOUCH, 1)
+            
+        elseif action == ACTION_MOVE then
+        
+            local slot = g_slot:SlotFind(id)
+            if slot == -1 then
+                return
+            end
+            
+            format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_SLOT, slot)
+            
+            format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_POSITION_X, x)
+            format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_POSITION_Y, y)
+            
+            format = format .. ShellFormatTouchEvent(EV_KEY, BTN_TOUCH, 1)
+            
+        elseif action == ACTION_UP then
+        
+            local slot = g_slot:SlotDealloc(id)
+            if slot == -1 then
+                return
+            end
+
+            format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_SLOT, slot)
+            format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_TRACKING_ID, -1)
+            
+        end
+        
+        format = format .. ShellFormatTouchEvent(EV_SYN, SYN_REPORT, 0)
+        ShellCmd(format)
+
+    else
+        
+        local format = ""
+        
+        if action == ACTION_DOWN then
+        
+            local slot = g_slot:SlotAlloc(id)
+            if slot == -1 then
+                return
+            end
+
+            format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_SLOT, slot)
+            format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_TRACKING_ID, id)
+        
+            format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_POSITION_X, x)
+            format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_POSITION_Y, y)
+            
+            format = format .. ShellDdFormatEvent(EV_KEY, BTN_TOUCH, 1)
+            
+        elseif action == ACTION_MOVE then
+        
+            local slot = g_slot:SlotFind(id)
+            if slot == -1 then
+                return
+            end
+            
+            format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_SLOT, slot)
+            
+            format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_POSITION_X, x)
+            format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_POSITION_Y, y)
+            
+            format = format .. ShellDdFormatEvent(EV_KEY, BTN_TOUCH, 1)
+            
+        elseif action == ACTION_UP then
+        
+            local slot = g_slot:SlotDealloc(id)
+            if slot == -1 then
+                return
+            end
+
+            format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_SLOT, slot)
+            format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_TRACKING_ID, -1)
+
+        end
+        
+        format = format .. ShellDdFormatEvent(EV_SYN, SYN_REPORT, 0)
+        ShellDdEvent(format)
+    
+    end
+    
+end
+
+function TouchBShellClick(x, y, id)
+    
+    if g_sdkversion < 15000 then
+        
+        local format = ""
+         
+        -- Down event
+         
+        local slot = g_slot:SlotAlloc(id)
+        if slot == -1 then
+            return
+        end
+        
+        format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_SLOT, slot)
+        format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_TRACKING_ID, id)
+    
+        format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_POSITION_X, x)
+        format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_POSITION_Y, y)
+        
+        format = format .. ShellFormatTouchEvent(EV_KEY, BTN_TOUCH, 1)
+        
+        format = format .. ShellFormatTouchEvent(EV_SYN, SYN_REPORT, 0)
+        
+        -- Up event
+        
+        local slot = g_slot:SlotDealloc(id)
+        if slot == -1 then
+            return
+        end
+
+        format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_SLOT, slot)
+        format = format .. ShellFormatTouchEvent(EV_ABS, ABS_MT_TRACKING_ID, -1)
+        
+        format = format .. ShellFormatTouchEvent(EV_SYN, SYN_REPORT, 0)
+        
+        -- Submit
+        
+        ShellCmd(format)
+        
+    else
+        
+        local format = ""
+        
+        -- Down event
+        
+        local slot = g_slot:SlotAlloc(id)
+        if slot == -1 then
+            return
+        end
+
+        format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_SLOT, slot)
+        format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_TRACKING_ID, id)
+
+        format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_POSITION_X, x)
+        format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_POSITION_Y, y)
+        
+        format = format .. ShellDdFormatEvent(EV_KEY, BTN_TOUCH, 1)
+        
+        format = format .. ShellDdFormatEvent(EV_SYN, SYN_REPORT, 0)
+        
+        -- Up event
+        
+        local slot = g_slot:SlotDealloc(id)
+        if slot == -1 then
+            return
+        end
+
+        format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_SLOT, slot)
+        format = format .. ShellDdFormatEvent(EV_ABS, ABS_MT_TRACKING_ID, -1)
+        
+        format = format .. ShellDdFormatEvent(EV_SYN, SYN_REPORT, 0)
+        
+        -- Submit
+        
+        ShellDdEvent(format)
+        
+    end
+        
+ end
+
+function TouchShell(action, x, y, id)
+
+    local devName, devWidth, devHeight, devType
+    devName, devWidth, devHeight, devType = g_androidUtil:GetTouchDevice()
+    local devX, devY = ToDeviceTouch(x, y, devWidth, devHeight, devType)
+
+    if devType == 0 then
+        -- A class device is not supported
+        TouchAShell(action, devX, devY, id)
+    elseif devType == 1 then
+        TouchBShell(action, devX, devY, id)
+    else
+        Logm("Unknown multitouch type")
+    end
+    
+end
+
+function TouchShellClick(x, y, id)
+
+    local devName, devWidth, devHeight, devType
+    devName, devWidth, devHeight, devType = g_androidUtil:GetTouchDevice()
+    local devX, devY = ToDeviceTouch(x, y, devWidth, devHeight, devType)
+    
+    -- Logm("[%d] Shell %d click %d, %d", devType, id, x, y)
+
+    if devType == 0 then
+        -- A class device is not supported
+        TouchAShell(ACTION_DOWN, devX, devY, id)
+        TouchAShell(ACTION_UP, devX, devY, id)
+    elseif devType == 1 then
+        TouchBShellClick(devX, devY, id)
+    else
+        Logm("Unknown multitouch type")
+    end
+    
+end
+-------------------- Touch handlers --------------------
+
+function UseShell()
+
+    if not g_androidUtil:IsAndroid() then
+        return false
+    end
+    
+    if g_androidUtil:IsSuEnabled() then
+        return g_androidUtil:GetTouchEnforce() == "enforcing"
+    else
+        return true
+    end
+   
+end
+
+function TouchClickD(x, y, id)
+
+    --[[
+    if id == nil then
+        Logm("TouchClick: [%d] %d, %d", -1, x, y)
+    else
+        Logm("TouchClick: [%d] %d, %d", id, x, y)
+    end
+    ]]--
+    
+    if UseShell() then
+        --TouchShell(ACTION_DOWN, x, y, id)
+        --TouchShell(ACTION_UP, 0, 0, id)
+        TouchShellClick(x, y, id)
+    else
+    
+        if id == nil then
+            TouchClick(x, y)
+        else
+            TouchClick(x, y, id)
+        end
+        
+    end
+    
+end
+
+function TouchDownD(x, y, id)
+
+    --[[
+    if id == nil then
+        Logm("TouchDown: [%d] %d, %d", -1, x, y)
+    else
+        Logm("TouchDown: [%d] %d, %d", id, x, y)
+    end
+    ]]--
+    
+    if UseShell() then
+        TouchShell(ACTION_DOWN, x, y, id)
+    else
+    
+        if id == nil then
+            TouchDown(x, y)
+        else
+            TouchDown(x, y, id)
+        end
+        
+    end
+    
+end
+
+function TouchMoveD(x, y, id)
+    
+    --[[
+    if id == nil then
+        Logm("TouchMove: [%d] %d, %d", -1, x, y)
+    else
+        Logm("TouchMove: [%d] %d, %d", id, x, y)
+    end
+    ]]--
+    
+    if UseShell() then
+        TouchShell(ACTION_MOVE, x, y, id)
+    else
+    
+        if id == nil then
+            TouchMove(x, y)
+        else
+            TouchMove(x, y, id)
+        end
+        
+    end
+    
+end
+
+function TouchUpD(id)
+
+    --[[
+    if id == nil then
+        Logm("TouchUp: [%d]", -1)
+    else
+        Logm("TouchUp: [%d]", id)
+    end
+    ]]--
+    
+    if UseShell() then
+        TouchShell(ACTION_UP, 0, 0, id)
+    else
+    
+        if id == nil then
+            TouchUp()
+        else
+            TouchUp(id)
+        end
+        
+    end
+    
+end
+
+------------------------------------------------------------
+
+function SetFactor(self, factor, delay)
+    self.factor = factor
+    self.delay  = delay 
+    Logm("factor %d %d", self.factor, self.delay)
+end
+
+function GetFactor(self)
+    return self.factor, self.delay
+end
+
+function Click(self, x, y, id)
+    if id == nil then
+        TouchClickD(x, y, 5)
+    else
+        TouchClickD(x, y, id)
+    end
+end
+
+function Down(self, x, y, id)
+    
+    --[[
+    if id == nil then
+        Logm("Down: [%d] %d, %d", -1, x, y)
+    else
+        Logm("Down: [%d] %d, %d", id, x, y)
+    end
+    ]]--
+    
+    TouchDownD(x, y, id)
+end
+
+function Move(self, x, y, id)
+
+    --[[
+    if id == nil then
+        Logm("Move: [%d] %d, %d", -1, x, y)
+    else
+        Logm("Move: [%d] %d, %d", id, x, y)
+    end
+    ]]--
+    
+    TouchMoveD(x, y, id)
+end
+
+function Up(self, id)
+
+    --[[
+    if id == nil then
+        Logm("Up: [%d]", -1)
+    else
+        Logm("Up: [%d]", id)
+    end
+    ]]--
+    
+    TouchUpD(id)
+end
+
+function Swipe(self, id, x1, y1, x2, y2, touchShell, touchDown, touchUp)
+
+    self:Print()
+    
+    if touchDown == nil then
+        touchDown = true
+    end
+
+    if touchUp == nil then
+        touchUp = true
+    end
+    
+    if touchShell == nil then
+        touchShell = true
+    end
+    
+    if UseShell() and touchShell then
+        --Logm("Swipe by shell")
+        
+        local cmd = string.format("input swipe %d %d %d %d", x1, y1, x2, y2)
+        ShellCmd(cmd)
+    else
+        --Logm("Swipe by event")
+        
+        local t = TouchImplement:Create(self.factor, id, x1, y1, x2, y2, touchDown, touchUp)
+        
+        while true do
+        
+           if t:Move() == false then
+                break
+           end
+           
+            if self.delay > 0 then
+                Sleep(self.delay)
+            end
+        end
+        
+    end
+    
+end
+
+function DoubleSwipe(self, id1, x1, y1, x2, y2, id2, x3, y3, x4, y4)
+    
+    local t1 = TouchImplement:Create(self.factor, id1, x1, y1, x2, y2, true, true)
+    local t2 = TouchImplement:Create(self.factor, id2, x3, y3, x4, y4, true, true)
+	
+    while true do
+       
+       t1s = t1:Move()
+       t2s = t2:Move()
+       if t1s == false and t2s == false then
+            break
+       end
+       
+        if self.delay > 0 then
+            Sleep(self.delay)
+        end
+    end
+    
+end
+
+function MultiSwipe(self, ms)
+
+    local ts = {}
+    
+    for i, v in pairs(ms) do
+        if v ~= nil then
+            ts[i] = TouchImplement:Create(self.factor, v.id, v.x1, v.y1, v.x2, v.y2, true, true)
+        end
+    end
+    
+    while true do
+    
+        continue = false
+        for i, v in pairs(ts) do
+            if v ~= nil then
+                if v:Move() == true then
+                    continue = true
+                end
+            end
+        end
+        
+        if continue == false then
+            break
+        end
+    
+        if self.delay > 0 then
+            Sleep(self.delay)
+        end
+    end
+    
+end
+
+-- Clear the previous touch events
+
+function Clear(self)
+    for i = 0, 255 do
+        TouchUp(i)
+    end
+end
+
+function GetMode(self)
+
+    if UseShell() then
+        return "shell_event"
+    else
+        return "event"
+    end
+
+end
+
+function Print(self)
+    Logm("delay %d", self.delay)
+    Logm("factor %d", self.factor)
+end
+
+function RegisterObject()
+
+    obj = {}
+    obj.Create =  function(self)
+
+        local obj = {}
+        
+        if UseShell() then
+            obj.delay = 0
+            obj.factor = DpToPixel(32)
+        else
+            obj.delay = 60
+            obj.factor = DpToPixel(16)
+        end
+        
+        obj.Print = Print
+        
+        obj.Click = Click
+        obj.Down = Down
+        obj.Move = Move
+        obj.Up = Up
+        
+        obj.Swipe = Swipe
+        obj.DoubleSwipe = DoubleSwipe
+        obj.MultiSwipe = MultiSwipe
+        
+        obj.Clear = Clear
+        obj.GetMode = GetMode
+        
+        obj.SetFactor = SetFactor
+        obj.GetFactor = GetFactor
+        
+        return obj
+
+    end
+
+	SetObject("LuaTouchEventFactory", obj)
+	Logd("LuaTouchEventFactory has been registered")
+end
+
+----------------------
+-- The touch implement
+----------------------
+
+TouchImplement = {}
+TouchImplement.Create = function(self, factor, id, x1, y1, x2, y2, touchDown, touchUp)
+    local obj = {}
+    
+    obj.x1 = x1
+    obj.y1 = y1
+    obj.x2 = x2
+    obj.y2 = y2
+    
+    obj.x = x1
+    obj.y = y1
+    obj.id = id
+    -- 160dp per inch
+    obj.factor = factor
+
+    -- The method
+    obj.Move = Move
+
+    if x1 == x2 then
+    
+        if y2 >= y1 then
+            obj.y_inc = obj.factor
+        else
+            obj.y_inc = -obj.factor
+        end
+        
+        obj.method = 1
+        
+    else
+        
+        dx = x2 - x1
+        dy = y2 - y1
+        
+        obj.m = dy / dx
+        obj.b  = y1 - (obj.m * x1)
+        
+        if math.abs(dx) >= math.abs(dy) then
+        
+            if x2 > x1 then
+                obj.x_inc = obj.factor
+            else
+                obj.x_inc = -obj.factor
+            end
+            
+            obj.method = 2
+            
+        else
+        
+            if y2 > y1 then
+                obj.y_inc = obj.factor
+            else
+                obj.y_inc = -obj.factor
+            end
+        
+            obj.method = 3
+        
+        end
+        
+    end
+    
+    obj.touchDown = touchDown
+    obj.touchUp = touchUp
+    
+    obj.pressing = true
+    if obj.touchDown then
+        -- Press the touch now
+        TouchDownD(obj.x, obj.y, obj.id)
+    end
+        
+    obj.Move = function(self)
+        if self.method == 1 then
+            return self:DoMove1()
+        elseif self.method == 2 then
+            return self:DoMove2()
+        elseif self.method == 3 then
+            return self:DoMove3()
+        else
+            return false
+        end
+    end
+
+    obj.DoMove1 = function(self)
+        if self.y_inc >= 0 then
+            if self.y >= self.y2 then
+                if self.pressing then
+                    self.pressing = false
+                    if self.touchUp then
+                        TouchUpD(self.id)
+                    end
+                end
+                return false
+            end
+        else
+             if self.y <= self.y2 then
+                if self.pressing then
+                    self.pressing = false
+                    if self.touchUp then
+                        TouchUpD(self.id)
+                    end
+                end
+                return false
+            end
+        end
+        
+        self.y  = self.y + self.y_inc
+        -- Move the touch now
+        TouchMoveD(self.x + 0.5, self.y + 0.5, self.id)
+        return true
+    end
+        
+    obj.DoMove2 = function(self)
+        if self.x_inc >= 0 then
+            if self.x >= self.x2 then
+                if self.pressing then
+                    self.pressing = false
+                    if self.touchUp then
+                        TouchUpD(self.id)
+                    end
+                end
+                return false
+            end
+        else
+             if self.x <= self.x2 then
+                if self.pressing then
+                    self.pressing = false
+                    if self.touchUp then
+                        TouchUpD(self.id)
+                    end
+                end
+                return false
+            end
+        end
+        
+        self.x  = self.x + self.x_inc
+        self.y  = ((self.m * self.x) + self.b)
+        -- Move the touch now
+        TouchMoveD(self.x + 0.5, self.y + 0.5, self.id)
+        return true
+    end
+
+    obj.DoMove3 = function(self)
+        if self.y_inc >= 0 then
+            if self.y >= self.y2 then
+                if self.pressing then
+                    self.pressing = false
+                    if self.touchUp then
+                        TouchUpD(self.id)
+                    end
+                end
+                return false
+            end
+        else
+             if self.y <= self.y2 then
+                if self.pressing then
+                    self.pressing = false
+                    if self.touchUp then
+                        TouchUpD(self.id)
+                    end
+                end
+                return false
+            end
+        end
+        
+        self.y  = self.y + self.y_inc
+        self.x  = ((1 / self.m) * (self.y - self.b));
+        -- Move the touch now
+        TouchMoveD(self.x + 0.5, self.y + 0.5, self.id)
+        return true
+    end
+
+    return obj
+
+end

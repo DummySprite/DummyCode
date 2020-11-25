@@ -1,0 +1,64 @@
+﻿
+Import("stringutil.dsf")
+
+function GetValue(self, tag, defaultValue)
+    local tagParent, tagHandle = GetHandle(self, tag)
+    if tagParent[tagHandle] == nil then
+        return defaultValue
+    else
+        return tagParent[tagHandle]
+    end
+end
+
+function SetValue(self, tag, value)
+    local tagParent, tagHandle = GetHandle(self, tag)
+    tagParent[tagHandle] = value
+end
+
+function GetHandle(self, tag)
+
+    tags, tagsCount = GetObject("LuaStringUtil"):Split(tag, ":")
+    if tagsCount <= 0 then
+        Loge("Tag %s is invalid", tag)
+        return nil
+    end
+    
+    -- Logm("%s with %d:%s", tag, tagsCount, tags[tagsCount - 1])
+    
+    local d = self.doc
+    for i = 0, tagsCount - 2 do
+        if d[tags[i]] == nil then
+            d[tags[i]] = {}
+        end
+        d = d[tags[i]]
+    end
+    
+    return d, tags[tagsCount - 1]
+  
+end
+
+function Clear(self)
+    self.doc = nil
+    self.doc = {}
+end
+
+function RegisterObject()
+	local obj = { }  
+
+	obj.Create = function(self)
+        local obj = { }
+        
+        obj.GetValue = GetValue
+        obj.SetValue = SetValue
+        obj.Clear = Clear
+        
+        obj.doc = {}
+        
+        return obj
+    end
+
+	SetObject("LuaCachedConfig", obj)
+	Logd("LuaCachedConfig对象已经注册完成")
+end
+
+

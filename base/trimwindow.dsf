@@ -1,0 +1,97 @@
+﻿
+g_index = 0
+
+function ClaimId()
+    g_index = g_index + 1
+    return string.format("trimwindow_%d", g_index)
+end
+
+function RegisterObject()
+
+	local obj = {}
+        
+	obj.Create = function(self)
+        
+        DOCHECK(GetSdkVersion() >= 16000)
+
+        local obj = {}
+        
+        obj.m_winMain = nil
+        
+        obj.m_layoutMain = nil
+       
+        obj.m_clientWidth = GetDisplayClientWidth()
+        obj.m_clientHeight = GetDisplayClientHeight()
+        
+        obj.m_trim_x = 0
+        obj.m_trim_y = 0
+        obj.m_trim_width = obj.m_clientWidth
+        obj.m_trim_height = obj.m_clientHeight
+        
+        obj.SetTrimRect = function(self, x, y, width, height)
+            self.m_trim_x = x
+            self.m_trim_y = y
+            self.m_trim_width = width 
+            self.m_trim_height = height
+        end
+        
+        obj.GetTrimRect = function(self)
+            return self.m_trim_x, self.m_trim_y, self.m_trim_width, self.m_trim_height
+        end
+        
+        obj.Show = function (self, path)
+
+            --Logm("Showing action window ...")
+            --Logm("%d, %d", self.m_clientWidth, self.m_clientHeight)
+            
+            self.m_winMain = CreateFrame(ClaimId(), "",  0,  0,   self.m_clientWidth, self.m_clientHeight)
+            self.m_winMain:EnableActionBar(false)
+            self.m_winMain:EnableMovable(false)
+            if GetSystemName() == "windows" then
+                self.m_winMain:SetBackgroundColor(RGBAToColor(0, 0, 0, 255))
+            end
+            --
+                self.m_layoutMain =  CreateAbsoluteLayout("m_layoutMain", "mach_parent", "match_parent")
+                --self.m_layoutMain:SetBackgroundColor(RGBAToColor(255, 0, 0, 255))
+                --
+                    local iviewTrim = CreateImageTrim("CreateImageTrim", self.m_clientWidth, self.m_clientHeight)
+                    iviewTrim:SetElevation(100)
+                    iviewTrim:SetTrimRect(self.m_trim_x, self.m_trim_y, self.m_trim_width, self.m_trim_height)
+                    iviewTrim:SetBackgroundImage(path)
+                    iviewTrim:SetOnCloseListener(function()
+                        Logm("OnClose")
+                        
+                        self.m_trim_x, self.m_trim_y, self.m_trim_width, self.m_trim_height = 
+                            iviewTrim:GetTrimRect()
+                        
+                        self.m_winMain:Close()
+                        
+                        if self.m_onCloseListener() ~= nil then
+                            self.m_onCloseListener()
+                        end
+                        
+                    end)
+                    self.m_layoutMain:AddControl(iviewTrim)
+                --
+                self.m_winMain:Attach(self.m_layoutMain)
+            --
+            self.m_winMain:Show()
+            
+        end
+
+        obj.SetOnCloseListener = SetOnCloseListener
+
+        obj.Close = function (self)
+            self.m_winMain:Close()
+        end
+
+        obj.SetOnCloseListener = function (self, listener)
+            self.m_onCloseListener = listener
+        end
+        
+        return obj
+    end
+
+	SetObject("LuaTrimWindowFactory", obj)
+	Logd("LuaTrimWindowFactory has been registered")
+end
