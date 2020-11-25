@@ -1,1 +1,2 @@
-Free for all
+
+1 Download DummySprite IDE from www.dummysprite.com
