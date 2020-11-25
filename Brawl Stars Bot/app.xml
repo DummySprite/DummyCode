@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<app>
+
+   <name>Brawl Stars Bot</name>
+    <author>benistin</author>
+    <date>Date</date>
+    <desc></desc>
+    
+    <version>2240</version>
+    <sdkversion>2100</sdkversion>
+    <date>Date</date>
+    
+    <!--  Dependencies -->
+    <library>../base;</library>
+</app>

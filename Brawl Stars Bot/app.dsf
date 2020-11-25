@@ -1,0 +1,671 @@
+------
+------ Project : Brawl Stars Bot
+------ Desc: None
+------
+
+Import("base.dsb>touchutil.dsf")
+Import("base.dsb>keyutil.dsf")
+Import("base.dsb>runloop.dsf")
+Import("base.dsb>picture.dsf")
+Import("base.dsb>pictureex.dsf")
+
+Import("base.dsb>controlwindow.dsf")
+Import("base.dsb>scenemanager.dsf")
+Import("base.dsb>cachedconfig.dsf")
+Import("base.dsb>uncachedconfig.dsf")
+Import("base.dsb>alertwindow.dsf")
+
+Import("base.dsb>language.dsf")
+
+Import("base.dsb>commandmanager.dsf")
+Import("base.dsb>powermanager.dsf")
+Import("base.dsb>steering.dsf")
+Import("base.dsb>controlmanager.dsf")
+Import("base.dsb>resolutionmanager.dsf")
+
+Import("buttons.dsf")
+Import("scenes.dsf")
+Import("bsbot.dsf")
+
+----------------------------------------------------------------
+
+-- Utils
+g_touchUtil = GetObject("LuaTouchUtil")
+g_touchUtil:SetFactor(DpToPixel(5), 10)
+
+g_keyUtil = GetObject("LuaKeyUtil")
+
+g_bsbot = GetObject("LuaBsBotFactory"):Create()
+g_bsbot:Print()
+
+-- Scene variables
+g_currentButtons = {}
+g_currentSceneManager = GetObject("LuaSceneManagerFactory"):Create()
+
+-- Window variables
+g_currentControlWindow = nil 
+g_currentControlWindowTimer = nil
+g_currentControlWindowRotation = -1
+
+-- Managers
+g_currentCommandManager = GetObject("LuaCommandManager"):Create()
+g_currentPowerManager = GetObject("LuaPowerManagerFactory"):Create()
+g_currentControlManager = GetObject("LuaControlManagerFactory"):Create()
+g_currentResolutionManager = GetObject("LuaResolutionManagerFactory"):Create()
+
+-- Configurations
+g_currentLang = GetObject("LuaLanguageFactory"):Create()
+
+g_currentUncachedConfig = GetObject("LuaUncachedConfig"):Create()
+g_currentCachedConfig = GetObject("LuaCachedConfig"):Create()
+
+-- Constants
+
+if GetSystemName() == "ios" then
+    g_currentGameApp = "com.supercell.brawlstars"
+    g_currentGameProcess = "Brawl Stars"
+else
+    g_currentGameApp = "com.supercell.brawlstars"
+    g_currentGameProcess = "com.supercell.brawlstars"
+end
+
+MODE_BATTLE = 0
+
+COMMAND_BATTLE = "COMMAND_BATTLE"
+
+function OnRun()
+
+	-- Configuration "debug","message","error"
+    Logc("debug")
+    -- Set capture compatible
+    SetDisplayMode("compatible")
+    -- Capture fps in ms
+    SetDisplayRefreshRate(400)
+    
+    local path = JoinPath(GetCurrentPath(), "lang.xml")
+    if  g_currentLang:Init(path) == false then
+        return
+    end
+    -- g_currentLang:SetLang("en")
+    -- g_currentLang:SetLang("ko")
+    -- g_currentLang:SetLang("zh")
+    
+    LoadConfig()
+    
+    g_currentButtons = g_currentResolutionManager:Init(
+        "BrawlStarsScenes", g_currentSceneManager, 
+        "BrawlStarsButtons", 
+        g_currentGameProcess,
+        g_currentLang
+    )
+    if  g_currentButtons == nil then
+        HideSprite()
+    else
+        CreateWindow()
+    
+        HideSprite()
+
+        Run()
+    end
+    
+end
+
+function Run()
+    Logm("Run %s", g_currentGameApp)
+    g_currentSceneManager:RunTarget(g_currentGameApp)
+end
+
+function IsEventEnabled(index)
+    local tag = string.format("event_%d_option", index)
+    return g_currentUncachedConfig:GetValue(tag, "") == "yes"
+end
+
+function CreateWindow()
+    g_currentControlWindow = GetObject("LuaControlWindowFactory"):Create()
+    
+    local pageBasic = CreateLinearLayout("pageBasic",  "vertical")
+    --
+        local layoutTaskMode =  CreateLinearLayout("layoutTaskMode", "horizontal", "match_parent", "wrap_content")
+        --
+            local tviewTaskMode = CreateTextView("tviewTaskMode", g_currentLang:GetValue("mode") .. ":", "wrap_content", "wrap_content")
+            tviewTaskMode:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            layoutTaskMode:AddControl(tviewTaskMode)
+            
+            local cboxTaskMode = g_currentControlManager:MakeComboBox(
+                "current_mode", 
+                { 
+                    g_currentLang:GetValue("mode_battle") 
+                }, 
+                g_currentUncachedConfig,
+                0
+            )
+            cboxTaskMode:SetWeight(1)
+            layoutTaskMode:AddControl(cboxTaskMode)
+        --
+        pageBasic:AddControl(layoutTaskMode)
+        
+    --
+    g_currentControlWindow:AddScrollPage("vertical", DpToPixel(200), g_currentLang:GetValue("mode"), pageBasic)
+    
+    local pageBattle = CreateLinearLayout("pageBasic",  "vertical")
+    --
+        local layoutAttackDistance =  CreateLinearLayout("layoutAttackDistance", "horizontal", "match_parent", "wrap_content")
+        --
+            local tviewAttackDistance = CreateTextView("tviewAttackDistance", g_currentLang:GetValue("attack_distance") .. ":", "wrap_content", "wrap_content")
+            tviewAttackDistance:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            layoutAttackDistance:AddControl(tviewAttackDistance)
+        
+            local cboxAttackDistance = g_currentControlManager:MakeComboBox(
+                "current_attack_distance", 
+                { 
+                    g_currentLang:GetValue("attack_distance_short"),
+                    g_currentLang:GetValue("attack_distance_medium"),
+                    g_currentLang:GetValue("attack_distance_long")
+                },
+                g_currentUncachedConfig,
+                1
+            )
+            cboxAttackDistance:SetWeight(1)
+            layoutAttackDistance:AddControl(cboxAttackDistance)
+        --
+        pageBattle:AddControl(layoutAttackDistance)
+        
+        pageBattle:AddControl(
+            g_currentControlManager:MakeCheckButton("event_1_option", g_currentUncachedConfig, g_currentLang, "yes")
+        )
+        pageBattle:AddControl(
+            g_currentControlManager:MakeCheckButton("event_2_option", g_currentUncachedConfig, g_currentLang, "no")
+        )
+        pageBattle:AddControl(
+            g_currentControlManager:MakeCheckButton("event_3_option", g_currentUncachedConfig, g_currentLang, "no")
+        )
+        pageBattle:AddControl(
+            g_currentControlManager:MakeCheckButton("event_4_option", g_currentUncachedConfig, g_currentLang, "no")
+        )
+    --
+    g_currentControlWindow:AddScrollPage("vertical", DpToPixel(200), g_currentLang:GetValue("battle"), pageBattle)
+    
+    local pageSavingPower = CreateLinearLayout("pageSavingPower",  "vertical")
+    --
+        pageSavingPower:AddControl(
+            g_currentControlManager:MakeCheckButton("enable_saving_power", g_currentUncachedConfig, g_currentLang, "no")
+        )
+        
+        local tviewEnterSleepTime = CreateTextView("tviewEnterSleepTime", g_currentLang:GetValue("power_enter_sleep_time") .. ":", "wrap_content", "wrap_content")
+        tviewEnterSleepTime:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        pageSavingPower:AddControl(tviewEnterSleepTime)
+        
+        pageSavingPower:AddControl(
+            g_currentControlManager:MakeTextCtrl("power_enter_sleep_time", g_currentUncachedConfig:GetValue("power_enter_sleep_time", "30"))
+        )
+        
+        local tviewWakeupTime = CreateTextView("tviewEnterSleepTime", g_currentLang:GetValue("power_wakeup_time") .. ":", "wrap_content", "wrap_content")
+        tviewWakeupTime:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        pageSavingPower:AddControl(tviewWakeupTime)
+        
+        pageSavingPower:AddControl(
+            g_currentControlManager:MakeTextCtrl("power_wakeup_time", g_currentUncachedConfig:GetValue("power_wakeup_time", "20"))
+        )
+        
+        local tviewSavingPowerDesc = CreateTextView("tviewSavingPowerDesc", g_currentLang:GetValue("saving_power_desc"), "wrap_content", DpToPixel(96))
+        tviewSavingPowerDesc:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        pageSavingPower:AddControl(tviewSavingPowerDesc)
+    --
+    g_currentControlWindow:AddScrollPage("vertical", DpToPixel(200), g_currentLang:GetValue("saving_power"), pageSavingPower)
+    
+    local logo = JoinPath(GetCurrentPath(), "app.png")
+    Logm(logo)
+    g_currentControlWindow:CreateWindow(
+        DpToPixel(300), "wrap_content", 
+        logo, RGBAToColor(0, 0, 0, 150), RGBAToColor(255, 255, 255, 255),  
+        g_currentLang:GetValue("start"), g_currentLang:GetValue("quit"), 
+        DpToPixel(140)
+    )
+    g_currentControlWindow:SetOnStartListener(function()
+        g_currentControlWindow:SetStatus(g_currentLang:GetValue("running"))
+        OnStart()
+    end)
+    g_currentControlWindow:SetOnStopListener(function()
+        g_currentControlWindow:SetStatus(g_currentLang:GetValue("stopped"))
+        OnPause()
+    end)
+    g_currentControlWindow:SetOnQuitListener(function()
+        OnQuit()
+    end)
+    g_currentControlWindow:Show()
+    g_currentControlWindow:SetStatus(g_currentLang:GetValue("stopped"))
+    g_currentControlWindow:EnableStatus(false)
+    
+    g_currentControlWindowTimer = CreateObject("LuaTimer")
+    g_currentControlWindowTimer:SetTimer(2000, function()
+    
+        local rotation = GetDisplayRotation()
+        if not (rotation == g_currentControlWindowRotation) then
+            g_currentControlWindowRotation = rotation
+            g_currentControlWindow:SetPosition("center", 0)
+        end
+        
+    end)
+end
+
+function PrintConfg(name)
+    Logm("%s = %s", name, g_currentUncachedConfig:GetValue(name, "yes"))
+end
+
+function OnPrint()
+
+    Logm("Print configuration")
+    
+end
+
+function OnStart()
+
+    Logm("OnStart")
+    
+    PowerOnReset()
+    
+    g_currentCommandManager:Clear()
+    
+    OnPrint()
+    
+    local currentMode = g_currentUncachedConfig:GetValue("current_mode_position", MODE_BATTLE)
+    Logm("Current mode  %d", currentMode)
+    
+    if currentMode == MODE_BATTLE or
+        currentMode == MODE_BATTLE_AND_DONATE  then
+      
+        g_currentCommandManager:AddCommandWithTimedout(COMMAND_BATTLE, -1, 15 * 60 * 1000)
+
+    end
+    
+    g_currentCommandManager:Print()
+    
+    SaveConfig()
+    
+    g_currentSceneManager:Reset()
+    -- param 1 : Detection delay
+    -- param 2 : Max scene detection duration
+    -- param 3 : Callback
+    g_currentSceneManager:Start(100, 200, OnAction)
+    
+end
+
+function OnPause()
+    g_currentSceneManager:Pause()
+end
+
+function OnQuit()
+    SaveConfig()
+    
+    g_currentSceneManager:Reset()
+    g_currentSceneManager:Stop()
+    
+    ShowSprite()
+end
+
+function WaitForScene(name, ms)
+    return g_currentSceneManager:WaitForScene(name, ms, g_currentButtons["General"].sim_normal)
+end
+
+function WaitForSceneWithClick(name, ms)
+    local wait_and_click = function()
+        ClickBlank()
+    end
+    return g_currentSceneManager:WaitForScene(name, ms, g_currentButtons["General"].sim_normal, wait_and_click, 5000)
+end
+
+function ClickBlank()
+    Logm("Click blank %d,%d", g_currentButtons["General"].blank_x, g_currentButtons["General"].blank_y)
+    TouchClickD(g_currentButtons["General"].blank_x, g_currentButtons["General"].blank_y)
+end
+
+function WaitForObject(obj, sim, ms)
+    local x, y
+    local wait_timedout = GetSystemTime() + ms
+    while wait_timedout >  GetSystemTime() do
+        x, y = obj:Find(sim)
+        if not (x == -1) and not (y == -1) then
+            return x, y
+        end
+    end
+    return -1, -1
+end
+
+function ClickDefault(obj)
+    local x, y = obj:GetPosition(0)
+    TouchClickD(x, y)
+end
+
+function IsNameTimedout(name, ms)
+    
+    if GetSystemTime() - g_currentCachedConfig:GetValue(name, 0) >= ms then
+        g_currentCachedConfig:SetValue(name, GetSystemTime())
+        return true
+    else
+        return false
+    end
+    
+end
+
+function CheckForObject(obj, sim)
+    local x, y
+    x, y = obj:Find(sim)
+    if not (x == -1) and not (y == -1) then
+        return true
+    else
+        return false
+    end
+end
+
+function PowerClearScene()
+
+    g_currentSceneManager:Reset()
+    
+    SetDisplayRefreshRate(10)
+    
+    Sleep(500)
+
+end
+
+function PowerOnEnterSaving()
+    Logm("PowerOnLeaveSaving")
+    
+    PowerClearScene()
+    SetDisplayRefreshRate(10 * 60 * 1000)
+
+    Sleep(5000)
+
+end
+
+function PowerOnLeaveSaving()
+    Logm("PowerOnLeaveSaving")
+
+    PowerClearScene()
+    SetDisplayRefreshRate(400)
+    
+    Sleep(2000)
+    
+    ClickBlank()
+    
+    Sleep(2000)
+    
+    ClickBlank()
+    
+    Sleep(4000)
+    
+    g_currentSceneManager:RunTarget(g_currentGameApp)
+    
+end
+
+function PowerOnReset()
+    Logm("PowerOnReset")
+    g_currentPowerManager:Reset()
+    g_currentPowerManager:SetListener(PowerOnEnterSaving, PowerOnLeaveSaving)
+    
+    local power_enter_sleep_time = g_currentUncachedConfig:GetValue("power_enter_sleep_time", 30)
+    local power_wakeup_time = g_currentUncachedConfig:GetValue("power_wakeup_time", 20)
+    Logm("Power saving parameters : %d, %d", power_enter_sleep_time, power_wakeup_time)
+    
+    g_currentPowerManager:SetTimedout(power_enter_sleep_time * 60 * 1000, power_wakeup_time * 60 * 1000)
+end
+
+function PowerOnLoop()
+
+    if g_currentSceneManager:GetScene() == "battle_scene" or g_currentSceneManager:GetScene() == "battle_scene2" then
+        return false
+    elseif g_currentSceneManager:GetSceneDuration() >= 1000 then
+    
+        if g_currentPowerManager:Loop() then
+            return true
+        else
+            return false
+        end
+    else
+        return false
+    end
+    
+end
+
+g_currentEventTimedout = GetSystemTime() + 10 * 60 * 100
+g_currentEvent = 1
+g_battleEvent = 1
+
+function OnAction()
+
+    if g_currentUncachedConfig:GetValue("enable_saving_power", "no") == "yes" then
+        
+        if PowerOnLoop() then
+            -- Handled by power manager
+            return
+        end
+
+    end
+    
+    if CheckStuck() then
+        g_currentCommandManager:NextCommand()
+        return
+    end
+    
+    local prev_scene = g_currentSceneManager:GetScene()
+    local scene = g_currentSceneManager:GetScene()
+    local command = g_currentCommandManager:GetCurrentCommand()
+    if prev_scene ~= scene then
+        Logm("Current scene %s, command %s", scene, command)
+    end
+    
+    local x, y
+    if scene == "home_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+      
+        Logm("Click bonus ...")
+        
+        --TouchClickD(g_currentButtons["home_scene"].reward_01_x, g_currentButtons["home_scene"].reward_01_y)
+        --Sleep(1000)
+        
+        --TouchClickD(g_currentButtons["home_scene"].reward_02_x, g_currentButtons["home_scene"].reward_02_y)
+        --Sleep(1000)
+        
+        if  GetSystemTime() >= g_currentEventTimedout then
+            --TouchClickD(g_currentButtons["home_scene"].event_x, g_currentButtons["home_scene"].event_y)
+            --Sleep(1000)
+            
+            g_currentEventTimedout = GetSystemTime() + 10 * 60 * 100
+        else
+            TouchClickD(g_currentButtons["home_scene"].play_x, g_currentButtons["home_scene"].play_y)
+            Sleep(1000)
+        end
+        
+    elseif scene == "event_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        GetEventPosition =  function(index)
+            
+            local value = index - 1
+            local x = g_currentButtons["event_scene"].event_base_x + (math.floor(value % 2) * g_currentButtons["event_scene"].event_offset_x)
+            local y = g_currentButtons["event_scene"].event_base_y + (math.floor(value / 2) * g_currentButtons["event_scene"].event_offset_y)
+            
+            return x, y
+            
+        end
+        
+        if g_currentEvent > 4 then
+            g_currentEvent = 1
+        end
+       
+        while g_currentEvent <= 4 do
+        
+            if IsEventEnabled(g_currentEvent) then
+            
+                g_battleEvent = g_currentEvent
+                local x, y = GetEventPosition(g_currentEvent)
+                Logm("Click Event %d - %d, %d", g_currentEvent, x, y)
+            
+                TouchClickD(x, y)
+                Sleep(1000)
+                if g_currentEvent == 2 then
+                    Sleep(3000)
+                    TouchClickD(x, y)
+                    Sleep(1000)
+                end
+                
+                g_currentEvent = g_currentEvent + 1
+                return
+                
+            end
+            
+            g_currentEvent = g_currentEvent + 1
+        end
+        
+        Logm("Event is not set and click back ...")
+        
+        Sleep(1000)
+        
+        ClickBack()
+        
+        Sleep(2000)
+       
+    elseif scene == "character_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        x, y = CharacterGetPosition(6)
+        Logm("Click character %d, %d", x, y)
+        TouchClickD(x, y)
+        
+    elseif scene == "battle_scene" or scene == "battle_scene2" then
+    
+        local reborn
+        local previousScene = g_currentSceneManager:GetPreviousScene()
+        if previousScene ~= "battle_scene" and previousScene ~= "battle_scene2" then
+            reborn = true
+        else
+            reborn = false
+        end
+        
+        local attack_distance = g_currentUncachedConfig:GetValue("current_attack_distance", 1)
+        
+        g_bsbot:Config(g_currentButtons["battle_scene"], 7)
+        g_bsbot:Play(g_battleEvent, attack_distance, reborn)
+        
+    elseif scene == "battle_result_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+
+        g_bsbot:End()
+        Sleep(1000)
+        
+        TouchClickD(g_currentSceneManager:GetScenePosition(scene))
+        
+    elseif scene ~= "" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        Logm("Unsoloved Scene %s and click default position ...", scene)
+        TouchClickD(g_currentSceneManager:GetScenePosition(scene))
+    
+    else
+    
+        g_unknownTick = g_unknownTick + 1
+        if g_unknownTick > 10000 then
+            g_unknownTick = 0
+        end
+
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        if scene == "" then
+            Logm("Unknown Scene ...")
+        else
+            Logm("Unknown Scene : %s ...", scene)
+        end
+        
+        if g_currentSceneManager:GetSceneDuration() > 4000 then
+        
+            if g_currentSceneManager:GetSceneDuration() > 12 * 1000 then
+            
+                if g_unknownTick % 4 <= 1 then
+                    ClickBlank()
+                else
+                    ClickBack()
+                end
+                
+            elseif g_currentSceneManager:GetSceneDuration() > 6000 then
+                ClickBlank()
+            end
+            
+        end
+   
+    end
+    
+end
+
+g_unknownTick = 0
+
+function WaitForFunction(func, ret, ms)
+    local wait_timedout = GetSystemTime() + ms
+    while wait_timedout >  GetSystemTime() do
+        local fret
+        fret = func() 
+        if fret == ret then
+        else
+            return fret
+        end
+    end
+    return ret
+end
+
+function ClickBack()
+    local x = DpToPixel(33)
+    local y = DpToPixel(22)
+    TouchClickD(x, y)
+end
+
+function CheckStuck()
+
+    local timedout = 0
+    if g_currentSceneManager:GetScene() == "" then
+        timedout = 7 * 60 * 1000
+    else
+        timedout = 15 * 60 * 1000
+    end
+    
+    if g_currentSceneManager:GetSceneDuration() > timedout then
+        Logm("Stucking and try to restart game ...")
+        g_currentSceneManager:RestartTarget(g_currentGameProcess, g_currentGameApp)
+        g_currentSceneManager:Reset()
+        return true
+    else
+        return false
+    end
+    
+end
+
+function LoadConfig()
+    path = JoinPath(GetDataPath(), "bsb02.cfg")
+    Logm(path)
+    -- Create if not exists
+    g_currentUncachedConfig:LoadConfig(path, false)
+end
+
+function SaveConfig()
+    g_currentControlManager:Save(g_currentUncachedConfig)
+    g_currentUncachedConfig:SaveConfig()
+end
+
+function TouchClickD(x, y)
+    -- Logm("Debug click %d, %d", x, y)
+    g_touchUtil:Click(x, y)
+end

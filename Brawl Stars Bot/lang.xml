@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<lang>
+    
+    <!-- 中文 -->
+    <zh>
+        <unsupported_device>Display resolution is not supported,Change display from Setting -> Display -> Screen resolution or contact dummyspriteonline@126.com for support( http://www.dummysprite.com/ds/backend/tutorial/tutorial.php )</unsupported_device>
+        <unsupported_dpi>当前DPI为%d,可能无法正常工作,正确的DPI应该为%d!</unsupported_dpi>
+        <error>异常提示!</error>
+  
+        <start>开始</start>
+        <setting>设置</setting>
+        <quit>退出</quit>
+        <mode>模式</mode>
+        
+        <running>运行中...</running>
+        <stopped>已经停止...</stopped>
+        
+        <saving_power>节能(手机平板专用)</saving_power>
+        <enable_saving_power>打开节能功能</enable_saving_power>
+        <power_enter_sleep_time>进入休眠时间(分钟)</power_enter_sleep_time>
+        <power_wakeup_time>唤醒时间(分钟)</power_wakeup_time>
+        
+        <saving_power_desc>1 关闭密码锁 2 IOS请更新到小白精灵最新版</saving_power_desc>
+        
+        <event_1_option>事件 1 : 宝石争霸和...</event_1_option>
+        <event_2_option>事件 2 : 荒野决斗和...</event_2_option>
+        <event_3_option>事件 3 : 赏金猎人和...</event_3_option>
+        <event_4_option>事件 4 : 乱斗足球和...</event_4_option>
+        
+        <attack_distance_short>小</attack_distance_short>
+        <attack_distance_medium>中</attack_distance_medium>
+        <attack_distance_long>大</attack_distance_long>
+        
+        <attack_distance>攻击距离</attack_distance>
+        
+        <mode_battle>战斗</mode_battle>
+        <battle>战斗</battle>
+    </zh>
+    
+    <!-- English -->
+    <en>
+        <unsupported_device>Display resolution is not supported,Change display from Setting -> Display -> Screen resolution or contact dummyspriteonline@126.com for support( http://www.dummysprite.com/ds/backend/tutorial/tutorial.php )</unsupported_device>
+        <unsupported_dpi>Current DPI is %d and may not works properly,normal DPI is %d!</unsupported_dpi>
+        <error>Error!</error>
+
+        <start>Start</start>
+        <setting>Setting</setting>
+        <quit>Quit</quit>
+        <mode>Mode</mode>
+                
+        <running>Running...</running>
+        <stopped>Stopped...</stopped>
+        
+        <saving_power>Saving Power(Phone and Pad ONLY)</saving_power>
+        <enable_saving_power>Enable Saving Power</enable_saving_power>
+        <power_enter_sleep_time>Enter Sleep Time(In Minutes)</power_enter_sleep_time>
+        <power_wakeup_time>Wakeup Time(In Minutes)</power_wakeup_time>
+        
+        <saving_power_desc>1 Turn off password of lock screen 2 Only works for pad and phone 3 IOS devices must update dummysprite to last version(5.2.15025 or above)</saving_power_desc>
+        
+        <event_1_option>Event 1 : GEM GRAB and ...</event_1_option>
+        <event_2_option>Event 2 : SHOWDOWN and ...</event_2_option>
+        <event_3_option>Event 3 : HEIST and ...</event_3_option>
+        <event_4_option>Event 4 : SEIGE and ...</event_4_option>
+        
+        <attack_distance_short>short</attack_distance_short>
+        <attack_distance_medium>medium</attack_distance_medium>
+        <attack_distance_long>long</attack_distance_long>
+        
+        <attack_distance>Attack Distance</attack_distance>
+        
+        <mode_battle>Battle</mode_battle>
+        <battle>Battle</battle>
+    </en>
+    
+    <!-- 韩語 -->
+    <ko>
+        <unsupported_device>디스플레이 해상도는 지원되지 않습니다(Setting -> Display -> Screen resolution). 지원을 받으려면 dummyspriteonline@126.com으로 문의하십시오 ( http://www.dummysprite.com/ds/backend/tutorial/tutorial.php )</unsupported_device>
+        <unsupported_dpi>현재 DPI가 %d이고 제대로 작동하지 않을 수 있습니다. 정상적인 DPI는 %d입니다.</unsupported_dpi>
+        <error>예외!</error>
+
+        <start>설정</start>
+        <setting>설정</setting>
+        <quit>종료</quit>
+        <mode>기본 설정</mode>
+        
+        <running>실행...</running>
+        <stopped>중지...</stopped>
+        
+        <saving_power>에너지 절약</saving_power>
+        <enable_saving_power>절전 사용</enable_saving_power>
+        <power_enter_sleep_time>수면(분)</power_enter_sleep_time>
+        <power_wakeup_time>깨우다(분)</power_wakeup_time>
+        
+        <saving_power_desc>1 잠금 화면 암호 비활성화 2 IOS devices must update dummysprite to last version(5.2.15025 or above)</saving_power_desc>
+        
+        <event_1_option>행사 1 : 젬 그랩 & ...</event_1_option>
+        <event_2_option>행사 2 : 쇼다운 & ...</event_2_option>
+        <event_3_option>행사 3 : 바운티 & ...</event_3_option>
+        <event_4_option>행사 4 : 브롤 볼 & ...</event_4_option>
+        
+        <attack_distance_short>짧은</attack_distance_short>
+        <attack_distance_medium>매질</attack_distance_medium>
+        <attack_distance_long>길다</attack_distance_long>
+        
+        <attack_distance>공격 거리</attack_distance>
+        
+        <mode_battle>전투</mode_battle>
+        <battle>전투</battle>
+    </ko>
+	
+</lang>

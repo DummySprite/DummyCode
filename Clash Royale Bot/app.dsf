@@ -1,0 +1,2453 @@
+
+Import("base.dsb>touchutil.dsf")
+Import("base.dsb>keyutil.dsf")
+Import("base.dsb>runloop.dsf")
+Import("base.dsb>picture.dsf")
+Import("base.dsb>pictureex.dsf")
+Import("base.dsb>shellutil.dsf")
+
+Import("base.dsb>controlwindow.dsf")
+Import("base.dsb>scenemanager.dsf")
+Import("base.dsb>cachedconfig.dsf")
+Import("base.dsb>uncachedconfig.dsf")
+Import("base.dsb>alertwindow.dsf")
+
+Import("base.dsb>language.dsf")
+
+Import("base.dsb>commandmanager.dsf")
+Import("base.dsb>powermanager.dsf")
+
+Import("buttons.dsf")
+Import("scenes.dsf")
+
+g_touchUtil = GetObject("LuaTouchUtil")
+g_keyUtil = GetObject("LuaKeyUtil")
+g_shellUtil = GetObject("LuaShellUtil")
+
+----------------------------------------------------------------
+
+g_2v2battle = false
+
+g_currentButtons = {}
+
+g_currentSceneManager = GetObject("LuaSceneManagerFactory"):Create()
+
+g_currentControlWindow = nil 
+g_currentControlWindowTimer = nil
+g_currentControlWindowRotation = -1
+
+if GetSystemName() == "ios" then
+    g_currentGameApp = "com.supercell.scroll"
+    g_currentGameProcess = "Clash Royale"
+else
+    g_currentGameApp = "com.supercell.clashroyale"
+    g_currentGameProcess = "com.supercell.clashroyale"
+end
+
+MODE_BATTLE = 0
+MODE_BATTLE_AND_DONATE = 1
+MODE_DONATE = 2
+MODE_DEBUG = 3
+
+COMMAND_BATTLE = "COMMAND_BATTLE"
+COMMAND_BATTLE_EVENT = "COMMAND_BATTLE_EVENT"
+COMMAND_PAGE_BATTLE = "COMMAND_PAGE_BATTLE"
+COMMAND_DONATE = "COMMAND_DONATE"
+COMMAND_REQUEST = "COMMAND_REQUEST"
+COMMAND_DEBUG = "COMMAND_DEBUG"
+
+g_currentLang = GetObject("LuaLanguageFactory"):Create()
+
+g_currentUncachedConfig = GetObject("LuaUncachedConfig"):Create()
+g_currentCachedConfig = GetObject("LuaCachedConfig"):Create()
+
+g_currentCommandManager = GetObject("LuaCommandManager"):Create()
+
+g_currentPowerManager = GetObject("LuaPowerManagerFactory"):Create()
+
+function OnRun()
+
+    Logc("debug")
+    SetDisplayMode("compatible")
+    SetDisplayRefreshRate(400)
+    
+    local path = JoinPath(GetCurrentPath(), "lang.xml")
+    if  g_currentLang:Init(path) == false then
+        return
+    end
+    -- g_currentLang:SetLang("en")
+    -- g_currentLang:SetLang("ko")
+    
+    LoadConfig()
+    
+    if Init() == false then
+        HideSprite()
+    else
+        HideSprite()
+        
+        Run()
+    end
+    
+end
+
+function IsVirtualKeyActive()
+    
+    local width  = GetDisplayWidth()
+    local height = GetDisplayHeight()
+    
+    local clientWidth  = GetDisplayClientWidth()
+    local clientHeight = GetDisplayClientHeight()
+    
+    Logm("width = %d height = %d", width, height)
+    Logm("clientWidth = %d clientHeight = %d", clientWidth, clientHeight)
+    
+    if width == clientWidth and height == clientHeight then
+        return false
+    else
+        return true
+    end
+    
+end
+
+function HideVirtualKey()
+
+    if not IsVirtualKeyActive() then
+        return false
+    end
+   
+    if GetSDKVersion() >= 3000 then
+        
+        if GetSystemVersion() < 19 then
+            
+            local pid = FindProcess(g_currentGameProcess)
+            if pid ~= -1 then
+                KillProcess(pid)
+                Sleep(1000)
+            end
+            
+            HideNavigationBar()
+            Sleep(1000)
+            
+            return true
+            
+        end
+        return false
+    else
+        return false
+    end
+
+end
+
+function Init()
+    
+    local width = GetDisplayWidth()
+    local height = GetDisplayHeight()
+    local res = string.format("%dx%d", width, height)
+    Logm("Display %d, %d with DPI %d", width, height, GetDisplayDensityDpi())
+    
+    -- android
+    
+    if res == "800x600" or res == "600x800" then
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 160 then
+            local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 160)
+            Toast(msg)
+        end
+        GetObject("ClashRoyaleScenes"):Init800x600x160(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init800x600x160()
+        
+    elseif res == "800x480" or res == "480x800" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 240 then
+            local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 240)
+            Toast(msg)
+        end
+        GetObject("ClashRoyaleScenes"):Init800x480x240(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init800x480x240()
+    
+    --[[
+    elseif res == "854x480" or res == "480x854" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 240 then
+            local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 240)
+            Toast(msg)
+        end
+        GetObject("ClashRoyaleScenes"):Init854x480x240(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init854x480x240()
+    ]]--
+    
+    elseif res == "960x540" or res == "540x960" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 240 then
+            local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 240)
+            Toast(msg)
+        end
+        GetObject("ClashRoyaleScenes"):Init960x540x240(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init960x540x240()
+        
+    elseif res == "1024x600" or res == "600x1024" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 160 then
+            local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 160)
+            Toast(msg)
+        end
+        GetObject("ClashRoyaleScenes"):Init1024x600x160(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init1024x600x160()
+    
+    elseif res == "1280x720" or res == "720x1280" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 320 then
+            local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 320)
+            Toast(msg)
+        end
+        GetObject("ClashRoyaleScenes"):Init1280x720x320(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init1280x720x320()
+        
+    elseif res == "1280x800" or res == "800x1280" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        if false then -- dpi > 280 then
+            
+            if dpi ~= 320 then
+                local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 320)
+                Toast(msg)
+            end
+            GetObject("ClashRoyaleScenes"):Init1280x800x320(g_currentSceneManager)
+            g_currentButtons = GetObject("ClashRoyaleButtons"):Init1280x800x320()
+            
+        else
+        
+            if dpi ~= 213 then
+                local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 213)
+                Toast(msg)
+            end
+            GetObject("ClashRoyaleScenes"):Init1280x800x213(g_currentSceneManager)
+            g_currentButtons = GetObject("ClashRoyaleButtons"):Init1280x800x213()
+            
+        end
+    
+    elseif res == "1920x1080" or res == "1080x1920" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 480 then
+            local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 480)
+            Toast(msg)
+        end
+        GetObject("ClashRoyaleScenes"):Init1920x1080x480(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init1920x1080x480()
+        
+    elseif res == "2560x1600" or res == "1600x2560" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 320 then
+            local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 320)
+            Toast(msg)
+        end
+        GetObject("ClashRoyaleScenes"):Init2560x1600x320(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init2560x1600x320()
+        
+    elseif res == "2560x1440" or res == "1440x2560" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        if dpi ~= 640 then
+            local msg = string.format(g_currentLang:GetValue("unsupported_dpi", ""), dpi, 320)
+            Toast(msg)
+        end
+        GetObject("ClashRoyaleScenes"):Init2560x1440x640(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init2560x1440x640()
+        
+    -- common
+            
+    elseif res == "1024x768" or res == "768x1024" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        -- 160
+        -- 132
+        -- 163
+        GetObject("ClashRoyaleScenes"):Init1024x768x160(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init1024x768x160()
+        
+    elseif res == "2048x1536" or res == "1536x2048" then
+    
+        HideVirtualKey()
+    
+        local dpi = GetDisplayDensityDpi()
+        -- 320
+        GetObject("ClashRoyaleScenes"):Init2048x1536x320(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init2048x1536x320()
+        
+    -- ios
+    
+    elseif res == "960x640" or res == "640x960" then
+    
+        local dpi = GetDisplayDensityDpi()
+        GetObject("ClashRoyaleScenes"):Init960x640x320(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init960x640x320()
+        
+    elseif res == "1136x640" or res == "640x1136" then
+    
+        local dpi = GetDisplayDensityDpi()
+        GetObject("ClashRoyaleScenes"):Init1136x640x320(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init1136x640x320()
+        
+    elseif res == "1334x750" or res == "750x1334" then
+    
+        local dpi = GetDisplayDensityDpi()
+        GetObject("ClashRoyaleScenes"):Init1334x750x320(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init1334x750x320()
+        
+    elseif res == "2208x1242" or res == "1242x2208" then
+    
+        local dpi = GetDisplayDensityDpi()
+        GetObject("ClashRoyaleScenes"):Init2208x1242x480(g_currentSceneManager)
+        g_currentButtons = GetObject("ClashRoyaleButtons"):Init2208x1242x480()
+        
+    else
+        alertMsg = GetObject("LuaAlertWindowFactory"):Create()
+        alertMsg:Show(g_currentLang:GetValue("error"), g_currentLang:GetValue("unsupported_device"), "center", "center")
+        return false
+    end
+    
+    CreateWindow()
+    return true
+end
+
+function Run()
+    Logm("Run %s", g_currentGameApp)
+    g_currentSceneManager:RunTarget(g_currentGameApp)
+end
+
+function CreateWindow()
+    g_currentControlWindow = GetObject("LuaControlWindowFactory"):Create()
+    
+    pageBasic = CreateLinearLayout("pageBasic",  "vertical")
+    --
+        layoutTaskMde =  CreateLinearLayout("suspendControl", "horizontal", "match_parent", "wrap_content")
+        --
+            tviewTaskMode = CreateTextView("tviewTaskMode", g_currentLang:GetValue("mode") .. ":", "wrap_content", "wrap_content")
+            tviewTaskMode:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            layoutTaskMde:AddControl(tviewTaskMode)
+            
+            cboxTaskMde = CreateComboBox("cboxTaskMde", "match_parent", "wrap_content")
+            cboxTaskMde:Add(g_currentLang:GetValue("mode_battle"))
+            cboxTaskMde:Add(g_currentLang:GetValue("mode_battle_donate"))
+            cboxTaskMde:Add(g_currentLang:GetValue("mode_donate"))
+            cboxTaskMde:Add(g_currentLang:GetValue("mode_debug"))
+            cboxTaskMde:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            onSelect = function(position)
+                Logm("Select mode %d:%s", position, cboxTaskMde:GetLabel(position))
+                        
+                g_currentUncachedConfig:SetValue("current_mode_position", position) 
+            end
+            position = g_currentUncachedConfig:GetValue("current_mode_position", MODE_BATTLE_AND_DONATE) 
+            Logm("Task mode %d %s", position, type(position))
+            cboxTaskMde:SetSelection(position)
+            onSelect(position)
+            cboxTaskMde:SetOnSelectListener(onSelect)
+            cboxTaskMde:SetWeight(1)
+            layoutTaskMde:AddControl(cboxTaskMde)
+        --
+        pageBasic:AddControl(layoutTaskMde)
+        
+        rbtnEnableOpenChest = CreateCheckButton("rbtnEnableOpenChest", g_currentLang:GetValue("enable_open_chest"), "wrap_content",  DpToPixel(33))
+        rbtnEnableOpenChest:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        if g_currentUncachedConfig:GetValue("enable_open_chest", "yes") == "yes" then
+            rbtnEnableOpenChest:SetCheck(true)
+        end
+        rbtnEnableOpenChest:SetOnCheckListener(function(check)
+            if check then
+                g_currentUncachedConfig:SetValue("enable_open_chest", "yes")
+            else
+                g_currentUncachedConfig:SetValue("enable_open_chest", "no")
+            end
+        end)
+        pageBasic:AddControl(rbtnEnableOpenChest)
+        
+        tviewDesc1 = CreateTextView("tviewDesc1", g_currentLang:GetValue("desc_1"), "match_parent", "wrap_content")
+        tviewDesc1:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        pageBasic:AddControl(tviewDesc1)
+        
+        tviewBattleDeskSuggection = CreateTextView("tviewBattleDeskSuggection", g_currentLang:GetValue("battle_desk_suggection"), "match_parent", "wrap_content")
+        tviewBattleDeskSuggection:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        pageBasic:AddControl(tviewBattleDeskSuggection)
+        
+        iviewDesc1 = CreateImageView("iviewDesc1", DpToPixel(125), DpToPixel(90))
+        iviewDesc1:SetBackgroundImage("example.png")
+        pageBasic:AddControl(iviewDesc1)
+        
+        tviewDesc2 = CreateTextView("tviewDesc2", g_currentLang:GetValue("desc_2"), "match_parent",  DpToPixel(64))
+        tviewDesc2:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        pageBasic:AddControl(tviewDesc2)
+    --
+    g_currentControlWindow:AddScrollPage("vertical", DpToPixel(200), g_currentLang:GetValue("mode"), pageBasic)
+
+    pageBattle = CreateLinearLayout("pageBattle",  "vertical")
+    --
+        layoutBattle = CreateLinearLayout("layoutBattle",  "vertical")
+        --
+            layoutPrivilege = CreateLinearLayout("layoutBattle",  "horizontal")
+            --
+                tviewBattlePrivilege = CreateTextView("tviewBattlePrivilege", g_currentLang:GetValue("privilege") .. ":", "wrap_content", "wrap_content")
+                tviewBattlePrivilege:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+                layoutPrivilege:AddControl(tviewBattlePrivilege)
+            
+                cboxBattlePrvilege = CreateComboBox("cboxBattlePrvilege", "match_parent", "wrap_content")
+                cboxBattlePrvilege:Add(g_currentLang:GetValue("win"))
+                cboxBattlePrvilege:Add(g_currentLang:GetValue("crown"))
+                onSelect = function(position)
+                    local label =  cboxBattlePrvilege:GetLabel(position)
+                    Logm("Select %d:%s", position, label)
+                    
+                    g_currentUncachedConfig:SetValue("battle_privilege_pos", position) 
+                end
+                position = g_currentUncachedConfig:GetValue("battle_privilege_pos", 0) 
+                Logm("Battle privilege position %d %s", position, type(position))
+                cboxBattlePrvilege:SetSelection(position)
+                onSelect(position)
+                cboxBattlePrvilege:SetOnSelectListener(onSelect)
+                layoutPrivilege:AddControl(cboxBattlePrvilege)
+            --
+            layoutBattle:AddControl(layoutPrivilege)
+            
+            rbtnEnableBattle1v1 = CreateCheckButton("rbtnEnableBattle1v1", g_currentLang:GetValue("enable_battle_1v1"), "wrap_content",  DpToPixel(33))
+            rbtnEnableBattle1v1:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            if g_currentUncachedConfig:GetValue("enable_battle_1v1", "yes") == "yes" then
+                rbtnEnableBattle1v1:SetCheck(true)
+            end
+            rbtnEnableBattle1v1:SetOnCheckListener(function(check)
+                if check then
+                    g_currentUncachedConfig:SetValue("enable_battle_1v1", "yes")
+                else
+                    g_currentUncachedConfig:SetValue("enable_battle_1v1", "no")
+                end
+            end)
+            layoutBattle:AddControl(rbtnEnableBattle1v1)
+            
+            rbtnEnableBattle2v2 = CreateCheckButton("rbtnEnableBattle2v2", g_currentLang:GetValue("enable_battle_2v2"), "wrap_content",  DpToPixel(33))
+            rbtnEnableBattle2v2:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            if g_currentUncachedConfig:GetValue("enable_battle_2v2", "yes") == "yes" then
+                rbtnEnableBattle2v2:SetCheck(true)
+            end
+            rbtnEnableBattle2v2:SetOnCheckListener(function(check)
+                if check then
+                    g_currentUncachedConfig:SetValue("enable_battle_2v2", "yes")
+                else
+                    g_currentUncachedConfig:SetValue("enable_battle_2v2", "no")
+                end
+            end)
+            layoutBattle:AddControl(rbtnEnableBattle2v2)
+            
+            --[[
+            rbtnEnableBattleEvent = CreateCheckButton("rbtnEnableBattleEvent", g_currentLang:GetValue("enable_battle_event"), "wrap_content",  DpToPixel(33))
+            rbtnEnableBattleEvent:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            if g_currentUncachedConfig:GetValue("enable_battle_event", "yes") == "yes" then
+                rbtnEnableBattleEvent:SetCheck(true)
+            end
+            rbtnEnableBattleEvent:SetOnCheckListener(function(check)
+                if check then
+                    g_currentUncachedConfig:SetValue("enable_battle_event", "yes")
+                else
+                    g_currentUncachedConfig:SetValue("enable_battle_event", "no")
+                end
+            end)
+            layoutBattle:AddControl(rbtnEnableBattleEvent)
+            ]]--
+            
+            rbtnEnableBattleWithoutRewards = CreateCheckButton("rbtnEnableBattleWithoutRewards", g_currentLang:GetValue("enable_battle_without_rewards"), "wrap_content",  DpToPixel(33))
+            rbtnEnableBattleWithoutRewards:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            if g_currentUncachedConfig:GetValue("enable_battle_without_rewards", "yes") == "yes" then
+                rbtnEnableBattleWithoutRewards:SetCheck(true)
+            end
+            rbtnEnableBattleWithoutRewards:SetOnCheckListener(function(check)
+                if check then
+                    g_currentUncachedConfig:SetValue("enable_battle_without_rewards", "yes")
+                else
+                    g_currentUncachedConfig:SetValue("enable_battle_without_rewards", "no")
+                end
+            end)
+            layoutBattle:AddControl(rbtnEnableBattleWithoutRewards)
+            
+            rbtnEnableProtectTower = CreateCheckButton("rbtnEnableProtectTower", g_currentLang:GetValue("enable_battle_protect_tower"), "wrap_content",  DpToPixel(33))
+            rbtnEnableProtectTower:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            if g_currentUncachedConfig:GetValue("enable_battle_protect_tower", "yes") == "yes" then
+                rbtnEnableProtectTower:SetCheck(true)
+            end
+            rbtnEnableProtectTower:SetOnCheckListener(function(check)
+                if check then
+                    g_currentUncachedConfig:SetValue("enable_battle_protect_tower", "yes")
+                else
+                    g_currentUncachedConfig:SetValue("enable_battle_protect_tower", "no")
+                end
+            end)
+            layoutBattle:AddControl(rbtnEnableProtectTower)
+        --
+        pageBattle:AddControl(layoutBattle)
+    --
+    g_currentControlWindow:AddScrollPage("vertical", DpToPixel(200), g_currentLang:GetValue("battle"), pageBattle)
+    
+    pageDonate = CreateLinearLayout("pageDonate",  "vertical")
+    --
+        layoutDonate = CreateLinearLayout("layoutDonate",  "vertical")
+        --
+            -- Create request  
+            --
+            layoutRequest = CreateLinearLayout("layoutRequest",  "horizontal")
+            --
+                tviewRequest = CreateTextView("tviewRequest", g_currentLang:GetValue("request_card") .. ":", "wrap_content", "wrap_content")
+                tviewRequest:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+                layoutRequest:AddControl(tviewRequest)
+                
+                local createRequestItem = function(control, name)
+                    local pos = control:Add(g_currentLang:GetValue(name))
+                    g_currentCachedConfig:SetValue("request_" .. name .. "_position", pos)
+                    Logm("Request %s with %d", name, pos)
+                end
+                
+                cboxRequest = CreateComboBox("cboxRequest", "match_parent", "wrap_content")
+                createRequestItem(cboxRequest, "disabled")
+                for key, value in pairs(g_currentButtons["card"].common_cards) do
+                    createRequestItem(cboxRequest, value)
+                end
+                onSelect = function(position)
+                    local label =  cboxRequest:GetLabel(position)
+                    Logm("Select  %d:%s", position, label)
+                    
+                    g_currentUncachedConfig:SetValue("request_pos", position) 
+                end
+                position = g_currentUncachedConfig:GetValue("request_pos", 0) 
+                Logm("Request position %d %s", position, type(position))
+                cboxRequest:SetSelection(position)
+                onSelect(position)
+                cboxRequest:SetOnSelectListener(onSelect)
+                layoutRequest:AddControl(cboxRequest)
+            --
+            layoutDonate:AddControl(layoutRequest)
+            
+            layoutRequestEpic = CreateLinearLayout("layoutRequest",  "horizontal")
+            --
+                tviewRequestEpic = CreateTextView("tviewRequest", g_currentLang:GetValue("request_epic_card") .. ":", "wrap_content", "wrap_content")
+                tviewRequestEpic:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+                layoutRequestEpic:AddControl(tviewRequestEpic)
+                
+                local createEpicRequestItem = function(control, name)
+                    local pos = control:Add(g_currentLang:GetValue(name))
+                    g_currentCachedConfig:SetValue("request_epic_" .. name .. "_position", pos)
+                    Logm("Request %s with %d", name, pos)
+                end
+                
+                cboxRequestEpic = CreateComboBox("cboxRequestEpic", "match_parent", "wrap_content")
+                createEpicRequestItem(cboxRequestEpic, "disabled")
+                for key, value in pairs(g_currentButtons["card"].epic_cards) do
+                    createEpicRequestItem(cboxRequestEpic, value)
+                end
+                onSelect = function(position)
+                    local label =  cboxRequestEpic:GetLabel(position)
+                    Logm("Select  %d:%s", position, label)
+                    
+                    g_currentUncachedConfig:SetValue("request_epic_pos", position) 
+                end
+                position = g_currentUncachedConfig:GetValue("request_epic_pos", 0) 
+                Logm("Request Epic position %d %s", position, type(position))
+                cboxRequestEpic:SetSelection(position)
+                onSelect(position)
+                cboxRequestEpic:SetOnSelectListener(onSelect)
+                layoutRequestEpic:AddControl(cboxRequestEpic)
+            --
+            layoutDonate:AddControl(layoutRequestEpic)
+            
+            -- Create donate 
+            --
+            tviewDonate = CreateTextView("tviewDonate", g_currentLang:GetValue("donate_card"), "wrap_content", "wrap_content")
+            tviewDonate:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+            layoutDonate:AddControl(tviewDonate)
+            
+            local createDonateButton = function(control, name)
+                
+                iviewSkeletons = CreateImageView("iviewSkeletons", DpToPixel(24),  DpToPixel(24))
+                iviewSkeletons:SetBackgroundImage(name .. ".png")
+                control:AddControl(iviewSkeletons)
+                
+                local donate_name = "donate_" .. name .. "_checked"
+                
+                cboxSkeletons = CreateCheckButton("cboxSkeletons", g_currentLang:GetValue(name), "match_parent",  DpToPixel(33))
+                cboxSkeletons:SetWeight(1)
+                cboxSkeletons:SetOnCheckListener(function(check)
+                    if check then
+                        Logm("%s is checked", name)
+                        g_currentUncachedConfig:SetValue(donate_name,  "yes")
+                    else
+                        Logm("%s is unchecked", name)
+                        g_currentUncachedConfig:SetValue(donate_name,  "no")
+                    end
+                end)
+                check = g_currentUncachedConfig:GetValue(donate_name, "no")
+                if check == "yes" then
+                    cboxSkeletons:SetCheck(true)
+                end
+                control:AddControl(cboxSkeletons)
+                
+            end
+            
+            for key, value in pairs(g_currentButtons["card"].common_cards) do
+                if (key - 1) % 2 == 0 then
+                    layoutLine = CreateLinearLayout("layoutLine",  "horizontal")
+                    layoutDonate:AddControl(layoutLine)
+                end
+                createDonateButton(layoutLine, value)
+            end
+            
+            for key, value in pairs(g_currentButtons["card"].epic_cards) do
+                if (key - 1) % 2 == 0 then
+                    layoutLine = CreateLinearLayout("layoutLine",  "horizontal")
+                    layoutDonate:AddControl(layoutLine)
+                end
+                createDonateButton(layoutLine, value)
+            end
+        --
+        pageDonate:AddControl(layoutDonate)
+    --
+    g_currentControlWindow:AddScrollPage("vertical", DpToPixel(200), g_currentLang:GetValue("donate_card"), pageDonate)
+    
+    pageSavingPower = CreateLinearLayout("pageSavingPower",  "vertical")
+    --
+        rbtnEnableSavingPower = CreateCheckButton("rbtnEnableSavingPower", g_currentLang:GetValue("enable_saving_power"), "wrap_content",  DpToPixel(33))
+        rbtnEnableSavingPower:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        if g_currentUncachedConfig:GetValue("enable_saving_power", "no") == "yes" then
+            rbtnEnableSavingPower:SetCheck(true)
+        end
+        rbtnEnableSavingPower:SetOnCheckListener(function(check)
+            if check then
+                g_currentUncachedConfig:SetValue("enable_saving_power", "yes")
+            else
+                g_currentUncachedConfig:SetValue("enable_saving_power", "no")
+            end
+        end)
+        pageSavingPower:AddControl(rbtnEnableSavingPower)
+        
+        tviewEnterSleepTime = CreateTextView("tviewEnterSleepTime", g_currentLang:GetValue("enter_sleep_time") .. ":", "wrap_content", "wrap_content")
+        tviewEnterSleepTime:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        pageSavingPower:AddControl(tviewEnterSleepTime)
+                    
+        tctrlEnterSleepTime = CreateTextCtrl("nameSoldiersText11","", "match_parent",  "wrap_content")
+        tctrlEnterSleepTime:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        tctrlEnterSleepTime:SetBackgroundColor(RGBAToColor(0, 50, 0, 35))
+        tctrlEnterSleepTime:SetLabel(g_currentUncachedConfig:GetValue("power_enter_sleep_time", "30"))
+        pageSavingPower:AddControl(tctrlEnterSleepTime)  
+        
+        tviewWakeupTime = CreateTextView("tviewEnterSleepTime", g_currentLang:GetValue("wakeup_time") .. ":", "wrap_content", "wrap_content")
+        tviewWakeupTime:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        pageSavingPower:AddControl(tviewWakeupTime)
+        
+        tctrlWakeupTime = CreateTextCtrl("nameSoldiersText11","", "match_parent",  "wrap_content")
+        tctrlWakeupTime:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        tctrlWakeupTime:SetBackgroundColor(RGBAToColor(0, 50, 0, 35))
+        tctrlWakeupTime:SetLabel(g_currentUncachedConfig:GetValue("power_wakeup_time", "20"))
+        pageSavingPower:AddControl(tctrlWakeupTime)  
+        
+        tviewSavingPowerDesc = CreateTextView("tviewSavingPowerDesc", g_currentLang:GetValue("saving_power_desc"), "wrap_content",  DpToPixel(96))
+        tviewSavingPowerDesc:SetForegroundColor(RGBAToColor(0, 0, 0, 255))
+        pageSavingPower:AddControl(tviewSavingPowerDesc)
+    --
+    g_currentControlWindow:AddScrollPage("vertical", DpToPixel(200), g_currentLang:GetValue("saving_power"), pageSavingPower)
+    
+    local logo = JoinPath(GetCurrentPath(), "app.png")
+    Logm(logo)
+    g_currentControlWindow:CreateWindow(
+        DpToPixel(300), "wrap_content", 
+        -- logo ; disabled displaying logo
+        "", 
+        RGBAToColor(0, 0, 0, 150), RGBAToColor(255, 255, 255, 255),  
+        g_currentLang:GetValue("start"), g_currentLang:GetValue("quit"), 
+        DpToPixel(140)
+    )
+    g_currentControlWindow:SetOnStartListener(function()
+        g_currentControlWindow:SetStatus(g_currentLang:GetValue("running"))
+        OnStart()
+    end)
+    g_currentControlWindow:SetOnStopListener(function()
+        g_currentControlWindow:SetStatus(g_currentLang:GetValue("stopped"))
+        OnPause()
+    end)
+    g_currentControlWindow:SetOnQuitListener(function()
+        OnQuit()
+    end)
+    g_currentControlWindow:Show()
+    g_currentControlWindow:SetStatus(g_currentLang:GetValue("stopped"))
+    
+    g_currentControlWindowTimer = CreateObject("LuaTimer")
+    g_currentControlWindowTimer:SetTimer(2000, function()
+    
+        local rotation = GetDisplayRotation()
+        if not (rotation == g_currentControlWindowRotation) then
+            g_currentControlWindowRotation = rotation
+            g_currentControlWindow:SetPosition("center", 0)
+        end
+        
+    end)
+end
+
+function PrintConfg(name)
+    Logm("%s = %s", name, g_currentUncachedConfig:GetValue(name, "yes"))
+end
+
+function OnPrint()
+
+    Logm("Print configuration")
+    PrintConfg("enable_battle_1v1")
+    PrintConfg("enable_battle_2v2")
+    PrintConfg("enable_battle_event")
+    PrintConfg("enable_open_chest")
+    PrintConfg("enable_battle_without_rewards")
+    
+end
+
+function OnStart()
+
+    Logm("OnStart")
+
+    PowerOnReset()
+    
+    g_currentCommandManager:Clear()
+    
+    OnPrint()
+    
+    local currentMode = g_currentUncachedConfig:GetValue("current_mode_position", MODE_BATTLE_AND_DONATE)
+    Logm("Current mode %d", currentMode)
+    
+    if currentMode == MODE_BATTLE or
+      currentMode == MODE_BATTLE_AND_DONATE  then
+      
+        g_currentCommandManager:AddCommandWithTimedout(COMMAND_BATTLE, -1, 15 * 60 * 1000)
+        
+        if g_currentUncachedConfig:GetValue("enable_battle_event", "yes") == "yes" then
+            -- g_currentCommandManager:AddCommandWithTimedout(COMMAND_BATTLE_EVENT, -1, 15 * 60 * 1000)
+        end
+        
+    end
+
+    if  currentMode == MODE_DONATE or 
+       currentMode == MODE_BATTLE_AND_DONATE  then
+      
+        g_currentCommandManager:AddCommandWithTimedout(COMMAND_DONATE, -1, 5 * 60 * 1000)
+        g_currentCommandManager:AddCommandWithTimedout(COMMAND_REQUEST, -1, 5 * 60 * 1000)
+        
+    end
+    
+    if  currentMode == MODE_DEBUG  then
+        g_currentCommandManager:AddCommandWithTimedout(COMMAND_DEBUG, -1, 15 * 60 * 1000)
+    else
+        g_currentCommandManager:AddCommandWithTimedout(COMMAND_PAGE_BATTLE, -1, 5 * 60 * 1000)
+    end
+    
+    g_currentCommandManager:Print()
+    
+    SaveConfig()
+    
+    g_currentSceneManager:Reset()
+    g_currentSceneManager:Start(1000, 200, OnAction)
+    
+end
+
+function OnPause()
+
+    g_currentSceneManager:Pause()
+    
+end
+
+function OnQuit()
+
+    SaveConfig()
+    
+    g_currentSceneManager:Reset()
+    g_currentSceneManager:Stop()
+    
+    ShowSprite()
+    
+end
+
+function WaitForScene(name, ms)
+    return g_currentSceneManager:WaitForScene(name, ms, g_currentButtons["general"].sim_normal)
+end
+
+function WaitForNonScene(name, ms)
+    return g_currentSceneManager:WaitForNonScene(name, ms, g_currentButtons["general"].sim_normal)
+end
+
+function WaitForSceneWithClick(name, ms)
+    local wait_and_click = function()
+        ClickBlank()
+    end
+    return g_currentSceneManager:WaitForScene(name, ms, g_currentButtons["general"].sim_normal, wait_and_click, 5000)
+end
+
+function ClickBlank()
+    Logm("Click blank %d,%d", g_currentButtons["general"].blank_x, g_currentButtons["general"].blank_y)
+    TouchClickD(g_currentButtons["general"].blank_x, g_currentButtons["general"].blank_y)
+end
+
+-- 0  emtpy
+-- 1  locked
+-- 2  unlocking
+-- 3  unlocked
+-- -1 unknown
+TREASURE_EMPTY = 0
+TREASURE_LOCKED = 1
+TREASURE_UNLOCKING = 2
+TREASURE_UNLOCKED = 3
+TREASURE_UNKNOWN = -1
+function GetTreasureState(index)
+
+    local chest_base_x
+    local chest_base_y 
+    if (GetDisplayWidth() == 800 and GetDisplayHeight() == 600) or (GetDisplayWidth() == 600 and GetDisplayHeight() == 800) then
+        chest_base_x = 177
+        chest_base_y = 644
+    else
+        chest_base_x = DpToPixel(83)
+        chest_base_y = g_currentButtons["home_battle_scene"].chest_locked_y
+    end
+    Logm("base %d, %d", chest_base_x, chest_base_y)
+   
+    local chest_unlocked_c = RGBToColor(255, 243, 121)
+    
+    local chest_locked_c = RGBToColor(59, 138, 186)
+    
+    local chest_unlocked_2_c = RGBToColor(126, 134, 234)
+    local chest_unlocking_c = RGBToColor(192, 255, 214)
+    
+    if IsColor(chest_base_x + index * g_currentButtons["home_battle_scene"].chest_offset_x, chest_base_y, chest_unlocked_c, 90) then
+        -- unlocked 
+        Logm("%d Unlocked", index)
+        return TREASURE_UNLOCKED
+    
+    elseif IsColor(chest_base_x + index * g_currentButtons["home_battle_scene"].chest_offset_x, chest_base_y, chest_unlocking_c, 90) then
+        -- unlocking 
+        Logm("%d Unlocking", index)
+        return TREASURE_UNLOCKING
+        
+    elseif IsColor(chest_base_x + index * g_currentButtons["home_battle_scene"].chest_offset_x, chest_base_y,  chest_locked_c, 90) then
+        -- locked 
+        Logm("%d Locked", index)
+        return TREASURE_LOCKED
+    
+    elseif IsColor(chest_base_x + index * g_currentButtons["home_battle_scene"].chest_offset_x, chest_base_y, chest_unlocked_2_c, 90) then
+        -- locked 
+        Logm("%d Locking", index)
+        return TREASURE_LOCKED
+        
+    else
+        Logm("%d None", index)
+        return TREASURE_EMPTY
+    end
+    
+end
+
+function WaitForObject(obj, sim, ms)
+    local x, y
+    local wait_timedout = GetSystemTime() + ms
+    while wait_timedout >  GetSystemTime() do
+        x, y = obj:Find(sim)
+        if not (x == -1) and not (y == -1) then
+            return x, y
+        end
+    end
+    return -1, -1
+end
+
+function ClickDefault(obj)
+    local x, y = obj:GetPosition(0)
+    TouchClickD(x, y)
+end
+
+function GetChestPositionByIndex(index)
+    local x = g_currentButtons["home_battle_scene"].chest_x + index * g_currentButtons["home_battle_scene"].chest_offset_x
+    local y = g_currentButtons["home_battle_scene"].chest_y
+    Logm("treasure position %d, %d for %d", x, y, index)
+    return x, y
+end
+
+g_chest_position = 0
+g_chest_timedout = 5 * 60 * 1000
+
+function GetChestPosition()
+    local index 
+    index = g_chest_position
+    g_chest_position = g_chest_position + 1
+    if g_chest_position > 3 then
+        g_chest_timedout = 20 * 60 * 1000
+        g_chest_position = 0
+    end
+    return index
+end
+
+function GetChestTimedout()
+    return g_chest_timedout
+end
+
+function DonateConfigCards(p)
+    p:SetRange(
+        g_currentButtons["card"].donate_attribute.range.topleftx, 
+        g_currentButtons["card"].donate_attribute.range.toplefty, 
+        g_currentButtons["card"].donate_attribute.range.bottomrightx, 
+        g_currentButtons["card"].donate_attribute.range.bottomrighty
+    )
+    p:SetFactor(g_currentButtons["card"].donate_attribute.xFactor, g_currentButtons["card"].donate_attribute.yFactor)
+end
+
+function DonateIsChecked(name)
+    local donate_name = "donate_" .. name .. "_checked"
+    check = g_currentUncachedConfig:GetValue(donate_name, "no")
+    if check == "yes" then
+        return true
+    else
+        return false
+    end
+end
+
+function RequestIsEnabled(name)
+    local position = g_currentUncachedConfig:GetValue("request_pos", 0) 
+    return  position ~= 0
+end
+
+function RequestIsSelected(name)
+    local position = g_currentUncachedConfig:GetValue("request_pos", 0) 
+    local name_pos = g_currentCachedConfig:GetValue("request_" .. name .. "_position", -1)
+    return position == name_pos
+end
+
+function RequestEpicIsSelected(name)
+    local position = g_currentUncachedConfig:GetValue("request_epic_pos", 0) 
+    local name_pos = g_currentCachedConfig:GetValue("request_epic_" .. name .. "_position", -1)
+    return position == name_pos
+end
+
+function RequestConfigCard(p)
+    p:SetRange(
+        g_currentButtons["card"].request_attribute.range.topleftx, 
+        g_currentButtons["card"].request_attribute.range.toplefty, 
+        g_currentButtons["card"].request_attribute.range.bottomrightx, 
+        g_currentButtons["card"].request_attribute.range.bottomrighty
+    )
+    p:SetFactor(0, 0)
+end
+
+function DebugBattleUI()
+    for i = 0, 3 do
+        GetTreasureState(i)
+    end
+    
+    Sleep(3 * 1000)
+end
+
+function DebugCommunityUI()
+    local x, y 
+            
+    x, y = g_currentButtons["home_social_scene"].clan_chest:Find(96)
+    if not (x == -1) and not (y == -1) then
+        Logm("Clan chest found")
+    else
+        Logm("Unable to find clan chest")
+    end
+    
+    if IsColor(g_currentButtons["home_social_scene"].request_card_x, g_currentButtons["home_social_scene"].request_card_y, g_currentButtons["home_social_scene"].request_card_epic_c, 97) then
+        Logm("EPIC card request")
+    elseif IsColor(g_currentButtons["home_social_scene"].request_card_x, g_currentButtons["home_social_scene"].request_card_y, g_currentButtons["home_social_scene"].request_card_disabled_c, 96) then
+    else
+        Logm("Generic card request")
+    end
+
+    for key, value in pairs(g_currentButtons["card"].raw) do  
+    
+        DonateConfigCards(g_currentButtons["card"].raw[key])
+        Logm("Search %s (%d, %d to %d, %d)", key, g_currentButtons["card"].raw[key]:GetRange())
+        if g_currentButtons["card"].raw[key] == nil then
+            Logm("card not existed")
+        else
+        
+            local x, y = g_currentButtons["card"].raw[key]:Find(96)
+            if not (x == -1) and not (y == -1) then
+                Logm("card at %d, %d", x, y)
+
+                Logm("Start to find donate card button ...")
+                
+                local toplefty = y - g_currentButtons["card"].donate_attribute.height
+                local bottomrighty = y + g_currentButtons["card"].donate_attribute.height
+                
+                local a1, a2, a3, a4 = g_currentButtons["card"].donate_button:GetRange()
+                g_currentButtons["card"].donate_button:SetRange(a1, toplefty, a3, bottomrighty)
+                
+                x, y = g_currentButtons["card"].donate_button:Find(96)
+                if not (x == -1) and not (y == -1) then
+                    Logm("Click donate %d, %d", x, y)
+                else
+                    Logm("Donation button not found")
+                end
+                
+            end
+            
+        end
+        
+    end
+    
+    Sleep(3 * 1000)
+end
+
+function DebugRequestUI()
+    for key, value in pairs(g_currentButtons["card"].raw) do  
+        Logm("Request %s enabled", key)
+        
+        RequestConfigCard(g_currentButtons["card"].raw[key])
+        
+        local x, y
+        
+        x, y = g_currentButtons["card"].raw[key]:Find(96)
+        Logm("card at %d, %d", x, y)
+        if x == -1 or y == - 1 then
+            Logm("Unable to find card,go search next page")
+            
+            TouchSwipeD(
+                g_currentButtons["home_social_scene"].request_card_swipe_bottomx, 
+                g_currentButtons["home_social_scene"].request_card_swipe_bottomy, 
+                g_currentButtons["home_social_scene"].request_card_swipe_topx, 
+                g_currentButtons["home_social_scene"].request_card_swipe_topy
+            )
+            Sleep(2000)
+            
+            x, y = g_currentButtons["card"].raw[key]:Find(96)
+            Logm("Card at %d, %d", x, y)
+        end
+        
+        if x == -1 or y == - 1 then
+            Logm("Unable to find card")
+        else
+            Logm("Start to request card")
+            
+            TouchClickD(x, y)
+            Sleep(2000)
+            
+            x, y = g_currentButtons["card"].request_button:Find(96)
+            if not (x == -1) and not (y == -1) then
+                Logm("Click request button")
+                Sleep(2000)
+            else
+                Logm("Unable to find request button")
+            end
+        end
+    end
+
+    Sleep(3 * 1000)
+end
+
+function DebugBattleFightUI()   
+
+    Logm("Exlir %d", BattleGetElixirCount())
+    
+    for i = 0, 3 do
+    
+        local avail
+        
+        if BattleIsCardAvailable(i) then
+            avail = true
+        else
+            avail = false
+        end
+        
+        if avail then
+            Logm("[%d] available", i)
+        else
+            Logm("[%d] not available", i)
+        end
+        
+    end
+    
+    x, y = WaitForObject(g_currentButtons["battle_scene"].tower_left, 96, 500)
+    if not(x == -1) and not(y == -1) then
+        leftTowerState = true
+    else
+        leftTowerState = false
+        Logm("Left tower destroyed")
+    end
+    
+    x, y = WaitForObject(g_currentButtons["battle_scene"].tower_right, 96, 500)
+    if not(x == -1) and not(y == -1) then
+        rightTowerState = true
+    else
+        rightTowerState = false
+        Logm("Right tower destroyed")
+    end
+    
+    BattleProtectTest()
+    
+    OnFightIdentifyCards()
+    
+    Sleep(3 * 1000)
+end
+
+function IsNameTimedout(name, ms)
+    
+    if GetSystemTime() - g_currentCachedConfig:GetValue(name, 0) >= ms then
+        g_currentCachedConfig:SetValue(name, GetSystemTime())
+        return true
+    else
+        return false
+    end
+    
+end
+
+function PowerClearScene()
+
+    g_currentSceneManager:Reset()
+    
+    SetDisplayRefreshRate(10)
+    
+    Sleep(500)
+
+end
+
+function PowerOnReset()
+
+    PowerClearScene()
+    SetDisplayRefreshRate(400)
+    
+    g_currentUncachedConfig:SetValue("power_enter_sleep_time", tctrlEnterSleepTime:GetLabel())
+    g_currentUncachedConfig:SetValue("power_wakeup_time", tctrlWakeupTime:GetLabel())
+    
+    g_currentPowerManager:Reset()
+    g_currentPowerManager:SetListener(PowerOnEnterSaving, PowerOnLeaveSaving)
+
+    if g_currentUncachedConfig:GetValue("enable_saving_power", "no") == "yes" then
+        Logm("Power saving enabled")
+    else
+        Logm("Power saving is off")
+    end
+
+    local power_enter_sleep_time = g_currentUncachedConfig:GetValue("power_enter_sleep_time", 30)
+    local power_wakeup_time = g_currentUncachedConfig:GetValue("power_wakeup_time", 20)
+    Logm("Power saving paramaters : %d, %d", power_enter_sleep_time, power_wakeup_time)
+        
+    g_currentPowerManager:SetTimedout(power_enter_sleep_time * 60 * 1000, power_wakeup_time * 60 * 1000)
+end
+
+function PowerOnEnterSaving()
+
+    PowerClearScene()
+    SetDisplayRefreshRate(10 * 60 * 1000)
+
+    Sleep(5000)
+
+end
+
+function PowerOnLeaveSaving()
+
+    PowerClearScene()
+    SetDisplayRefreshRate(400)
+    
+    Sleep(2000)
+    
+    ClickBlank()
+    
+    Sleep(2000)
+    
+    ClickBlank()
+    
+    Sleep(4000)
+    
+    g_currentSceneManager:RunTarget(g_currentGameApp)
+    
+end
+
+function PowerOnLoop()
+
+    if g_currentSceneManager:GetScene() == "battle_scene" then
+        return false
+    elseif g_currentSceneManager:GetSceneDuration() >= 1000 then
+    
+        if g_currentPowerManager:Loop() then
+            return true
+        else
+            return false
+        end
+    else
+        return false
+    end
+    
+end
+
+g_battleEnterTick = 0
+
+function OnAction()
+        
+    if GetSystemName() == "ios" then
+        if GetSDKVersion() >= 11000 then
+            if g_currentUncachedConfig:GetValue("enable_saving_power", "no") == "yes" then
+                if PowerOnLoop() then
+                    return
+                end
+            end
+        end
+    else
+        if g_currentUncachedConfig:GetValue("enable_saving_power", "no") == "yes" then
+            if PowerOnLoop() then
+                return
+            end
+        end
+    end
+       
+    if CheckStuck() then
+        g_currentCommandManager:NextCommand()
+        return
+    end
+    
+    local scene = g_currentSceneManager:GetScene()
+    local command = g_currentCommandManager:GetCurrentCommand()
+    Logm("Current scene %s, command %s", scene, command)
+    
+    if scene == "home_battle_scene" then
+        
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        if command == COMMAND_DEBUG then
+            DebugBattleUI()
+            return
+        end
+        
+        g_2v2battle = false 
+        
+        if g_currentUncachedConfig:GetValue("enable_open_chest", "yes") == "yes" and IsNameTimedout("open_free_and_crown_chest", 20 * 60 * 1000) then
+            
+            Logm("Try to open chest")
+            
+            --Sleep(1000)
+            --TouchClickD(g_currentButtons["home_battle_scene"].crown_chest_x, g_currentButtons["home_battle_scene"].crown_chest_y)
+            --Sleep(1000)
+            
+            local t = GetChestPosition()
+            Logm("Ready to unlock %d ", t)
+            TouchClickD(GetChestPositionByIndex(t))
+             
+            Logm("Waiting for unlock button ...")
+            
+            Sleep(4000)
+            
+            local x, y = WaitForObject(g_currentButtons["home_battle_scene"].start_unlock_button, 97, 6000)
+            Logm("%d, %d", x, y)
+            if not (x == -1) and not (y == - 1) then    
+                Logm("Button found and ready to click ...")
+                TouchClickD(x, y)
+            else
+                Logm("Unable to find button ...")
+            end
+            
+            return
+        
+        elseif g_currentUncachedConfig:GetValue("enable_open_chest", "yes") == "yes" and IsNameTimedout("collect_task_rewards", 8 * 60 * 1000) then
+            
+            if g_currentButtons["task_scene"] ~= nil then
+                Logm("Try to collect reward")
+
+                --Sleep(1000)
+                --TouchClickD(g_currentButtons["home_battle_scene"].free_chest_x, g_currentButtons["home_battle_scene"].free_chest_y)
+                --Sleep(1000)
+                
+                return
+            end
+            
+        else
+            Logm("auto-open chest is disabled")
+        end
+        
+        if command == COMMAND_BATTLE then
+   
+            Logm("Try to enter battle tick : %d", g_battleEnterTick)
+            
+            BattleOnPreFight()
+                
+            if g_battleEnterTick <= 3 then
+            
+                Logm("Try to enter 1v1 battle")
+                
+                if g_currentUncachedConfig:GetValue("enable_battle_1v1", "yes") == "yes" then
+                
+                    Logm("entering 1v1 battle")
+                    
+                    --TouchClickD(g_currentButtons["home_battle_scene"].battle_x, g_currentButtons["home_battle_scene"].battle_y)
+                    --Sleep(1000)
+                    TouchClickD(g_currentButtons["home_battle_scene"].battle_timedout_x, g_currentButtons["home_battle_scene"].battle_timedout_y)
+                
+                    if g_currentSceneManager:WaitForNonScene("home_battle_scene", 5000, g_currentButtons["general"].sim_normal) == false then
+                        Logm("Finding battle scene timedout and click back button")
+                        ClickBack()
+                    else
+                        Logm("Completed")
+                    end
+                    
+                end
+                
+            elseif g_battleEnterTick <= 4 then
+                
+                Logm("Try to enter 2v2 battle")
+                
+                if g_currentUncachedConfig:GetValue("enable_battle_2v2", "yes") == "yes" then
+            
+                    Logm("entering 2V2 battle")
+                 
+                    local battle_2v2_x, battle_2v2_y
+                    battle_2v2_y = g_currentButtons["home_battle_scene"].battle_timedout_y
+                    battle_2v2_x = GetDisplayWidth() - g_currentButtons["home_battle_scene"].battle_timedout_x
+                    TouchClickD(battle_2v2_x, battle_2v2_y)
+                    
+                    if WaitForNonScene("home_battle_scene", 5000) then
+                        Logm("Finding battle scene timedout and click back button")
+                        ClickBack()
+                    end
+                    Logm("Completed")
+                    
+                end
+                
+            end
+            
+            g_battleEnterTick = g_battleEnterTick + 1
+            if g_battleEnterTick >= 5 then
+                g_battleEnterTick = 0
+            end
+            
+        elseif command == COMMAND_BATTLE_EVENT then
+        
+            PageEnterEvent()
+            
+        elseif command == COMMAND_DONATE or command == COMMAND_REQUEST then
+        
+            PageEnterCommunity()
+            
+        elseif command == COMMAND_PAGE_BATTLE then
+            
+            Logm("Go next command")
+            g_currentCommandManager:NextCommand()
+                
+        else
+            Logm("Unknown command")
+        end
+        
+    elseif scene == "home_social_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        if command == COMMAND_DEBUG then
+            DebugCommunityUI()
+            return
+        end
+        
+        if g_currentUncachedConfig:GetValue("enable_open_chest", "yes") == "yes" and IsNameTimedout("open_clan_chest", 20 * 1000) then
+            
+            Logm("Try to open clan chest")
+            
+            local x, y 
+            
+            x, y = g_currentButtons["home_social_scene"].clan_chest:Find(96)
+            if not (x == -1) and not (y == -1) then
+               ClickDefault(g_currentButtons["home_social_scene"].clan_chest)
+               Sleep(2000)
+               
+               -- Open chest again
+               TouchClickD(math.floor(GetDisplayWidth() / 2), y)
+               Sleep(2000)
+            end
+            
+        else
+            Logm("Auto-open chest disabled")
+        end
+        
+        if command == COMMAND_DONATE then
+            
+            for key, value in pairs(g_currentButtons["card"].raw) do  
+            
+                if DonateIsChecked(key) then
+                    DonateConfigCards(g_currentButtons["card"].raw[key])
+                    if g_currentButtons["card"].raw[key] == nil then
+                    
+                    else
+                        local x, y = g_currentButtons["card"].raw[key]:Find(96)
+                        if not (x == -1) and not (y == -1) then
+                            
+                            local toplefty = y - g_currentButtons["card"].donate_attribute.height
+                            local bottomrighty = y + g_currentButtons["card"].donate_attribute.height
+                            
+                            local a1, a2, a3, a4 = g_currentButtons["card"].donate_button:GetRange()
+                            g_currentButtons["card"].donate_button:SetRange(a1, toplefty, a3, bottomrighty)
+                            
+                            x, y = g_currentButtons["card"].donate_button:Find(96)
+                            if not (x == -1) and not (y == -1) then
+                                
+                                for i = 1, 5 do
+                                    TouchClickD(x, y)
+                                    Sleep(500)
+                                end
+                                
+                            else
+                                Logm("Unable to find button")
+                            end
+                            
+                        end
+                    end
+                end
+                
+            end
+            
+            Logm("Donation completed")
+            
+            g_currentCommandManager:NextCommand()
+            
+        elseif command == COMMAND_REQUEST then
+            
+            if RequestIsEnabled() then
+                
+                Sleep(1500)
+                
+                if IsColor(g_currentButtons["home_social_scene"].request_card_x, g_currentButtons["home_social_scene"].request_card_y, g_currentButtons["home_social_scene"].request_card_epic_c, 97) then
+                
+                    -- 1 epic request
+                    g_currentCachedConfig:SetValue("request_state", 1)
+                    
+                    Logm("EPIC card request, Enter scene")
+                    TouchClickD(g_currentButtons["home_social_scene"].request_card_x, g_currentButtons["home_social_scene"].request_card_y)
+                    
+                elseif IsColor(g_currentButtons["home_social_scene"].request_card_x, g_currentButtons["home_social_scene"].request_card_y, g_currentButtons["home_social_scene"].request_card_disabled_c, 96) then
+                
+                    -- -1 reset
+                    g_currentCachedConfig:SetValue("request_state", -1)
+                    
+                    g_currentCommandManager:NextCommand()
+                
+                else
+                
+                    -- 2 common request
+                    g_currentCachedConfig:SetValue("request_state", 2)
+                    
+                    TouchClickD(g_currentButtons["home_social_scene"].request_card_x, g_currentButtons["home_social_scene"].request_card_y)
+                
+                end
+                
+            else
+                Logm("Request is not enabled")
+                g_currentCommandManager:NextCommand()
+            end
+            
+        elseif command == COMMAND_BATTLE_EVENT then
+        
+            PageEnterEvent()
+            
+        elseif command == COMMAND_BATTLE or command == COMMAND_PAGE_BATTLE then
+            
+            PageEnterBattle()
+           
+        else
+            Logm("Unknown command")
+        end
+    
+    elseif scene == "home_requst_card_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        if command == COMMAND_DEBUG then
+            DebugRequestUI()
+            return
+        end
+        
+        if command == COMMAND_REQUEST then
+            
+            -- Try epic card first
+            
+            local requestSearch = function(func)
+                for key, value in pairs(g_currentButtons["card"].raw) do  
+                    if func(key) then
+                        return key
+                    end
+                end
+                return ""
+            end
+            
+            local requestTry = function(func)
+            
+                local key = requestSearch(func)
+                if key == "" then
+                    Logm("Unable to find card")
+                    return false
+                end
+                
+                Sleep(2500)
+                
+                RequestConfigCard(g_currentButtons["card"].raw[key])
+                
+                local x, y
+                
+                x, y = g_currentButtons["card"].raw[key]:Find(96)
+                if x == -1 or y == - 1 then
+                    TouchSwipeD(
+                        g_currentButtons["home_social_scene"].request_card_swipe_bottomx, 
+                        g_currentButtons["home_social_scene"].request_card_swipe_bottomy, 
+                        g_currentButtons["home_social_scene"].request_card_swipe_topx, 
+                        g_currentButtons["home_social_scene"].request_card_swipe_topy
+                    )
+                    Sleep(2000)
+                    
+                    x, y = g_currentButtons["card"].raw[key]:Find(96)
+                end
+                
+                if x == -1 or y == - 1 then
+                    return false
+                end
+                
+                TouchClickD(x, y)
+                Sleep(2000)
+                
+                x, y = g_currentButtons["card"].request_button:Find(96)
+                if not (x == -1) and not (y == -1) then
+                    TouchClickD(x, y)
+                    Sleep(2000)
+                end
+                
+                return true
+                
+            end
+            
+            local state = g_currentCachedConfig:GetValue("request_state", -1)
+            if  state == 1 then
+                requestTry(RequestEpicIsSelected)
+            elseif state == 2 then
+                requestTry(RequestIsSelected)
+            end
+            
+            -- -1 reset
+            g_currentCachedConfig:SetValue("request_state", -1)
+                
+            g_currentCommandManager:NextCommand()
+            
+        else
+            TouchClickD(g_currentSceneManager:GetScenePosition(scene))
+        end
+        
+    elseif scene == "home_no_recard_confirm_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        if command == COMMAND_BATTLE then
+            
+            if g_currentUncachedConfig:GetValue("enable_battle_without_rewards", "yes") == "yes" then
+            
+                TouchClickD(g_currentButtons["home_no_recard_confirm_scene"].confirm_x, g_currentButtons["home_no_recard_confirm_scene"].confirm_y)
+                
+            else
+                ClickBlank()
+                
+                g_currentCommandManager:NextCommand()
+            end
+            
+        else
+            Logm("Click blank")
+            ClickBlank()
+        end
+        
+    elseif scene == "home_2V2_confirm_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        if command == COMMAND_BATTLE or command == COMMAND_BATTLE_EVENT then
+            g_2v2battle = true
+            TouchClickD(g_currentButtons["home_2V2_confirm_scene"].enter_x, g_currentButtons["home_2V2_confirm_scene"].enter_y)
+        else
+            TouchClickD(g_currentButtons["home_2V2_confirm_scene"].close_x, g_currentButtons["home_2V2_confirm_scene"].close_y)
+        end
+        
+    elseif scene == "battle_scene" or scene == "2V2battle_scene" then
+    
+       if g_currentSceneManager:GetSceneRetry(100) == false then
+            return
+        end
+        
+        if command == COMMAND_DEBUG then
+            DebugBattleFightUI()
+            return
+        end
+        
+        BattleOnFight()
+        
+    elseif scene == "battle_completed_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        TouchClickD(g_currentButtons["battle_completed_scene"].confirm_x, g_currentButtons["battle_completed_scene"].confirm_y)
+        Sleep(500)
+        TouchExit()
+        
+        g_2v2battle = false
+        
+    elseif scene == "battle_completed_chat_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        TouchExit()
+        
+        g_2v2battle = false
+        
+    elseif scene == "areana_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        Logm("areana_scene, Click default position")
+        TouchClickD(g_currentSceneManager:GetScenePosition(scene))
+    
+    elseif scene == "task_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        if g_currentButtons["task_scene"] ~= nil then
+            
+            local CollectRewards = function ()
+            
+                local offset_y = math.floor(g_currentButtons["task_scene"].task_offset_y / 3)
+                local offset_x = math.floor((g_currentButtons["task_scene"].x_max - g_currentButtons["task_scene"].x_min) / 8)
+                local offset_total = math.floor(3 * 3) - 1
+                for i = 0, offset_total do
+                    
+                    local dx, dy
+                    
+                    dy = g_currentButtons["task_scene"].task_first_y + i * offset_y
+                    
+                    for j = 0, 7 do
+
+                        dx = g_currentButtons["task_scene"].x_min + j * offset_x
+
+                        if dx >= g_currentButtons["task_scene"].x_min and dx <= g_currentButtons["task_scene"].x_max and 
+                          dy >= g_currentButtons["task_scene"].y_min and dy <= g_currentButtons["task_scene"].y_max then
+                        
+                            Logm("[%d] Click %d, %d", i, dx, dy)
+                            TouchClickD(dx, dy)
+                            Sleep(100)
+                            
+                        else
+                            Logm("Ignore %d, %d", dx, dy)
+                        end
+                    
+                    end
+                    
+                end
+                    
+            end
+            
+            TouchClickD(g_currentButtons["task_scene"].task_reward_x, g_currentButtons["task_scene"].task_reward_y)
+            Sleep(500)
+            TouchClickD(g_currentButtons["task_scene"].task_reward_x, g_currentButtons["task_scene"].task_reward_y)
+            Sleep(500)
+            
+            CollectRewards()
+            Sleep(1000)
+            
+            TouchSwipeD(
+                    g_currentButtons["task_scene"].task_swipe_bottomx, 
+                    g_currentButtons["task_scene"].task_swipe_bottomy, 
+                    g_currentButtons["task_scene"].task_swipe_topx, 
+                    g_currentButtons["task_scene"].task_swipe_topy
+                )
+            Sleep(1500)
+            
+            CollectRewards()
+            
+            Sleep(2000)
+            
+            TouchClickD(g_currentButtons["task_scene"].close_x, g_currentButtons["task_scene"].close_y)
+            
+            -- Wakeup the refresh thread if this take too long
+            LockDisplay()
+            UnlockDisplay()
+            --
+            
+            Sleep(2000)
+            
+        end
+        
+    --[[
+    elseif scene == "event_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        if command == COMMAND_BATTLE_EVENT then
+        
+            local crown_x, crown_y 
+            crown_x, crown_y = g_currentButtons["event_scene"].event_special_event:Find(96)
+            if not (crown_x == -1) and not (crown_y == -1) then
+                Logm("找到特殊事件图标")
+                
+                crown_x, crown_y = g_currentButtons["event_scene"].event_2v2_touchdown_daily_practice:Find(96)
+                if not (crown_x == -1) and not (crown_y == -1) then
+                    TouchClickD(crown_x, crown_y)
+                else
+                    crown_x = math.floor(GetDisplayWidht() / 2)
+                    crown_y = math.floor(GetDisplayWidht() / 2)
+                    TouchClickD(crown_x, crown_y)
+                end
+                
+            else
+                TouchClickD(g_currentButtons["event_scene"].start_x, g_currentButtons["event_scene"].start_y)
+            end
+            
+        elseif command == COMMAND_BATTLE or command == COMMAND_PAGE_BATTLE then
+            
+            PageEnterBattle()
+            
+        elseif command == COMMAND_DONATE or command == COMMAND_REQUEST then
+        
+            PageEnterCommunity()
+            
+        else
+            Logm("Unknown command")
+            PageEnterBattle()
+        end
+        
+    elseif scene == "event_card_scene" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        TouchClickD(g_currentButtons["event_scene"].choose_card_1_x, g_currentButtons["event_scene"].choose_card_1_y)
+    ]]--
+    
+    elseif scene ~= "" then
+    
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        Logm("Unknown scene  %s,Click default position of scene", scene)
+        TouchClickD(g_currentSceneManager:GetScenePosition(scene))
+    
+    else
+        
+        if g_currentSceneManager:GetSceneRetry(2000) == false then
+            return
+        end
+        
+        if scene == "" then
+            Logm("Unknown scene  ...")
+        else
+            Logm("Unknown scene : %s ...", scene)
+        end
+        
+        if g_currentSceneManager:GetSceneDuration() > 4000 then
+        
+            if FindAndClickCommon() then
+                Sleep(2000)
+                return
+            end
+            
+            if g_currentSceneManager:GetSceneRetry(8000, 12) then
+                PageEnterBattle()
+                return
+            end
+            
+            if g_currentSceneManager:GetSceneRetry(8000, 10) then
+                ClickBack() 
+                return
+            end
+            
+            if g_currentSceneManager:GetSceneRetry(8000, 11) then
+                Logm("Click confirm")
+                TouchClickD(g_currentButtons["battle_completed_scene"].confirm_x, g_currentButtons["battle_completed_scene"].confirm_y)
+                return
+            end
+            
+            if g_currentSceneManager:GetSceneDuration() > 6000 then
+                
+                if g_2v2battle then
+                    TouchExit()
+                end
+                
+                ClickBlank()
+            end
+            
+        end
+   
+    end
+    
+end
+
+g_battleSwitch = false
+
+function PageEnterBattle()
+    local x, y = g_currentButtons["home"].battle_page_icon:Find(95)
+    if not (x == -1) and not (y == -1) then
+        Logm("Click battle icon %d,%d", x, y)
+        TouchClickD(x, y)
+    else
+        local width = GetDisplayWidth()
+        
+        local x
+        if g_battleSwitch == false then
+            x = width / (6 * 2) * 5
+            g_battleSwitch = true
+        else
+            x = width / (6 * 2) * 7
+            g_battleSwitch = false
+        end 
+        
+        local y = GetDisplayHeight() - DpToPixel(16)
+        Logm("Click battle position %d,%d", x, y)
+        TouchClickD(x, y)
+    end
+end
+
+function PageEnterCommunity()
+    local x, y = g_currentButtons["home"].community_page_icon:Find(95)
+    if not (x == -1) and not (y == -1) then
+        Logm("Click social icon %d,%d", x, y)
+        TouchClickD(x, y)
+    end
+end
+
+function PageEnterEvent()
+    local x, y = g_currentButtons["home"].event_page_icon:Find(95)
+    if not (x == -1) and not (y == -1) then
+        Logm("Click event icon %d,%d", x, y)
+        TouchClickD(x, y)
+    end
+end
+
+-- Get elixir count 
+function BattleGetElixirCount()
+
+    local c = 0 
+    for i = 0, 9 do
+    
+        local x = g_currentButtons["battle_scene"].elixir_x + i * g_currentButtons["battle_scene"].elixir_offset_x
+        local y = g_currentButtons["battle_scene"].elixir_y
+        -- Logm("Test elixir %d %d, %d", i, x, y)
+        
+        local not_full = true
+        
+        not_full = IsColor(x, y, g_currentButtons["battle_scene"].elixir_c, 96)
+        if not_full  == false then
+            not_full = IsColor(x, y, g_currentButtons["battle_scene"].elixir_light_c, 96)
+        end
+        
+        if not_full == false then
+            -- Logm("满")
+            c = i + 1
+        else
+            -- Logm("空")
+            break
+        end
+        
+    end
+    return c
+    
+end
+
+function BattleGetCardPosition(index)
+    local x = g_currentButtons["battle_scene"].card_available_x + index * g_currentButtons["battle_scene"].card_available_offset_x
+    local y = g_currentButtons["battle_scene"].card_available_y
+    return x, y
+end
+
+-- index 0 to 3
+function BattleIsCardAvailable(index)
+
+    local x, y = BattleGetCardPosition(index)
+    -- Logm("Test card %d %d, %d", index, x, y)
+        
+    if IsColor(x, y, g_currentButtons["battle_scene"].card_available_c, 96) then
+        -- Logm("%d OK", index)
+        return true
+    else
+        -- Logm("%d None", index)
+        return false
+    end
+
+end
+
+function BattleConfigCard(p, x, y)
+
+    local topleftx = x + g_currentButtons["battle_scene"].card_offset_topleftx
+    local toplefty = y + g_currentButtons["battle_scene"].card_offset_toplefty
+    local bottomrightx = x + g_currentButtons["battle_scene"].card_offset_bottomrightx
+    local bottomrighty = y + g_currentButtons["battle_scene"].card_offset_bottomrighty
+    -- Logm("%d, %d to %d, %d", topleftx, toplefty, bottomrightx, bottomrighty)
+    
+    p:SetRange(topleftx, toplefty, bottomrightx, bottomrighty)
+    p:SetFactor(g_currentButtons["card"].battle_attribute.xFactor, g_currentButtons["card"].battle_attribute.yFactor)
+
+end
+
+function BattleGetCardName(index, ms)
+
+    if BattleIsCardAvailable(index) == false then
+        return ""
+    end
+
+    local x, y 
+    x, y = BattleGetCardPosition(index)
+
+    local timedout = GetSystemTime() + ms
+    for key, value in pairs(g_currentButtons["card"].raw) do  
+        if GetSystemTime() >= timedout then
+            break
+        end
+    
+        BattleConfigCard(g_currentButtons["card"].raw[key], x, y)
+        
+        local fx, fy = g_currentButtons["card"].raw[key]:Find(96)
+        if not (fx == -1) and not (fy == -1) then
+            return key
+        end
+        
+    end
+    
+    return ""
+end
+
+function BattleSendByName(name, battle_x, battle_y)
+
+    local index = -1
+    for i = 0, 3 do
+        if g_battleCards[i] == name then
+            index = i
+            break
+        end
+    end
+    
+    if index == -1 then
+        return false
+    end
+
+    return BattleSendByIndex(index, battle_x, battle_y)
+    
+end
+
+function BattleSendByIndex(index, battle_x, battle_y)
+
+    for i = 0, 3 do
+    
+        if i == index then
+            
+            if BattleIsCardAvailable(i) then
+            
+                -- this card is being sent out so we reset it now
+                g_battleCards[i] = ""
+                
+                local x, y = BattleGetCardPosition(i)
+                Logm("Choose card %d %d, %d", i, x, y)
+                TouchClickD(x, y)
+                Sleep(1000)
+                
+                TouchClickD(battle_x, battle_y)
+                Sleep(500)
+                return true
+                
+            else
+                return false
+            end
+            
+        end
+        
+    end
+    
+    return false
+    
+end
+
+g_battleCards = {}
+g_battleCardsPos = 0
+g_battleCards[0] = ""
+g_battleCards[1] = ""
+g_battleCards[2] = ""
+g_battleCards[3] = ""
+
+g_battleRound = 0
+
+g_battleKingBlood = 100
+g_battleLeftTowerBlood = 100
+g_battleRightTowerBlood = 100
+
+function BattleOnPreFight()
+    Logm("Reset before fight")
+    
+    g_battleCards = {}
+    g_battleCards[0] = ""
+    g_battleCards[1] = ""
+    g_battleCards[2] = ""
+    g_battleCards[3] = ""
+    
+    g_battleRound = 0
+    
+    g_battleKingBlood = 100
+    g_battleLeftTowerBlood = 100
+    g_battleRightTowerBlood = 100
+end
+
+function BattleTowerLeftBlood()
+    return math.floor(BattleBlood(g_currentButtons["battle_scene"].blood_tower_left_x, g_currentButtons["battle_scene"].blood_tower_left_y, g_currentButtons["battle_scene"].blood_tower_c, g_currentButtons["battle_scene"].blood_tower_width))
+end
+
+function BattleTowerRightBlood()
+    return math.floor(BattleBlood(g_currentButtons["battle_scene"].blood_tower_right_x, g_currentButtons["battle_scene"].blood_tower_right_y, g_currentButtons["battle_scene"].blood_tower_c, g_currentButtons["battle_scene"].blood_tower_width))
+end
+
+function BattleKingBlood()
+    return math.floor(BattleBlood(g_currentButtons["battle_scene"].blood_king_x, g_currentButtons["battle_scene"].blood_king_y, g_currentButtons["battle_scene"].blood_king_c, g_currentButtons["battle_scene"].blood_king_width))
+end
+
+function BattleBlood(x, y, c, w)
+
+    local cc = 30
+    local offset = w / cc
+    for i = 0, (cc - 1) do
+    
+        if IsColor(x - (offset * i), y, c, 96) then
+            return ((cc - 1 - i) + 1) * (100 / cc)
+        end
+    
+    end
+    
+    return 100
+    
+end
+
+function BattleProtectCommand(x, y)
+    Logm("Send troop to guard ally")
+    if BattleSendByName("skeleton_army", x, y) then
+        return true
+    elseif BattleSendByName("barbarians", x, y) then
+        return true
+    elseif BattleSendByName("baby_dragon", x, y) then
+        return true
+    else
+        for i = 0, 3 do
+            if not BattleIsTargeted(i) then
+                if BattleSendByIndex(i, x, y) then
+                    return true
+                end
+            end
+        end
+    end
+    Logm("Unable to send troop")
+end
+
+function BattleProtect(ret)
+
+    if ret == BLOOD_KING_CHANGED then
+        Logm("Guard king")
+        BattleProtectCommand(g_currentButtons["battle_scene"].pos_king_front_x, g_currentButtons["battle_scene"].pos_king_front_y)
+    elseif ret == BLOOD_LEFTTOWER_CHANGED then
+        Logm("Guard left tower")
+        BattleProtectCommand(g_currentButtons["battle_scene"].pos_tower_left_back_x, g_currentButtons["battle_scene"].pos_tower_left_back_y)
+    elseif ret == BLOOD_RIGHTTOWER_CHANGED then
+        Logm("Guard right tower")
+        BattleProtectCommand(g_currentButtons["battle_scene"].pos_tower_right_back_x, g_currentButtons["battle_scene"].pos_tower_right_back_y)
+    else
+        return false
+    end
+    
+    return true
+    
+end
+
+BLOOD_NORMAL = 0
+BLOOD_KING_CHANGED = 1
+BLOOD_LEFTTOWER_CHANGED = 2
+BLOOD_RIGHTTOWER_CHANGED = 3
+function BattleProtectTest()
+
+    if g_currentUncachedConfig:GetValue("enable_battle_protect_tower", "yes") == "yes" then
+    else
+        Logm("Tower guard disabled")
+        return BLOOD_NORMAL
+    end
+    
+    local kingBlood = BattleKingBlood()
+    local leftTowerBlood = BattleTowerLeftBlood()
+    local rightTowerBlood = BattleTowerRightBlood()
+    -- Logm("Blood King:%f(%f) Left tower:%f(%f) Right tower:%f(%f)", kingBlood, g_battleKingBlood, leftTowerBlood, g_battleLeftTowerBlood, rightTowerBlood, g_battleRightTowerBlood)
+    
+    local ret = BLOOD_NORMAL
+    if g_battleKingBlood > kingBlood then
+        ret = BLOOD_KING_CHANGED
+    elseif g_battleLeftTowerBlood > leftTowerBlood then
+        ret = BLOOD_LEFTTOWER_CHANGED
+    elseif g_battleRightTowerBlood > rightTowerBlood then
+        ret = BLOOD_RIGHTTOWER_CHANGED
+    else
+        ret = BLOOD_NORMAL
+    end
+    -- Logm("State %d", ret)
+    
+    if ret == BLOOD_NORMAL then
+    else
+        g_battleKingBlood = kingBlood
+        g_battleLeftTowerBlood = leftTowerBlood
+        g_battleRightTowerBlood = rightTowerBlood
+    end
+    
+    return ret
+end
+
+function WaitForFunction(func, ret, ms)
+    local wait_timedout = GetSystemTime() + ms
+    while wait_timedout >  GetSystemTime() do
+        local fret
+        fret = func() 
+        if fret == ret then
+        else
+            return fret
+        end
+    end
+    return ret
+end
+
+function BattleSendByNameWithSave(name, x, y)
+
+    local ret = BattleProtectTest()
+    if not (ret == BLOOD_NORMAL) then
+        BattleProtect(ret)
+        return false
+    end
+    
+    return BattleSendByName(name, x, y)
+end
+
+function BattleSendByIndexWithSave(index, x, y)
+
+    local ret = BattleProtectTest()
+    if not (ret == BLOOD_NORMAL) then
+        BattleProtect(ret)
+        return false
+    end
+    
+    return BattleSendByIndex(index, x, y)
+end
+
+PRIVILEGE_WIN = 0
+PRIVILEGE_CROWN = 1
+function BattleGetAttackPosition(privilege, is_left_destroyed, is_right_destoryed)
+
+    local x, y
+    
+    if is_left_destroyed then
+        if privilege == PRIVILEGE_WIN then
+            x = g_currentButtons["battle_scene"].pos_enemy_tower_left_x
+            y = g_currentButtons["battle_scene"].pos_enemy_tower_left_y
+        elseif privilege == PRIVILEGE_CROWN then
+            if is_right_destoryed then
+                x = g_currentButtons["battle_scene"].pos_enemy_tower_right_x
+                y = g_currentButtons["battle_scene"].pos_enemy_tower_right_y
+            else
+                x = g_currentButtons["battle_scene"].pos_tower_right_front_x
+                y = g_currentButtons["battle_scene"].pos_tower_right_front_y
+            end
+        else
+            Logm("Unknown position")
+            return -1, -1
+        end
+    else
+        x = g_currentButtons["battle_scene"].pos_tower_left_front_x
+        y = g_currentButtons["battle_scene"].pos_tower_left_front_y
+    end
+    
+    Logm("Attack at %d, %d", x, y)
+    return x, y
+    
+end
+
+function BattleIsMagic(index)
+
+    if g_battleCards[index] == "fireball" then
+        return true
+    elseif g_battleCards[index] == "arrows" then
+        return true
+    elseif g_battleCards[index] == "rocket" then
+        return true
+        
+    elseif g_battleCards[index] == "rage" then
+        return true
+    elseif g_battleCards[index] == "lighting" then
+        return true
+   
+    end
+
+    return false
+end
+
+function BattleIsTargeted(index)
+
+    if g_battleCards[index] == "gaint" then
+        return true
+    elseif g_battleCards[index] == "hog_rider" then
+        return true
+
+    elseif g_battleCards[index] == "balloon" then
+        return true
+    
+    end
+
+    return false
+end
+
+function BattleOnFight()
+
+    local battle_privilege = g_currentUncachedConfig:GetValue("battle_privilege_pos", 0) 
+    
+    local x, y
+    local battle_x, battle_y
+    local leftTowerState
+    local rightTowerState
+    local ret
+    
+    ret = BattleProtectTest()
+    if not (ret == BLOOD_NORMAL) then
+        BattleProtect(ret)
+    end
+    
+    x, y = WaitForObject(g_currentButtons["battle_scene"].tower_left, 90, 500)
+    Logm("Left tower %d, %d", x, y)
+    if not(x == -1) and not(y == -1) then
+        leftTowerState = true
+    else
+        leftTowerState = false
+        Logm("Left tower destroyed")
+    end
+    
+    x, y = WaitForObject(g_currentButtons["battle_scene"].tower_right, 90, 500)
+    Logm("Right tower %d, %d", x, y)
+    if not(x == -1) and not(y == -1) then
+        rightTowerState = true
+    else
+        rightTowerState = false
+        Logm("Right tower destroyed")
+    end
+    
+    local c = BattleGetElixirCount()
+    Logm("Elixir : %d", c)
+    
+    if c >= 8 then
+    
+        Logm("Battle round %d", g_battleRound)
+        
+        if g_battleRound == 0 then
+        
+            battle_x = g_currentButtons["battle_scene"].pos_tower_right_back_x
+            battle_y = g_currentButtons["battle_scene"].pos_tower_right_back_y
+            
+            if BattleSendByName("gaint", battle_x, battle_y) then
+            elseif BattleSendByName("prince", battle_x, battle_y) then
+            elseif BattleSendByName("barbarians", battle_x, battle_y) then
+            elseif BattleSendByName("spear_goblins", battle_x, battle_y) then
+            elseif BattleSendByName("witch", battle_x, battle_y) then
+            else
+                for i = 0, 3 do
+                
+                    if not BattleIsMagic(i) then
+                        if BattleSendByIndex(i, battle_x, battle_y) then
+                            break
+                        end
+                    end
+                    
+                end
+            end
+                
+        else
+            
+            battle_x, battle_y = BattleGetAttackPosition(battle_privilege, leftTowerState == false, rightTowerState == false)
+            
+            local flimit
+            if leftTowerState then
+                flimit = 2
+            else
+                flimit = 4
+            end
+            
+            for j = 0, flimit do
+                
+                if BattleSendByNameWithSave("prince", battle_x, battle_y) then
+                    BattleSendByNameWithSave("mini_pekka", battle_x, battle_y)
+                else
+                    if BattleSendByNameWithSave("gaint", battle_x, battle_y) then
+                        Sleep(1000)
+                        BattleSendByNameWithSave("mini_pekka", battle_x, battle_y)
+                    end
+                end
+                BattleSendByNameWithSave("witch", battle_x, battle_y)
+                BattleSendByNameWithSave("gaint_skeleton", battle_x, battle_y)
+                BattleSendByNameWithSave("baby_dragon", battle_x, battle_y)
+                BattleSendByNameWithSave("balloon", battle_x, battle_y)
+                BattleSendByNameWithSave("barbarians", battle_x, battle_y)
+
+                for i = 0, 3 do
+                    if BattleSendByIndexWithSave(i, battle_x, battle_y) then
+                    end
+                end
+                
+                ret = WaitForFunction(BattleProtectTest, BLOOD_NORMAL, 2000) 
+                if not (ret == BLOOD_NORMAL) then
+                    BattleProtect(ret)
+                end
+                
+            end
+        
+        end
+          
+        g_battleRound = g_battleRound + 1
+    
+    else
+       OnFightIdentifyCards()
+    end
+      
+end
+
+function OnFightIdentifyCards()
+
+     local timedout = GetSystemTime() + 2000
+    local si = g_battleCardsPos
+    for i = si, 3 do
+    
+        g_battleCardsPos = i
+        if GetSystemTime() >= timedout then
+            break
+        end
+        
+        if g_battleCards[i] == "" then
+            g_battleCards[i] = BattleGetCardName(i, 1000)
+        end
+        Logm("[%d] %s", i, g_battleCards[i])
+    end
+    
+    if g_battleCardsPos >= 3 then
+        g_battleCardsPos = 0
+    end
+    
+end
+
+function FindAndClickCommon()
+
+    local x, y
+    
+    Logm("Try to find battle icon ...")
+    x, y = g_currentButtons["home"].battle_page_icon:Find(95)
+    if not (x == -1) and not (y == -1) then
+        TouchClickD(x, y)
+        return true
+    end
+    
+    return false
+    
+end
+
+function CheckStuck()
+
+    local timedout = 0
+    if g_currentSceneManager:GetScene() == "" then
+        timedout = 7 * 60 * 1000
+    else
+        timedout = 15 * 60 * 1000
+    end
+    
+    if g_currentSceneManager:GetSceneDuration() > timedout then
+        g_currentSceneManager:RestartTarget(g_currentGameProcess, g_currentGameApp)
+        g_currentSceneManager:Reset()
+        return true
+    else
+        return false
+    end
+    
+end
+
+function ClickBack()
+    Logm("Click back")
+    if GetDisplayWidth() == 600 and GetDisplayHeight() == 800 then
+        TouchClickD(102, 23)
+    else
+        local x, y = g_shellUtil:RelativeCoords(46, 33, 720, 1280)
+        if not (x == -1) and not (y == -1) then
+            TouchClickD(x, y)
+        end        
+    end
+end
+
+function LoadConfig()
+    path = JoinPath(GetDataPath(), "crb07.cfg")
+    g_currentUncachedConfig:LoadConfig(path, false)
+end
+
+function SaveConfig()
+    g_currentUncachedConfig:SaveConfig()
+end
+
+-- Debug Touch Event(MUST use this)
+
+function TouchClickD(x, y, id)
+    -- Logm("Debug click %d, %d %d", x, y, id)
+    g_touchUtil:Click(x, y, id)
+end
+
+function TouchSwipeD(sx, sy, dx, dy)
+    g_touchUtil:Swipe(0, sx, sy, dx, dy)
+end
+
+function TouchExit()
+    -- calculated based on 800x600 160
+    local display_width = GetDisplayWidth()
+    local display_height = GetDisplayHeight()
+    
+    local target_scale_x = (132/ 600)
+    local target_scale_y  = (758/ 800)
+    
+    local click_x = display_width * target_scale_x
+    local click_y = display_height * target_scale_y
+    
+    Logd("Click %d, %d", click_x, click_y)
+    TouchClickD(click_x, click_y)
+    
+end

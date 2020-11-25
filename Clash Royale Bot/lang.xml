@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<lang>
+    
+    <!-- 中文 -->
+    <zh>
+        <unsupported_device>模拟器/PC用户请按照教程使用 http://dummysprite.com/ds/backend/tutorial/tutorial.php , 手机/平板用户请联系email dummyspriteonline@126.com</unsupported_device>
+        <unsupported_dpi>您的设备DPI为%d,此分辨率正常适配DPI为%d,可能存在使用异常。如果您是模拟器用户请将分辨率改为800x600。如果遇到问题请联系作者并将设备信息发给作者,我们将进行后续添加支持</unsupported_dpi>
+        <error>异常提示!</error>
+  
+        <start>开始</start>
+        <setting>设置</setting>
+        <quit>退出</quit>
+        <mode>模式</mode>
+        
+        <running>运行中...</running>
+        <stopped>已经停止...</stopped>
+        
+        <!-- ---------------------------------------- -->
+        
+        <request_card>请求卡片</request_card>
+        <request_epic_card>请求传奇卡片</request_epic_card>
+        <donate_card>捐卡</donate_card>
+        
+        <battle>战斗</battle>
+        
+        <disabled>已关闭</disabled>
+        
+        <skeletons>骷髅兵</skeletons>
+        <archers>弓箭手</archers>
+        <mini_pekka>迷你皮卡</mini_pekka>
+        <skeleton_army>骷髅军团</skeleton_army>
+        <minions>亡灵</minions>
+        <prince>王子</prince>
+        <gaint>Gaint</gaint>
+        <witch>女巫</witch>
+        <baby_dragon>飞龙宝宝</baby_dragon>
+        <goblins>哥布林</goblins>
+        <spear_goblins>哥布林投矛手</spear_goblins>
+        <knight>骑士</knight>
+        <bomber>炸弹兵</bomber>
+        <arrows>万箭齐发</arrows>
+        <barbarians>野蛮人</barbarians>
+        <tombstone>骷髅墓碑</tombstone>
+        <musketeer>火枪手</musketeer>
+        <cannon>加农炮</cannon>
+        <hog_rider>野猪骑士</hog_rider>
+        <lighting>雷电法术</lighting>
+        <gaint_skeleton>骷髅巨人</gaint_skeleton>
+        <barbarian_hut>野蛮人小屋</barbarian_hut>
+        <rage>狂暴法术</rage>
+        <goblin_barrel>哥布林飞桶</goblin_barrel>
+        <balloon>气球兵</balloon>
+        <rocket>火箭</rocket>
+        <bomb_tower>炸弹塔</bomb_tower>
+        <goblin_hut>哥布林小屋</goblin_hut>
+        <fireball>火球</fireball>
+        <inferno_tower>地狱之塔</inferno_tower>
+        <tesla>特斯拉电磁塔</tesla>
+        <pekka>皮卡</pekka>
+        
+        <mode_battle>战斗</mode_battle>
+        <mode_battle_donate>战斗+捐兵</mode_battle_donate>
+        <mode_donate>捐兵</mode_donate>
+        <mode_debug>调试</mode_debug>
+        
+        <enable_open_chest>自动打开宝箱</enable_open_chest>
+        <enable_battle_without_rewards>自动战斗(即使没有奖励)</enable_battle_without_rewards>
+        <enable_battle_protect_tower>自动保护塔和王</enable_battle_protect_tower>
+        
+        <privilege>优先级</privilege>
+        <win>获胜</win>
+        <crown>皇冠</crown>
+        
+        <desc_1>1 魔法卡片不支持</desc_1>
+        <desc_2>2 更多功能添加中,请关注www.dummysprite.com</desc_2>
+        
+        <battle_desk_suggection>战斗建议</battle_desk_suggection>
+        
+        <saving_power>节能(手机平板专用)</saving_power>
+        <enable_saving_power>打开节能功能</enable_saving_power>
+        <enter_sleep_time>进入休眠时间(分钟)</enter_sleep_time>
+        <wakeup_time>唤醒时间(分钟)</wakeup_time>
+        
+        <saving_power_desc>1 关闭密码锁 2 IOS请更新到小白精灵最新版</saving_power_desc>
+        
+        <enable_battle_1v1>自动1V1战斗</enable_battle_1v1>
+        <enable_battle_2v2>自动2V2战斗</enable_battle_2v2>
+        <enable_battle_event>自动特殊事件战斗(免费)</enable_battle_event>
+    </zh>
+    
+    <!-- English -->
+    <en>
+        <unsupported_device>Please follow http://www.dummysprite.com/ds/backend/tutorial/tutorial.php if you are using Bluestacks/Computer or contact us by email dummyspriteonline@126.com</unsupported_device>
+        <unsupported_dpi>Your device DPI is %d(%d is normal) and may not working great。please change resolution to 800x600 if you re using Simulator/Computer</unsupported_dpi>
+        <error>Error!</error>
+
+        <start>Start</start>
+        <setting>Setting</setting>
+        <quit>Quit</quit>
+        <mode>Mode</mode>
+                
+        <running>Running...</running>
+        <stopped>Stopped...</stopped>
+        
+        <!-- ---------------------------------------- -->
+        
+        <request_card>Request Card</request_card>
+        <request_epic_card>Request Epic Card</request_epic_card>
+        <donate_card>Donate</donate_card>
+        
+        <battle>Battle</battle>
+        
+        <disabled>Disabled</disabled>
+        
+        <skeletons>Skeletons</skeletons>
+        <archers>Archers</archers>
+        <mini_pekka>Mini Pekka</mini_pekka>
+        <skeleton_army>Skeletons</skeleton_army>
+        <minions>Minions</minions>
+        <prince>Prince</prince>
+        <gaint>Gaint</gaint>
+        <witch>Witch</witch>
+        <baby_dragon>Baby Dragon</baby_dragon>
+        <goblins>Goblins</goblins>
+        <spear_goblins>Spear Goblins</spear_goblins>
+        <knight>Knight</knight>
+        <bomber>Bomber</bomber>
+        <arrows>Arrows</arrows>
+        <barbarians>Barbarians</barbarians>
+        <tombstone>Tombstone</tombstone>
+        <musketeer>Musketeer</musketeer>
+        <cannon>Cannon</cannon>
+        <hog_rider>Hog Rider</hog_rider>
+        <lighting>Lighting</lighting>
+        <gaint_skeleton>Gaint Skeleton</gaint_skeleton>
+        <barbarian_hut>Barbarian Hut</barbarian_hut>
+        <rage>Rage</rage>
+        <goblin_barrel>Goblin Barrel</goblin_barrel>
+        <balloon>Balloon</balloon>
+        <rocket>Rocket</rocket>
+        <bomb_tower>Bomb Tower</bomb_tower>
+        <goblin_hut>Goblin Hut</goblin_hut>
+        <fireball>Fireball</fireball>
+        <inferno_tower>Inferno Tower</inferno_tower>
+        <tesla>Tesla</tesla>
+        <pekka>Pekka</pekka>
+        
+        <mode_battle>Battle</mode_battle>
+        <mode_battle_donate>Battle And Donate</mode_battle_donate>
+        <mode_donate>Donate</mode_donate>
+        <mode_debug>Debug</mode_debug>
+        
+        <enable_open_chest>Enable Auto-Open Chest</enable_open_chest>
+        <enable_battle_without_rewards>Enable Auto-Battle even no rewards after win</enable_battle_without_rewards>
+        <enable_battle_protect_tower>Enable protect tower in the battle</enable_battle_protect_tower>
+        
+        <privilege>Privilege</privilege>
+        <win>Victory</win>
+        <crown>Crown</crown>
+        
+        <desc_1>1 Spell Card and Tower Card and Hut Card are not supported by now</desc_1>
+        <desc_2>2 More functions are coming,Please wait and check our website www.dummysprite.com for news</desc_2>
+        
+        <battle_desk_suggection>Battle Desk Suggestion</battle_desk_suggection>
+        
+        <saving_power>Saving Power(Phone and Pad ONLY)</saving_power>
+        <enable_saving_power>Enable Saving Power</enable_saving_power>
+        <enter_sleep_time>Enter Sleep Time(In Minutes)</enter_sleep_time>
+        <wakeup_time>Wakeup Time(In Minutes)</wakeup_time>
+        
+        <saving_power_desc>1 Turn off password of lock screen 2 Only works for pad and phone 3 IOS devices must update dummysprite to last version(5.2.15025 or above)</saving_power_desc>
+        
+        <enable_battle_1v1>Enable Auto-Battle 1V1</enable_battle_1v1>
+        <enable_battle_2v2>Enable Auto-Battle 2V2</enable_battle_2v2>
+        <enable_battle_event>Enable Auto-Battle Special Events(Free Only)</enable_battle_event>
+    </en>
+    
+    <!-- 韩語 -->
+    <ko>
+        <unsupported_device>Please follow http://www.dummysprite.com/ds/backend/tutorial/tutorial.php if you are using Bluestacks/Computer or contact us by email dummyspriteonline@126.com</unsupported_device>
+        <unsupported_dpi>이 기기의 DPI는 %d(%d 이 보통)이며 오작동할 수 있습니다. PC에서 이용중이시라면 해상도를 800x600으로 변경해주세요</unsupported_dpi>
+        <error>예외!</error>
+
+        <start>설정</start>
+        <setting>설정</setting>
+        <quit>종료</quit>
+        <mode>기본 설정</mode>
+        
+        <running>실행...</running>
+        <stopped>중지...</stopped>
+        
+        <!-- ---------------------------------------- -->
+        
+        <request_card>카드 요청</request_card>
+        <request_epic_card>카드 Epic 요청</request_epic_card>
+        <donate_card>카드 기부</donate_card>
+        
+        <battle>전투</battle>
+        
+        <disabled>미사용</disabled>
+        <skeletons>Skeletons</skeletons>
+        <archers>Archers</archers>
+        <mini_pekka>Mini Pekka</mini_pekka>
+        <skeleton_army>Skeletons</skeleton_army>
+        <minions>Minions</minions>
+        <prince>Prince</prince>
+        <gaint>Gaint</gaint>
+        <witch>Witch</witch>
+        <baby_dragon>Baby Dragon</baby_dragon>
+        <goblins>Goblins</goblins>
+        <spear_goblins>Spear Goblins</spear_goblins>
+        <knight>Knight</knight>
+        <bomber>Bomber</bomber>
+        <arrows>Arrows</arrows>
+        <barbarians>Barbarians</barbarians>
+        <tombstone>Tombstone</tombstone>
+        <musketeer>Musketeer</musketeer>
+        <cannon>Cannon</cannon>
+        <hog_rider>Hog Rider</hog_rider>
+        <lighting>Lighting</lighting>
+        <gaint_skeleton>Gaint Skeleton</gaint_skeleton>
+        <barbarian_hut>Barbarian Hut</barbarian_hut>
+        <rage>Rage</rage>
+        <goblin_barrel>Goblin Barrel</goblin_barrel>
+        <balloon>Balloon</balloon>
+        <rocket>Rocket</rocket>
+        <bomb_tower>Bomb Tower</bomb_tower>
+        <goblin_hut>Goblin Hut</goblin_hut>
+        <fireball>Fireball</fireball>
+        <inferno_tower>Inferno Tower</inferno_tower>
+        <tesla>Tesla</tesla>
+        <pekka>Pekka</pekka>
+        
+        <mode_battle>전투</mode_battle>
+        <mode_battle_donate>전투+카드</mode_battle_donate>
+        <mode_donate>카드</mode_donate>
+        <mode_debug>Debug</mode_debug>
+        
+        <enable_open_chest>자동 열기 상자</enable_open_chest>
+        <enable_battle_without_rewards>자동 전투</enable_battle_without_rewards>
+        <enable_battle_protect_tower>타워 보호</enable_battle_protect_tower>
+        
+        <privilege>특권</privilege>
+        <win>승리</win>
+        <crown>크라운</crown>
+        
+        <desc_1>1 마법과 타워와 오두막은 지원 되지 않습니다</desc_1>
+        <desc_2>2 More functions are coming,Please wait and check our website www.dummysprite.com for news</desc_2>
+        
+        <battle_desk_suggection>배틀 제안</battle_desk_suggection>
+        
+        <saving_power>에너지 절약</saving_power>
+        <enable_saving_power>절전 사용</enable_saving_power>
+        <enter_sleep_time>수면(분)</enter_sleep_time>
+        <wakeup_time>깨우다(분)</wakeup_time>
+        
+        <saving_power_desc>1 잠금 화면 암호 비활성화 2 IOS devices must update dummysprite to last version(5.2.15025 or above)</saving_power_desc>
+        
+        <enable_battle_1v1>Enable Auto-Battle 1V1</enable_battle_1v1>
+        <enable_battle_2v2>Enable Auto-Battle 2V2</enable_battle_2v2>
+        <enable_battle_event>Enable Auto-Battle Special Events(Free Only)</enable_battle_event>
+    </ko>
+	
+</lang>

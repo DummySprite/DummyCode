@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<app>
+
+    <name>Clash Royale Bot</name>
+    <author>benistin</author>
+    <date>Date</date>
+    <desc></desc>
+    
+    <version>7600</version>
+    <sdkversion>2100</sdkversion>
+    <date>Date</date>
+    
+    <!--  Dependencies -->
+    <library>../base;</library>
+</app>

@@ -1,0 +1,2167 @@
+﻿
+Import("base.dsb>picture.dsf")
+Import("base.dsb>layermanager.dsf")
+
+function SelectColor(x, y, color)
+    pic:Add(x, y, color)
+end
+function SelectMatchedColor(x, y, color, sim)
+    pic:AddEx(x, y, color, true, sim)
+end
+
+function 选择颜色(x, y, color)
+    pic:Add(x, y, color)
+end
+function 选择匹配度颜色(x, y, color, sim)
+    pic:AddEx(x, y, color, true, sim)
+end
+
+-- android
+
+-- X -- L17
+function Init800x600x160(self, scenes)
+
+    Logm("Init800x600X160")
+     
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(578, 23, RGBToColor(71, 208, 27))
+SelectColor(587, 20, RGBToColor(85, 216, 45))
+SelectColor(442, 23, RGBToColor(226, 184, 55))
+SelectColor(495, 74, RGBToColor(255, 255, 255))
+SelectColor(448, 80, RGBToColor(250, 194, 75))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(400, 752, RGBToColor(255, 255, 255))
+        SelectColor(401, 763, RGBToColor(56, 156, 240))
+        SelectColor(362, 750, RGBToColor(82, 121, 156))
+        SelectColor(327, 761, RGBToColor(124, 220, 255))
+        SelectColor(473, 761, RGBToColor(124, 220, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- X -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(496, 90, RGBToColor(255, 172, 214))
+        SelectColor(507, 90, RGBToColor(252, 57, 54))
+        SelectColor(515, 97, RGBToColor(100, 108, 124))
+        SelectColor(400, 749, RGBToColor(104, 104, 104))
+        SelectColor(38, 17, RGBToColor(16, 22, 27))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(133, 269, RGBToColor(36, 150, 255))
+SelectColor(141, 269, RGBToColor(255, 40, 92))
+SelectColor(474, 252, RGBToColor(255, 255, 255))
+SelectColor(305, 741, RGBToColor(34, 36, 38))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(288, 348, RGBToColor(255, 255, 215))
+SelectColor(477, 263, RGBToColor(255, 255, 255))
+SelectColor(286, 733, RGBToColor(69, 80, 87))
+SelectColor(226, 760, RGBToColor(53, 88, 99))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(591, 394, RGBToColor(44, 180, 255))
+        SelectColor(574, 381, RGBToColor(255, 195, 98))
+        SelectColor(588, 291, RGBToColor(255, 53, 138))
+        SelectColor(581, 282, RGBToColor(255, 255, 156))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(124, 211, RGBToColor(152, 12, 64))
+        SelectColor(481, 242, RGBToColor(120, 11, 54))
+        SelectColor(302, 197, RGBToColor(64, 40, 24))
+        SelectColor(480, 247, RGBToColor(121, 12, 55))
+        SelectColor(199, 201, RGBToColor(67, 44, 29))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- X -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(254, 773, RGBToColor(78, 175, 255))
+        SelectColor(346, 772, RGBToColor(76, 174, 255))
+        SelectColor(312, 791, RGBToColor(52, 66, 83))
+        SelectColor(580, 776, RGBToColor(52, 66, 83))
+        SelectColor(22, 757, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(498, 86, RGBToColor(255, 255, 255))
+SelectColor(124, 98, RGBToColor(48, 124, 212))
+SelectColor(111, 84, RGBToColor(255, 232, 64))
+SelectColor(296, 751, RGBToColor(84, 90, 95))
+    --
+    scenes:AddScene("task_scene", pic)
+    
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(590, 409, RGBToColor(44, 182, 255))
+        SelectColor(574, 399, RGBToColor(255, 192, 97))
+        SelectColor(591, 307, RGBToColor(255, 48, 128))
+        SelectColor(581, 298, RGBToColor(255, 255, 155))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- X -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(575, 21, RGBToColor(255, 172, 214))
+SelectColor(586, 18, RGBToColor(254, 53, 49))
+SelectColor(160, 202, RGBToColor(15, 31, 47))
+SelectColor(301, 434, RGBToColor(16, 36, 56))
+SelectColor(404, 202, RGBToColor(15, 30, 47))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+    
+    
+    
+    --[[
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(492, 741, RGBToColor(29, 96, 164))
+        SelectColor(514, 749, RGBToColor(5, 49, 91))
+        SelectColor(511, 739, RGBToColor(255, 208, 76))
+        SelectColor(427, 761, RGBToColor(124, 220, 255))
+        SelectColor(448, 762, RGBToColor(89, 133, 168))
+    --
+    scenes:AddScene("event_scene", pic)
+    
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(16, 50, RGBToColor(163, 61, 51))
+        SelectColor(10, 758, RGBToColor(41, 107, 162))
+        SelectColor(517, 78, RGBToColor(119, 49, 40))
+        SelectColor(492, 719, RGBToColor(45, 70, 131))
+        SelectColor(233, 377, RGBToColor(255, 64, 240))
+    --
+    scenes:AddScene("event_card_scene", pic)
+    ]]--
+    
+    return scenes
+
+end
+
+
+-- XX -- L16
+function Init800x480x240(self, scenes)
+
+    Logm("Init800x480x240")
+     
+    -- XX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(261, 750, RGBToColor(255, 219, 76))
+        SelectColor(225, 733, RGBToColor(151, 180, 192))
+        SelectColor(236, 752, RGBToColor(216, 228, 240))
+        SelectColor(204, 758, RGBToColor(85, 132, 164))
+        SelectColor(186, 761, RGBToColor(124, 220, 255))
+        SelectColor(293, 760, RGBToColor(135, 224, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(320, 752, RGBToColor(255, 255, 255))
+        SelectColor(319, 764, RGBToColor(56, 152, 236))
+        SelectColor(286, 754, RGBToColor(84, 124, 160))
+        SelectColor(266, 760, RGBToColor(135, 224, 255))
+        SelectColor(374, 760, RGBToColor(135, 224, 255))
+        SelectColor(303, 733, RGBToColor(40, 112, 190))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(436, 91, RGBToColor(255, 172, 215))
+        SelectColor(448, 92, RGBToColor(254, 48, 41))
+        SelectColor(320, 750, RGBToColor(104, 104, 104))
+        SelectColor(322, 763, RGBToColor(23, 63, 95))
+        SelectColor(284, 765, RGBToColor(34, 50, 65))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(413, 251, RGBToColor(255, 255, 255))
+SelectColor(81, 269, RGBToColor(255, 40, 92))
+SelectColor(73, 269, RGBToColor(36, 151, 255))
+SelectColor(67, 259, RGBToColor(255, 181, 60))
+SelectColor(242, 745, RGBToColor(32, 35, 36))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(418, 262, RGBToColor(255, 255, 255))
+SelectColor(227, 347, RGBToColor(255, 255, 213))
+SelectColor(235, 360, RGBToColor(255, 200, 88))
+SelectColor(195, 742, RGBToColor(34, 48, 63))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(120, 785, RGBToColor(220, 28, 210))
+        SelectColor(20, 55, RGBToColor(245, 177, 53))
+        SelectColor(470, 294, RGBToColor(255, 48, 128))
+        SelectColor(453, 383, RGBToColor(255, 184, 100))
+        SelectColor(471, 395, RGBToColor(44, 180, 255))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(416, 243, RGBToColor(113, 10, 48))
+        SelectColor(62, 210, RGBToColor(153, 12, 64))
+        SelectColor(237, 197, RGBToColor(64, 43, 28))
+        SelectColor(350, 201, RGBToColor(72, 46, 28))
+        SelectColor(416, 208, RGBToColor(104, 8, 40))
+        SelectColor(64, 243, RGBToColor(160, 13, 69))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(195, 772, RGBToColor(76, 174, 255))
+        SelectColor(284, 772, RGBToColor(76, 174, 255))
+        SelectColor(464, 778, RGBToColor(52, 66, 83))
+        SelectColor(21, 766, RGBToColor(52, 66, 83))
+        SelectColor(255, 794, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(437, 86, RGBToColor(255, 255, 255))
+SelectColor(51, 84, RGBToColor(255, 232, 64))
+SelectColor(65, 99, RGBToColor(48, 126, 212))
+SelectColor(50, 102, RGBToColor(46, 167, 241))
+    --
+    scenes:AddScene("task_scene", pic)
+      
+    -- XX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(471, 409, RGBToColor(44, 182, 255))
+        SelectColor(471, 308, RGBToColor(255, 48, 128))
+        SelectColor(454, 294, RGBToColor(255, 200, 100))
+        SelectColor(454, 397, RGBToColor(255, 191, 100))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(455, 20, RGBToColor(255, 172, 214))
+        SelectColor(444, 20, RGBToColor(253, 56, 52))
+        SelectColor(94, 201, RGBToColor(15, 31, 46))
+        SelectColor(234, 433, RGBToColor(16, 37, 56))
+        SelectColor(335, 438, RGBToColor(18, 37, 56))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+
+    return scenes
+    
+end
+
+-- XXX -- L16
+function Init960x540x240(self, scenes)
+
+    Logm("Init960x540x240")
+     
+    -- XXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(295, 900, RGBToColor(255, 217, 72))
+        SelectColor(328, 912, RGBToColor(135, 224, 255))
+        SelectColor(253, 880, RGBToColor(152, 180, 195))
+        SelectColor(264, 903, RGBToColor(212, 225, 240))
+        SelectColor(210, 912, RGBToColor(135, 224, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(361, 900, RGBToColor(255, 255, 255))
+        SelectColor(361, 917, RGBToColor(60, 156, 244))
+        SelectColor(341, 880, RGBToColor(40, 115, 196))
+        SelectColor(302, 912, RGBToColor(135, 224, 255))
+        SelectColor(419, 912, RGBToColor(135, 224, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(506, 109, RGBToColor(255, 172, 216))
+        SelectColor(519, 107, RGBToColor(254, 54, 49))
+        SelectColor(34, 104, RGBToColor(96, 104, 124))
+        SelectColor(360, 900, RGBToColor(104, 104, 104))
+        SelectColor(358, 914, RGBToColor(21, 57, 89))
+        SelectColor(326, 921, RGBToColor(34, 51, 66))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(476, 302, RGBToColor(255, 255, 255))
+SelectColor(69, 323, RGBToColor(32, 147, 255))
+SelectColor(82, 323, RGBToColor(255, 41, 94))
+SelectColor(65, 293, RGBToColor(255, 193, 64))
+SelectColor(255, 882, RGBToColor(25, 29, 32))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(482, 315, RGBToColor(255, 255, 255))
+SelectColor(254, 423, RGBToColor(255, 255, 212))
+SelectColor(268, 441, RGBToColor(255, 200, 88))
+SelectColor(269, 899, RGBToColor(85, 91, 97))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(126, 942, RGBToColor(220, 28, 210))
+        SelectColor(529, 473, RGBToColor(44, 181, 255))
+        SelectColor(528, 351, RGBToColor(255, 48, 130))
+        SelectColor(515, 336, RGBToColor(255, 255, 180))
+        SelectColor(517, 462, RGBToColor(255, 255, 155))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(57, 248, RGBToColor(156, 12, 64))
+        SelectColor(478, 292, RGBToColor(112, 9, 48))
+        SelectColor(257, 237, RGBToColor(64, 40, 24))
+        SelectColor(133, 241, RGBToColor(72, 46, 28))
+        SelectColor(488, 296, RGBToColor(121, 12, 56))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(214, 929, RGBToColor(78, 175, 255))
+        SelectColor(324, 927, RGBToColor(76, 173, 255))
+        SelectColor(524, 942, RGBToColor(52, 66, 83))
+        SelectColor(25, 933, RGBToColor(52, 66, 83))
+        SelectColor(268, 953, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(506, 104, RGBToColor(255, 255, 255))
+SelectColor(43, 103, RGBToColor(255, 231, 64))
+SelectColor(58, 119, RGBToColor(48, 124, 212))
+SelectColor(44, 125, RGBToColor(47, 172, 245))
+    --
+    scenes:AddScene("task_scene", pic)
+  
+    -- XXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(529, 491, RGBToColor(44, 182, 255))
+        SelectColor(508, 478, RGBToColor(255, 188, 99))
+        SelectColor(508, 356, RGBToColor(255, 188, 97))
+        SelectColor(527, 369, RGBToColor(255, 48, 132))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(510, 29, RGBToColor(255, 172, 213))
+        SelectColor(497, 29, RGBToColor(254, 54, 50))
+        SelectColor(269, 240, RGBToColor(12, 29, 44))
+        SelectColor(131, 525, RGBToColor(16, 37, 57))
+        SelectColor(272, 522, RGBToColor(16, 36, 55))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+    
+    return scenes
+    
+end
+
+-- XXXX -- L16
+function Init1280x720x320(self, scenes)
+
+    Logm("Init1280x720x320")
+     
+    -- XXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(393, 1202, RGBToColor(255, 218, 72))
+        SelectColor(361, 1194, RGBToColor(216, 232, 244))
+        SelectColor(338, 1175, RGBToColor(152, 180, 196))
+        SelectColor(281, 1217, RGBToColor(130, 222, 255))
+        SelectColor(438, 1217, RGBToColor(130, 222, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(480, 1202, RGBToColor(255, 255, 255))
+        SelectColor(479, 1222, RGBToColor(56, 152, 236))
+        SelectColor(455, 1172, RGBToColor(40, 112, 192))
+        SelectColor(403, 1218, RGBToColor(124, 220, 255))
+        SelectColor(558, 1216, RGBToColor(137, 224, 255))
+        SelectColor(539, 1213, RGBToColor(84, 130, 164))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(675, 145, RGBToColor(255, 172, 215))
+        SelectColor(693, 149, RGBToColor(252, 49, 44))
+        SelectColor(481, 1225, RGBToColor(23, 61, 94))
+        SelectColor(404, 1218, RGBToColor(47, 83, 96))
+        SelectColor(428, 1215, RGBToColor(34, 51, 64))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(638, 404, RGBToColor(255, 255, 255))
+SelectColor(109, 431, RGBToColor(255, 40, 94))
+SelectColor(86, 417, RGBToColor(255, 186, 63))
+SelectColor(91, 429, RGBToColor(32, 142, 250))
+SelectColor(334, 1172, RGBToColor(25, 30, 32))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(645, 420, RGBToColor(255, 255, 255))
+SelectColor(340, 561, RGBToColor(255, 255, 216))
+SelectColor(355, 581, RGBToColor(255, 200, 88))
+SelectColor(339, 1177, RGBToColor(67, 79, 86))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(163, 1252, RGBToColor(226, 28, 216))
+        SelectColor(704, 631, RGBToColor(45, 183, 255))
+        SelectColor(705, 470, RGBToColor(255, 48, 128))
+        SelectColor(681, 446, RGBToColor(255, 206, 102))
+        SelectColor(689, 608, RGBToColor(255, 255, 158))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(638, 343, RGBToColor(104, 8, 40))
+        SelectColor(77, 340, RGBToColor(152, 12, 64))
+        SelectColor(355, 316, RGBToColor(64, 43, 29))
+        SelectColor(193, 323, RGBToColor(68, 44, 32))
+        SelectColor(642, 394, RGBToColor(118, 11, 50))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(290, 1233, RGBToColor(76, 174, 255))
+        SelectColor(433, 1238, RGBToColor(78, 175, 255))
+        SelectColor(712, 1254, RGBToColor(52, 66, 83))
+        SelectColor(24, 1244, RGBToColor(52, 66, 83))
+        SelectColor(357, 1262, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(675, 140, RGBToColor(255, 255, 255))
+SelectColor(59, 136, RGBToColor(255, 232, 64))
+SelectColor(82, 157, RGBToColor(48, 126, 212))
+SelectColor(58, 165, RGBToColor(46, 168, 242))
+    --
+    scenes:AddScene("task_scene", pic)
+    
+    -- XXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(704, 654, RGBToColor(46, 182, 255))
+        SelectColor(677, 630, RGBToColor(255, 199, 103))
+        SelectColor(703, 492, RGBToColor(255, 48, 132))
+        SelectColor(677, 473, RGBToColor(255, 188, 100))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(680, 38, RGBToColor(255, 172, 212))
+        SelectColor(662, 38, RGBToColor(252, 52, 48))
+        SelectColor(354, 698, RGBToColor(12, 34, 55))
+        SelectColor(197, 699, RGBToColor(18, 37, 57))
+        SelectColor(321, 319, RGBToColor(12, 29, 45))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+
+    return scenes
+    
+end
+
+
+-- XXXXX -- L16
+function Init1920x1080x480(self, scenes)
+
+    Logm("Init1920x1080x480")
+     
+    -- XXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(592, 1801, RGBToColor(255, 218, 74))
+        SelectColor(507, 1761, RGBToColor(152, 180, 192))
+        SelectColor(517, 1744, RGBToColor(234, 252, 255))
+        SelectColor(422, 1822, RGBToColor(143, 227, 255))
+        SelectColor(657, 1827, RGBToColor(125, 220, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(722, 1802, RGBToColor(255, 255, 255))
+        SelectColor(718, 1829, RGBToColor(56, 148, 229))
+        SelectColor(684, 1763, RGBToColor(40, 116, 199))
+        SelectColor(604, 1825, RGBToColor(133, 224, 255))
+        SelectColor(838, 1823, RGBToColor(142, 226, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1015, 222, RGBToColor(255, 172, 213))
+        SelectColor(1040, 215, RGBToColor(253, 51, 45))
+        SelectColor(18, 291, RGBToColor(93, 104, 124))
+        SelectColor(729, 1834, RGBToColor(25, 64, 97))
+        SelectColor(720, 1803, RGBToColor(103, 103, 103))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(956, 606, RGBToColor(255, 255, 255))
+SelectColor(163, 650, RGBToColor(255, 40, 93))
+SelectColor(129, 626, RGBToColor(255, 185, 62))
+SelectColor(139, 647, RGBToColor(33, 148, 255))
+SelectColor(513, 1769, RGBToColor(24, 28, 31))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(964, 632, RGBToColor(255, 255, 255))
+SelectColor(512, 839, RGBToColor(255, 255, 216))
+SelectColor(528, 867, RGBToColor(255, 200, 88))
+SelectColor(502, 1761, RGBToColor(66, 79, 86))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(243, 1873, RGBToColor(232, 48, 224))
+        SelectColor(1059, 949, RGBToColor(44, 180, 255))
+        SelectColor(1037, 917, RGBToColor(255, 255, 173))
+        SelectColor(1050, 703, RGBToColor(255, 56, 143))
+        SelectColor(1016, 667, RGBToColor(255, 199, 102))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(118, 503, RGBToColor(152, 12, 64))
+        SelectColor(970, 589, RGBToColor(120, 12, 52))
+        SelectColor(582, 476, RGBToColor(64, 41, 27))
+        SelectColor(780, 484, RGBToColor(69, 44, 29))
+        SelectColor(296, 485, RGBToColor(68, 44, 31))
+        SelectColor(960, 593, RGBToColor(117, 12, 48))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(428, 1854, RGBToColor(76, 174, 255))
+        SelectColor(646, 1857, RGBToColor(78, 175, 255))
+        SelectColor(1052, 1858, RGBToColor(52, 66, 83))
+        SelectColor(27, 1844, RGBToColor(52, 66, 83))
+        SelectColor(534, 1902, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1008, 211, RGBToColor(255, 255, 255))
+SelectColor(88, 206, RGBToColor(255, 232, 64))
+SelectColor(120, 235, RGBToColor(48, 124, 212))
+SelectColor(86, 248, RGBToColor(45, 165, 241))
+    --
+    scenes:AddScene("task_scene", pic)
+    
+    -- XXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1061, 985, RGBToColor(47, 180, 255))
+        SelectColor(1018, 958, RGBToColor(255, 190, 98))
+        SelectColor(1005, 737, RGBToColor(244, 22, 114))
+        SelectColor(1039, 713, RGBToColor(255, 255, 201))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1022, 59, RGBToColor(255, 172, 213))
+        SelectColor(995, 61, RGBToColor(252, 56, 52))
+        SelectColor(503, 477, RGBToColor(13, 29, 44))
+        SelectColor(459, 1046, RGBToColor(14, 35, 55))
+        SelectColor(316, 1050, RGBToColor(17, 37, 57))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+
+    return scenes
+    
+end
+
+-- XXXXXX -- L16
+function Init1024x600x160(self, scenes)
+
+    Logm("Init1024x600x160")
+     
+    -- XXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(327, 960, RGBToColor(255, 218, 74))
+        SelectColor(283, 942, RGBToColor(151, 177, 192))
+        SelectColor(290, 935, RGBToColor(234, 250, 255))
+        SelectColor(237, 974, RGBToColor(126, 220, 255))
+        SelectColor(362, 974, RGBToColor(126, 220, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(399, 960, RGBToColor(255, 255, 255))
+        SelectColor(398, 978, RGBToColor(60, 160, 244))
+        SelectColor(376, 938, RGBToColor(40, 113, 194))
+        SelectColor(334, 973, RGBToColor(134, 224, 255))
+        SelectColor(460, 974, RGBToColor(126, 220, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(551, 115, RGBToColor(255, 172, 214))
+        SelectColor(566, 116, RGBToColor(253, 53, 48))
+        SelectColor(397, 977, RGBToColor(22, 61, 94))
+        SelectColor(349, 970, RGBToColor(33, 50, 63))
+        SelectColor(20, 921, RGBToColor(90, 100, 120))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(522, 322, RGBToColor(255, 255, 255))
+SelectColor(97, 344, RGBToColor(255, 40, 92))
+SelectColor(80, 333, RGBToColor(255, 186, 63))
+SelectColor(277, 934, RGBToColor(26, 31, 34))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(527, 336, RGBToColor(255, 255, 255))
+SelectColor(284, 447, RGBToColor(255, 255, 216))
+SelectColor(295, 467, RGBToColor(255, 200, 88))
+SelectColor(284, 940, RGBToColor(69, 80, 86))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(142, 1001, RGBToColor(227, 28, 217))
+        SelectColor(586, 503, RGBToColor(49, 187, 255))
+        SelectColor(573, 485, RGBToColor(255, 252, 172))
+        SelectColor(573, 363, RGBToColor(255, 255, 184))
+        SelectColor(588, 376, RGBToColor(255, 48, 128))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(521, 281, RGBToColor(104, 8, 40))
+        SelectColor(72, 274, RGBToColor(155, 12, 64))
+        SelectColor(167, 257, RGBToColor(70, 44, 31))
+        SelectColor(297, 253, RGBToColor(64, 43, 26))
+        SelectColor(444, 258, RGBToColor(70, 47, 30))
+        SelectColor(529, 280, RGBToColor(104, 8, 45))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(357, 990, RGBToColor(78, 175, 255))
+        SelectColor(241, 988, RGBToColor(76, 174, 255))
+        SelectColor(305, 1015, RGBToColor(52, 66, 83))
+        SelectColor(593, 977, RGBToColor(52, 66, 83))
+        SelectColor(18, 970, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(557, 103, RGBToColor(255, 255, 255))
+SelectColor(54, 101, RGBToColor(255, 232, 64))
+SelectColor(70, 120, RGBToColor(48, 124, 212))
+SelectColor(53, 124, RGBToColor(46, 166, 240))
+    --
+    scenes:AddScene("task_scene", pic)
+
+    -- XXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(588, 524, RGBToColor(44, 183, 255))
+        SelectColor(566, 510, RGBToColor(255, 188, 98))
+        SelectColor(576, 382, RGBToColor(255, 255, 156))
+        SelectColor(588, 395, RGBToColor(255, 48, 128))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(568, 26, RGBToColor(255, 172, 213))
+        SelectColor(554, 26, RGBToColor(253, 55, 51))
+        SelectColor(308, 256, RGBToColor(12, 28, 45))
+        SelectColor(284, 554, RGBToColor(16, 36, 55))
+        SelectColor(139, 559, RGBToColor(18, 37, 57))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+
+    return scenes
+
+end
+
+
+-- XXXXXXXXXXXXX -- L16
+function Init1280x800x213(self, scenes)
+
+    Logm("Init1280x800x213")
+     
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(434, 1201, RGBToColor(255, 219, 75))
+        SelectColor(403, 1194, RGBToColor(216, 232, 244))
+        SelectColor(373, 1173, RGBToColor(152, 180, 192))
+        SelectColor(321, 1216, RGBToColor(137, 224, 255))
+        SelectColor(478, 1217, RGBToColor(130, 222, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(522, 1201, RGBToColor(255, 255, 255))
+        SelectColor(522, 1221, RGBToColor(58, 158, 242))
+        SelectColor(494, 1175, RGBToColor(40, 112, 192))
+        SelectColor(443, 1216, RGBToColor(137, 224, 255))
+        SelectColor(468, 1218, RGBToColor(88, 132, 168))
+        SelectColor(598, 1218, RGBToColor(124, 220, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXXXXXXXXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(714, 146, RGBToColor(255, 172, 215))
+        SelectColor(732, 145, RGBToColor(253, 55, 51))
+        SelectColor(518, 1220, RGBToColor(20, 58, 88))
+        SelectColor(444, 1213, RGBToColor(58, 87, 98))
+        SelectColor(518, 1201, RGBToColor(104, 104, 104))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(678, 402, RGBToColor(255, 255, 255))
+SelectColor(145, 431, RGBToColor(255, 40, 92))
+SelectColor(131, 431, RGBToColor(32, 147, 255))
+SelectColor(127, 417, RGBToColor(255, 198, 70))
+SelectColor(374, 1172, RGBToColor(25, 30, 32))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(690, 416, RGBToColor(255, 255, 255))
+SelectColor(380, 564, RGBToColor(255, 255, 216))
+SelectColor(395, 584, RGBToColor(255, 200, 88))
+SelectColor(378, 1176, RGBToColor(68, 79, 85))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(199, 1252, RGBToColor(204, 28, 198))
+        SelectColor(785, 631, RGBToColor(44, 182, 255))
+        SelectColor(758, 612, RGBToColor(255, 190, 99))
+        SelectColor(759, 447, RGBToColor(255, 204, 100))
+        SelectColor(785, 468, RGBToColor(255, 48, 129))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(685, 337, RGBToColor(104, 8, 47))
+        SelectColor(585, 322, RGBToColor(72, 46, 31))
+        SelectColor(398, 315, RGBToColor(64, 42, 25))
+        SelectColor(215, 322, RGBToColor(71, 46, 31))
+        SelectColor(118, 336, RGBToColor(152, 12, 64))
+        SelectColor(116, 390, RGBToColor(160, 13, 70))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXXXXXXXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(474, 1240, RGBToColor(78, 175, 255))
+        SelectColor(766, 1235, RGBToColor(52, 66, 83))
+        SelectColor(17, 1213, RGBToColor(52, 66, 83))
+        SelectColor(394, 1267, RGBToColor(52, 66, 83))
+        SelectColor(325, 1236, RGBToColor(76, 175, 255))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(715, 138, RGBToColor(255, 255, 255))
+SelectColor(99, 135, RGBToColor(255, 232, 67))
+SelectColor(119, 160, RGBToColor(48, 127, 212))
+SelectColor(97, 165, RGBToColor(46, 170, 246))
+    --
+    scenes:AddScene("task_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(778, 492, RGBToColor(255, 67, 157))
+        SelectColor(758, 476, RGBToColor(255, 188, 96))
+        SelectColor(746, 656, RGBToColor(28, 160, 255))
+        SelectColor(769, 640, RGBToColor(255, 255, 162))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXXXXXXXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(761, 32, RGBToColor(255, 172, 213))
+        SelectColor(742, 33, RGBToColor(253, 52, 46))
+        SelectColor(398, 319, RGBToColor(12, 29, 45))
+        SelectColor(420, 695, RGBToColor(16, 37, 56))
+        SelectColor(242, 700, RGBToColor(17, 37, 56))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+
+    return scenes
+    
+end
+
+-- common
+
+-- XXXXXXX -- L16
+function Init1024x768x160(self, scenes)
+
+    Logm("Init1024x768x160")
+     
+    -- XXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(411, 960, RGBToColor(255, 218, 74))
+        SelectColor(366, 939, RGBToColor(152, 180, 193))
+        SelectColor(375, 934, RGBToColor(236, 250, 255))
+        SelectColor(320, 973, RGBToColor(134, 224, 255))
+        SelectColor(445, 973, RGBToColor(134, 224, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(483, 959, RGBToColor(255, 255, 255))
+        SelectColor(482, 976, RGBToColor(60, 157, 240))
+        SelectColor(461, 938, RGBToColor(40, 114, 196))
+        SelectColor(418, 974, RGBToColor(126, 220, 255))
+        SelectColor(544, 973, RGBToColor(134, 224, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(635, 117, RGBToColor(255, 172, 214))
+        SelectColor(650, 116, RGBToColor(253, 53, 48))
+        SelectColor(480, 977, RGBToColor(21, 60, 92))
+        SelectColor(482, 962, RGBToColor(104, 104, 104))
+        SelectColor(434, 973, RGBToColor(34, 51, 63))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(605, 322, RGBToColor(255, 255, 255))
+SelectColor(181, 343, RGBToColor(255, 40, 92))
+SelectColor(164, 334, RGBToColor(255, 184, 60))
+SelectColor(170, 345, RGBToColor(33, 148, 255))
+SelectColor(367, 939, RGBToColor(25, 29, 32))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(611, 336, RGBToColor(255, 255, 255))
+SelectColor(367, 453, RGBToColor(255, 255, 216))
+SelectColor(380, 466, RGBToColor(255, 200, 88))
+SelectColor(365, 940, RGBToColor(67, 80, 86))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(231, 1000, RGBToColor(240, 56, 229))
+        SelectColor(755, 504, RGBToColor(46, 182, 255))
+        SelectColor(743, 492, RGBToColor(255, 255, 160))
+        SelectColor(755, 375, RGBToColor(255, 48, 131))
+        SelectColor(745, 362, RGBToColor(255, 255, 182))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(164, 273, RGBToColor(145, 12, 63))
+        SelectColor(617, 311, RGBToColor(120, 12, 53))
+        SelectColor(390, 252, RGBToColor(64, 41, 25))
+        SelectColor(254, 257, RGBToColor(70, 44, 30))
+        SelectColor(513, 258, RGBToColor(70, 44, 31))
+        SelectColor(607, 318, RGBToColor(120, 11, 52))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(442, 991, RGBToColor(78, 175, 255))
+        SelectColor(325, 990, RGBToColor(78, 175, 255))
+        SelectColor(388, 1014, RGBToColor(52, 66, 83))
+        SelectColor(755, 984, RGBToColor(52, 66, 83))
+        SelectColor(9, 972, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(637, 109, RGBToColor(255, 255, 255))
+SelectColor(142, 108, RGBToColor(255, 232, 64))
+SelectColor(158, 125, RGBToColor(48, 124, 212))
+SelectColor(142, 131, RGBToColor(47, 168, 244))
+    --
+    scenes:AddScene("task_scene", pic)
+  
+    -- XXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(753, 394, RGBToColor(255, 52, 136))
+        SelectColor(734, 379, RGBToColor(255, 189, 98))
+        SelectColor(735, 509, RGBToColor(255, 192, 97))
+        SelectColor(726, 524, RGBToColor(28, 160, 255))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(736, 26, RGBToColor(255, 172, 213))
+        SelectColor(723, 26, RGBToColor(252, 62, 63))
+        SelectColor(371, 256, RGBToColor(12, 28, 45))
+        SelectColor(339, 553, RGBToColor(16, 36, 55))
+        SelectColor(271, 560, RGBToColor(17, 37, 56))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+    
+    return scenes
+
+end
+-- XXXXXXXX -- L16
+function Init2048x1536x320(self, scenes)
+
+    Logm("Init2048x1536x320")
+     
+    -- XXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(823, 1921, RGBToColor(255, 220, 76))
+        SelectColor(724, 1873, RGBToColor(148, 180, 192))
+        SelectColor(748, 1864, RGBToColor(236, 252, 255))
+        SelectColor(644, 1950, RGBToColor(120, 218, 255))
+        SelectColor(895, 1948, RGBToColor(128, 220, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(966, 1920, RGBToColor(255, 255, 255))
+        SelectColor(962, 1950, RGBToColor(60, 152, 233))
+        SelectColor(919, 1877, RGBToColor(40, 112, 192))
+        SelectColor(836, 1947, RGBToColor(132, 224, 255))
+        SelectColor(1086, 1944, RGBToColor(144, 226, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXXXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1272, 232, RGBToColor(255, 172, 216))
+        SelectColor(1301, 232, RGBToColor(252, 52, 48))
+        SelectColor(962, 1951, RGBToColor(23, 60, 92))
+        SelectColor(1326, 1835, RGBToColor(90, 100, 120))
+        SelectColor(954, 1920, RGBToColor(105, 105, 105))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1211, 645, RGBToColor(255, 255, 255))
+SelectColor(379, 667, RGBToColor(255, 244, 180))
+SelectColor(361, 687, RGBToColor(255, 40, 92))
+SelectColor(341, 686, RGBToColor(36, 148, 255))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1225, 671, RGBToColor(255, 255, 255))
+SelectColor(731, 893, RGBToColor(255, 255, 215))
+SelectColor(756, 934, RGBToColor(255, 200, 88))
+SelectColor(733, 1886, RGBToColor(66, 78, 84))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(461, 2012, RGBToColor(212, 28, 202))
+        SelectColor(1485, 980, RGBToColor(255, 255, 173))
+        SelectColor(1511, 1008, RGBToColor(44, 182, 255))
+        SelectColor(1511, 754, RGBToColor(255, 48, 128))
+        SelectColor(1487, 718, RGBToColor(255, 255, 156))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(319, 546, RGBToColor(152, 12, 64))
+        SelectColor(477, 515, RGBToColor(71, 47, 26))
+        SelectColor(743, 504, RGBToColor(64, 41, 24))
+        SelectColor(1068, 517, RGBToColor(72, 47, 26))
+        SelectColor(1225, 545, RGBToColor(104, 8, 41))
+        SelectColor(1220, 618, RGBToColor(112, 12, 48))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(887, 1984, RGBToColor(78, 175, 255))
+        SelectColor(648, 1979, RGBToColor(76, 176, 255))
+        SelectColor(777, 2029, RGBToColor(52, 66, 83))
+        SelectColor(1513, 1976, RGBToColor(52, 66, 83))
+        SelectColor(22, 1963, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1273, 220, RGBToColor(255, 255, 255))
+SelectColor(285, 217, RGBToColor(255, 232, 64))
+SelectColor(283, 266, RGBToColor(44, 172, 248))
+SelectColor(316, 255, RGBToColor(48, 124, 212))
+    --
+    scenes:AddScene("task_scene", pic)
+      
+    -- XXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1511, 788, RGBToColor(255, 48, 131))
+SelectColor(1446, 770, RGBToColor(255, 208, 108))
+SelectColor(1446, 1045, RGBToColor(28, 160, 255))
+SelectColor(1474, 1019, RGBToColor(255, 202, 100))
+SelectColor(449, 2015, RGBToColor(168, 28, 171))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1476, 50, RGBToColor(255, 172, 212))
+SelectColor(1446, 51, RGBToColor(252, 60, 59))
+SelectColor(756, 512, RGBToColor(12, 29, 45))
+SelectColor(775, 1120, RGBToColor(12, 34, 54))
+SelectColor(535, 1123, RGBToColor(17, 37, 56))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+
+    return scenes
+
+end
+
+-- ios
+
+-- XXXXXXXXX -- L16
+function Init960x640x320(self, scenes)
+
+    Logm("Init960x640x320")
+     
+    -- XXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(344, 901, RGBToColor(255, 218, 74))
+        SelectColor(305, 883, RGBToColor(151, 176, 192))
+        SelectColor(307, 872, RGBToColor(234, 252, 255))
+        SelectColor(244, 913, RGBToColor(127, 220, 255))
+        SelectColor(394, 913, RGBToColor(127, 220, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(428, 898, RGBToColor(255, 255, 255))
+        SelectColor(426, 917, RGBToColor(56, 152, 236))
+        SelectColor(407, 880, RGBToColor(40, 113, 193))
+        SelectColor(352, 913, RGBToColor(127, 220, 255))
+        SelectColor(502, 912, RGBToColor(135, 224, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXXXXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(555, 109, RGBToColor(255, 172, 214))
+        SelectColor(569, 111, RGBToColor(253, 52, 46))
+        SelectColor(427, 900, RGBToColor(104, 104, 104))
+        SelectColor(428, 915, RGBToColor(23, 61, 93))
+        SelectColor(379, 900, RGBToColor(34, 49, 63))
+        SelectColor(571, 865, RGBToColor(220, 232, 240))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(529, 301, RGBToColor(255, 255, 255))
+SelectColor(131, 322, RGBToColor(255, 40, 96))
+SelectColor(120, 322, RGBToColor(36, 151, 255))
+SelectColor(113, 312, RGBToColor(255, 182, 62))
+SelectColor(301, 879, RGBToColor(25, 29, 32))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(533, 316, RGBToColor(255, 255, 255))
+SelectColor(303, 420, RGBToColor(255, 255, 213))
+SelectColor(317, 438, RGBToColor(255, 200, 88))
+SelectColor(304, 882, RGBToColor(67, 79, 86))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(177, 944, RGBToColor(210, 28, 198))
+        SelectColor(624, 351, RGBToColor(255, 65, 155))
+        SelectColor(629, 474, RGBToColor(44, 180, 255))
+        SelectColor(609, 459, RGBToColor(255, 191, 97))
+        SelectColor(610, 337, RGBToColor(255, 202, 100))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(535, 257, RGBToColor(104, 8, 46))
+        SelectColor(110, 258, RGBToColor(152, 12, 64))
+        SelectColor(109, 293, RGBToColor(160, 16, 72))
+        SelectColor(194, 242, RGBToColor(69, 44, 31))
+        SelectColor(318, 237, RGBToColor(64, 42, 27))
+        SelectColor(445, 242, RGBToColor(68, 44, 28))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXXXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(375, 928, RGBToColor(78, 175, 255))
+        SelectColor(263, 928, RGBToColor(78, 175, 255))
+        SelectColor(326, 950, RGBToColor(52, 66, 83))
+        SelectColor(628, 916, RGBToColor(52, 66, 83))
+        SelectColor(6, 909, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(557, 103, RGBToColor(255, 255, 255))
+SelectColor(95, 99, RGBToColor(255, 232, 64))
+SelectColor(110, 118, RGBToColor(48, 126, 212))
+SelectColor(92, 123, RGBToColor(45, 170, 244))
+    --
+    scenes:AddScene("task_scene", pic)
+      
+    -- XXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(628, 368, RGBToColor(255, 48, 128))
+        SelectColor(609, 354, RGBToColor(255, 198, 100))
+        SelectColor(598, 490, RGBToColor(28, 162, 255))
+        SelectColor(618, 479, RGBToColor(255, 255, 162))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXXXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(609, 24, RGBToColor(255, 172, 215))
+SelectColor(597, 25, RGBToColor(255, 56, 52))
+SelectColor(298, 238, RGBToColor(13, 30, 44))
+SelectColor(193, 241, RGBToColor(15, 30, 46))
+SelectColor(329, 521, RGBToColor(16, 37, 55))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+    
+    return scenes
+
+end
+
+
+-- XXXXXXXXXX -- L16
+function Init1136x640x320(self, scenes)
+
+    Logm("Init1136x640x320")
+     
+    -- XXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(349, 1066, RGBToColor(255, 218, 74))
+        SelectColor(297, 1040, RGBToColor(148, 177, 191))
+        SelectColor(307, 1034, RGBToColor(236, 252, 255))
+        SelectColor(250, 1079, RGBToColor(138, 224, 255))
+        SelectColor(389, 1079, RGBToColor(138, 224, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(425, 1068, RGBToColor(255, 255, 255))
+        SelectColor(426, 1085, RGBToColor(56, 153, 239))
+        SelectColor(406, 1041, RGBToColor(40, 116, 200))
+        SelectColor(357, 1080, RGBToColor(130, 222, 255))
+        SelectColor(497, 1080, RGBToColor(130, 222, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXXXXXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(598, 128, RGBToColor(255, 172, 214))
+        SelectColor(613, 127, RGBToColor(252, 63, 64))
+        SelectColor(424, 1082, RGBToColor(21, 58, 89))
+        SelectColor(428, 1066, RGBToColor(103, 103, 103))
+        SelectColor(377, 1084, RGBToColor(34, 50, 65))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(566, 356, RGBToColor(255, 255, 255))
+SelectColor(97, 369, RGBToColor(255, 190, 64))
+SelectColor(96, 381, RGBToColor(255, 40, 92))
+SelectColor(81, 382, RGBToColor(32, 144, 255))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(573, 374, RGBToColor(255, 255, 255))
+SelectColor(301, 498, RGBToColor(255, 255, 212))
+SelectColor(315, 514, RGBToColor(255, 200, 88))
+SelectColor(297, 1037, RGBToColor(69, 83, 89))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(150, 1116, RGBToColor(212, 28, 204))
+        SelectColor(628, 560, RGBToColor(44, 180, 255))
+        SelectColor(614, 545, RGBToColor(255, 255, 165))
+        SelectColor(622, 415, RGBToColor(255, 58, 144))
+        SelectColor(603, 401, RGBToColor(255, 189, 97))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(572, 299, RGBToColor(105, 8, 47))
+        SelectColor(573, 347, RGBToColor(120, 12, 50))
+        SelectColor(69, 306, RGBToColor(152, 12, 64))
+        SelectColor(172, 286, RGBToColor(71, 44, 26))
+        SelectColor(317, 280, RGBToColor(64, 42, 28))
+        SelectColor(457, 286, RGBToColor(70, 44, 30))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXXXXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(252, 1098, RGBToColor(78, 175, 255))
+        SelectColor(383, 1099, RGBToColor(78, 175, 255))
+        SelectColor(327, 1124, RGBToColor(52, 66, 83))
+        SelectColor(634, 1089, RGBToColor(52, 66, 83))
+        SelectColor(10, 1081, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(600, 122, RGBToColor(255, 255, 255))
+SelectColor(53, 122, RGBToColor(255, 232, 67))
+SelectColor(72, 142, RGBToColor(48, 125, 212))
+SelectColor(53, 146, RGBToColor(46, 169, 244))
+    --
+    scenes:AddScene("task_scene", pic)
+    
+    -- XXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(626, 579, RGBToColor(44, 184, 255))
+        SelectColor(603, 564, RGBToColor(255, 191, 98))
+        SelectColor(594, 435, RGBToColor(241, 24, 113))
+        SelectColor(613, 421, RGBToColor(255, 255, 153))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXXXXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(606, 33, RGBToColor(255, 172, 213))
+SelectColor(589, 33, RGBToColor(253, 53, 49))
+SelectColor(332, 282, RGBToColor(13, 30, 44))
+SelectColor(162, 287, RGBToColor(15, 30, 46))
+SelectColor(150, 619, RGBToColor(18, 37, 56))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+
+    return scenes
+
+end
+
+
+-- XXXXXXXXXXX -- L16
+function Init1334x750x320(self, scenes)
+
+    Logm("Init1334x750x320")
+     
+    -- XXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(410, 1251, RGBToColor(255, 217, 73))
+        SelectColor(350, 1222, RGBToColor(149, 178, 191))
+        SelectColor(359, 1212, RGBToColor(232, 252, 255))
+        SelectColor(293, 1268, RGBToColor(132, 224, 255))
+        SelectColor(458, 1268, RGBToColor(132, 224, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(501, 1253, RGBToColor(255, 255, 255))
+        SelectColor(502, 1275, RGBToColor(60, 157, 244))
+        SelectColor(475, 1222, RGBToColor(40, 112, 196))
+        SelectColor(420, 1268, RGBToColor(132, 224, 255))
+        SelectColor(582, 1268, RGBToColor(132, 224, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXXXXXXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(702, 152, RGBToColor(255, 172, 214))
+        SelectColor(721, 154, RGBToColor(252, 55, 51))
+        SelectColor(739, 1195, RGBToColor(90, 100, 120))
+        SelectColor(499, 1253, RGBToColor(103, 103, 103))
+        SelectColor(499, 1276, RGBToColor(21, 59, 92))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(662, 421, RGBToColor(255, 255, 255))
+SelectColor(112, 450, RGBToColor(255, 40, 92))
+SelectColor(97, 451, RGBToColor(33, 148, 255))
+SelectColor(90, 436, RGBToColor(255, 188, 64))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(670, 439, RGBToColor(255, 255, 255))
+SelectColor(353, 581, RGBToColor(255, 255, 213))
+SelectColor(372, 604, RGBToColor(255, 200, 88))
+SelectColor(354, 1230, RGBToColor(67, 77, 85))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(171, 1312, RGBToColor(187, 28, 183))
+        SelectColor(736, 657, RGBToColor(44, 180, 255))
+        SelectColor(707, 639, RGBToColor(255, 189, 98))
+        SelectColor(709, 474, RGBToColor(255, 196, 96))
+        SelectColor(734, 489, RGBToColor(255, 48, 128))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(673, 353, RGBToColor(106, 10, 44))
+        SelectColor(669, 412, RGBToColor(120, 12, 52))
+        SelectColor(79, 343, RGBToColor(156, 12, 67))
+        SelectColor(198, 336, RGBToColor(70, 44, 30))
+        SelectColor(365, 328, RGBToColor(64, 43, 25))
+        SelectColor(538, 337, RGBToColor(71, 44, 31))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXXXXXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(297, 1290, RGBToColor(78, 175, 255))
+        SelectColor(452, 1291, RGBToColor(78, 175, 255))
+        SelectColor(373, 1318, RGBToColor(52, 66, 83))
+        SelectColor(736, 1264, RGBToColor(52, 66, 83))
+        SelectColor(8, 1267, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(701, 148, RGBToColor(255, 255, 255))
+SelectColor(61, 146, RGBToColor(255, 231, 64))
+SelectColor(60, 175, RGBToColor(47, 169, 244))
+SelectColor(83, 170, RGBToColor(48, 125, 212))
+    --
+    scenes:AddScene("task_scene", pic)
+    
+    -- XXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(733, 513, RGBToColor(255, 48, 130))
+        SelectColor(706, 495, RGBToColor(255, 188, 96))
+        SelectColor(721, 667, RGBToColor(255, 255, 192))
+        SelectColor(695, 682, RGBToColor(28, 161, 255))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXXXXXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(709, 41, RGBToColor(255, 172, 216))
+        SelectColor(691, 39, RGBToColor(253, 57, 54))
+        SelectColor(377, 338, RGBToColor(10, 27, 44))
+        SelectColor(202, 339, RGBToColor(15, 30, 45))
+        SelectColor(346, 728, RGBToColor(13, 34, 55))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+
+    return scenes
+
+end
+
+
+-- XXXXXXXXXXXX -- L16
+function Init2208x1242x480(self, scenes)
+
+    Logm("Init2208x1242x480")
+     
+    -- XXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(681, 2070, RGBToColor(255, 218, 74))
+        SelectColor(585, 2030, RGBToColor(152, 178, 192))
+        SelectColor(597, 2009, RGBToColor(236, 252, 255))
+        SelectColor(489, 2098, RGBToColor(136, 224, 255))
+        SelectColor(755, 2099, RGBToColor(133, 224, 255))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(824, 2076, RGBToColor(255, 255, 255))
+        SelectColor(825, 2108, RGBToColor(56, 150, 233))
+        SelectColor(781, 2027, RGBToColor(40, 112, 189))
+        SelectColor(696, 2102, RGBToColor(122, 220, 255))
+        SelectColor(967, 2100, RGBToColor(129, 221, 255))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXXXXXXXXX-- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1161, 249, RGBToColor(255, 172, 213))
+        SelectColor(1194, 253, RGBToColor(253, 55, 50))
+        SelectColor(829, 2112, RGBToColor(22, 61, 93))
+        SelectColor(824, 2073, RGBToColor(103, 103, 103))
+        SelectColor(741, 2105, RGBToColor(34, 51, 64))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1104, 698, RGBToColor(255, 255, 255))
+SelectColor(195, 719, RGBToColor(255, 212, 91))
+SelectColor(181, 740, RGBToColor(255, 38, 88))
+SelectColor(158, 746, RGBToColor(32, 148, 255))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1109, 725, RGBToColor(255, 255, 255))
+SelectColor(584, 975, RGBToColor(255, 255, 213))
+SelectColor(613, 1010, RGBToColor(255, 200, 88))
+SelectColor(580, 2028, RGBToColor(66, 79, 86))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(296, 2168, RGBToColor(225, 28, 211))
+        SelectColor(1217, 1092, RGBToColor(44, 180, 255))
+        SelectColor(1171, 1061, RGBToColor(255, 191, 97))
+        SelectColor(1207, 813, RGBToColor(255, 58, 144))
+        SelectColor(1174, 775, RGBToColor(255, 207, 100))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(147, 595, RGBToColor(151, 12, 64))
+        SelectColor(135, 681, RGBToColor(160, 13, 71))
+        SelectColor(325, 556, RGBToColor(71, 44, 29))
+        SelectColor(603, 545, RGBToColor(64, 43, 29))
+        SelectColor(915, 557, RGBToColor(69, 47, 27))
+        SelectColor(1104, 610, RGBToColor(104, 8, 40))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXXXXXXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(495, 2138, RGBToColor(78, 175, 255))
+        SelectColor(747, 2139, RGBToColor(78, 175, 255))
+        SelectColor(608, 2182, RGBToColor(52, 66, 83))
+        SelectColor(1229, 2120, RGBToColor(52, 66, 83))
+        SelectColor(13, 2100, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1160, 240, RGBToColor(255, 255, 255))
+SelectColor(98, 236, RGBToColor(255, 232, 64))
+SelectColor(97, 285, RGBToColor(44, 168, 240))
+SelectColor(142, 279, RGBToColor(48, 125, 212))
+    --
+    scenes:AddScene("task_scene", pic)
+      
+    -- XXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1214, 849, RGBToColor(255, 48, 129))
+        SelectColor(1170, 817, RGBToColor(255, 192, 100))
+        SelectColor(1149, 1125, RGBToColor(28, 164, 255))
+        SelectColor(1195, 1101, RGBToColor(255, 255, 211))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXXXXXXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1173, 66, RGBToColor(255, 172, 213))
+SelectColor(1144, 69, RGBToColor(254, 55, 50))
+SelectColor(312, 559, RGBToColor(15, 31, 46))
+SelectColor(920, 563, RGBToColor(14, 30, 46))
+SelectColor(258, 1205, RGBToColor(18, 38, 57))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+    
+    return scenes
+
+end
+
+-- android extension
+
+-- XXXXXXXXXXXXX -- L16
+function Init2560x1600x320(self, scenes)
+
+    Logm("Init2560x1600x320")
+     
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(866, 2406, RGBToColor(255, 220, 73))
+        SelectColor(801, 2395, RGBToColor(216, 232, 244))
+        SelectColor(644, 2435, RGBToColor(128, 221, 255))
+        SelectColor(958, 2430, RGBToColor(143, 225, 255))
+        SelectColor(752, 2343, RGBToColor(150, 178, 191))
+        SelectColor(732, 2451, RGBToColor(88, 168, 208))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1037, 2447, RGBToColor(54, 151, 236))
+        SelectColor(1043, 2397, RGBToColor(255, 255, 255))
+        SelectColor(885, 2430, RGBToColor(142, 226, 255))
+        SelectColor(927, 2424, RGBToColor(84, 128, 164))
+        SelectColor(1069, 2461, RGBToColor(255, 208, 72))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXXXXXXXXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1431, 288, RGBToColor(255, 172, 213))
+        SelectColor(1466, 294, RGBToColor(253, 53, 48))
+        SelectColor(1041, 2440, RGBToColor(22, 60, 92))
+        SelectColor(1049, 2404, RGBToColor(105, 105, 105))
+        SelectColor(889, 2432, RGBToColor(52, 85, 97))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1361, 810, RGBToColor(255, 255, 255))
+SelectColor(315, 835, RGBToColor(255, 253, 187))
+SelectColor(290, 856, RGBToColor(255, 36, 88))
+SelectColor(253, 859, RGBToColor(26, 134, 241))
+SelectColor(252, 837, RGBToColor(255, 187, 63))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1373, 843, RGBToColor(255, 255, 255))
+SelectColor(757, 1117, RGBToColor(255, 255, 214))
+SelectColor(791, 1159, RGBToColor(255, 200, 88))
+SelectColor(815, 1062, RGBToColor(152, 146, 144))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1566, 1262, RGBToColor(48, 184, 255))
+        SelectColor(1542, 1230, RGBToColor(255, 255, 167))
+        SelectColor(1498, 934, RGBToColor(242, 24, 114))
+        SelectColor(1518, 897, RGBToColor(255, 200, 100))
+        SelectColor(420, 2511, RGBToColor(228, 28, 216))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(252, 710, RGBToColor(145, 12, 62))
+        SelectColor(799, 632, RGBToColor(64, 42, 27))
+        SelectColor(1372, 788, RGBToColor(120, 12, 52))
+        SelectColor(1361, 1447, RGBToColor(24, 60, 112))
+        SelectColor(857, 1385, RGBToColor(64, 41, 24))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXXXXXXXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(667, 2476, RGBToColor(78, 175, 255))
+        SelectColor(944, 2480, RGBToColor(78, 175, 255))
+        SelectColor(791, 2542, RGBToColor(52, 66, 83))
+        SelectColor(1550, 2490, RGBToColor(52, 66, 83))
+        SelectColor(28, 2466, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1433, 272, RGBToColor(255, 255, 255))
+SelectColor(201, 274, RGBToColor(255, 232, 68))
+SelectColor(193, 334, RGBToColor(47, 173, 248))
+SelectColor(232, 319, RGBToColor(48, 124, 215))
+    --
+    scenes:AddScene("task_scene", pic)
+      
+    -- XXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1497, 1307, RGBToColor(28, 162, 255))
+        SelectColor(1517, 1276, RGBToColor(255, 190, 97))
+        SelectColor(1568, 987, RGBToColor(255, 48, 129))
+        SelectColor(1540, 955, RGBToColor(255, 255, 154))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXXXXXXXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1523, 66, RGBToColor(255, 172, 213))
+SelectColor(1486, 65, RGBToColor(254, 56, 52))
+SelectColor(817, 632, RGBToColor(13, 29, 45))
+SelectColor(548, 643, RGBToColor(13, 30, 46))
+SelectColor(842, 1401, RGBToColor(12, 34, 54))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+
+    return scenes
+
+end
+
+
+-- XXXXXXXXXXXXXX -- L16
+function Init2560x1440x640(self, scenes)
+
+    Logm("Init2560x1440x640")
+     
+    -- XXXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(790, 2402, RGBToColor(255, 216, 72))
+        SelectColor(714, 2399, RGBToColor(212, 228, 241))
+        SelectColor(669, 2354, RGBToColor(152, 180, 192))
+        SelectColor(564, 2433, RGBToColor(135, 224, 255))
+        SelectColor(657, 2409, RGBToColor(150, 92, 34))
+    --
+    scenes:AddScene("home_battle_scene", pic)
+
+    -- XXXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(967, 2402, RGBToColor(255, 255, 255))
+        SelectColor(964, 2438, RGBToColor(58, 155, 235))
+        SelectColor(801, 2431, RGBToColor(140, 224, 255))
+        SelectColor(856, 2406, RGBToColor(84, 124, 160))
+        SelectColor(909, 2348, RGBToColor(40, 114, 194))
+    --
+    scenes:AddScene("home_social_scene", pic)
+    
+    -- XXXXXXXXXXXXXX -- close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1347, 289, RGBToColor(255, 172, 214))
+        SelectColor(1383, 295, RGBToColor(252, 59, 57))
+        SelectColor(963, 2442, RGBToColor(22, 61, 93))
+        SelectColor(953, 2404, RGBToColor(103, 103, 103))
+        SelectColor(804, 2437, RGBToColor(45, 83, 96))
+    --
+    scenes:AddScene("home_requst_card_scene", pic)
+    
+    -- XXXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1275, 806, RGBToColor(255, 255, 255))
+SelectColor(227, 835, RGBToColor(255, 217, 103))
+SelectColor(217, 861, RGBToColor(255, 40, 92))
+SelectColor(184, 863, RGBToColor(32, 147, 255))
+SelectColor(173, 837, RGBToColor(255, 188, 64))
+    --
+    scenes:AddScene("home_2V2_confirm_scene", pic)
+    
+    -- XXXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1290, 844, RGBToColor(255, 255, 255))
+SelectColor(682, 1112, RGBToColor(255, 255, 215))
+SelectColor(708, 1160, RGBToColor(255, 200, 88))
+SelectColor(738, 1072, RGBToColor(155, 147, 144))
+    --
+    scenes:AddScene("home_no_recard_confirm_scene", pic)
+    
+    -- XXXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1407, 1263, RGBToColor(48, 187, 255))
+        SelectColor(1410, 1234, RGBToColor(255, 251, 148))
+        SelectColor(1414, 936, RGBToColor(255, 49, 130))
+        SelectColor(1407, 914, RGBToColor(255, 254, 144))
+        SelectColor(332, 2512, RGBToColor(214, 28, 206))
+    --
+    scenes:AddScene("battle_scene", pic)
+    
+    -- XXXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1280, 1519, RGBToColor(24, 68, 128))
+        SelectColor(753, 1381, RGBToColor(64, 41, 25))
+        SelectColor(171, 1460, RGBToColor(32, 92, 168))
+        SelectColor(699, 628, RGBToColor(64, 42, 28))
+        SelectColor(164, 670, RGBToColor(149, 12, 64))
+    --
+    scenes:AddScene("battle_completed_scene", pic)
+    
+    -- XXXXXXXXXXXXXX -- confirm button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(580, 2471, RGBToColor(76, 173, 255))
+        SelectColor(863, 2472, RGBToColor(76, 173, 255))
+        SelectColor(728, 2540, RGBToColor(52, 66, 83))
+        SelectColor(1390, 2490, RGBToColor(52, 66, 83))
+        SelectColor(37, 2454, RGBToColor(52, 66, 83))
+    --
+    scenes:AddScene("areana_scene", pic)
+    
+    -- XXXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1348, 284, RGBToColor(255, 255, 255))
+SelectColor(120, 279, RGBToColor(255, 232, 67))
+SelectColor(155, 324, RGBToColor(48, 124, 216))
+SelectColor(113, 334, RGBToColor(46, 172, 244))
+    --
+    scenes:AddScene("task_scene", pic)
+      
+    -- XXXXXXXXXXXXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+        SelectColor(1404, 989, RGBToColor(255, 50, 132))
+        SelectColor(1359, 951, RGBToColor(255, 192, 96))
+        SelectColor(1386, 1282, RGBToColor(255, 255, 216))
+        SelectColor(1340, 1312, RGBToColor(28, 163, 255))
+    --
+    scenes:AddScene("2V2battle_scene", pic)
+    
+    -- XXXXXXXXXXXXXX -- Close button
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("absolute")
+    --
+SelectColor(1359, 76, RGBToColor(255, 172, 215))
+SelectColor(1326, 77, RGBToColor(253, 55, 51))
+SelectColor(658, 634, RGBToColor(13, 30, 45))
+SelectColor(450, 646, RGBToColor(14, 30, 46))
+SelectColor(635, 1390, RGBToColor(15, 36, 56))
+    --
+    scenes:AddScene("battle_completed_chat_scene", pic)
+
+    return scenes
+
+end
+
+function RegisterObject()
+	local obj = { }  
+	-- 注册函数
+    obj.Init800x600x160 = Init800x600x160
+    obj.Init800x480x240 = Init800x480x240
+    obj.Init960x540x240 = Init960x540x240
+    obj.Init1280x720x320 = Init1280x720x320
+    obj.Init1920x1080x480 = Init1920x1080x480
+    obj.Init1024x600x160 = Init1024x600x160
+    obj.Init1280x800x213 = Init1280x800x213
+    
+    obj.Init1024x768x160 = Init1024x768x160
+    obj.Init2048x1536x320 = Init2048x1536x320
+    
+    obj.Init960x640x320 = Init960x640x320
+    obj.Init1136x640x320 = Init1136x640x320
+    obj.Init1334x750x320 = Init1334x750x320
+    obj.Init2208x1242x480 = Init2208x1242x480
+
+    obj.Init2560x1600x320 = Init2560x1600x320
+    obj.Init2560x1440x640 = Init2560x1440x640
+
+	SetObject("ClashRoyaleScenes", obj)
+	Logd("ClashRoyaleScenes对象已经注册完成")
+end
+

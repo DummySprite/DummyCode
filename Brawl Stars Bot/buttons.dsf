@@ -1,0 +1,488 @@
+﻿
+Import("base.dsb>picture.dsf")
+
+function SelectColor(x, y, color)
+    pic:Add(x, y, color)
+end
+function SelectMatchedColor(x, y, color, sim)
+    pic:AddEx(x, y, color, true, sim)
+end
+
+function 选择颜色(x, y, color)
+    pic:Add(x, y, color)
+end
+function 选择匹配度颜色(x, y, color, sim)
+    pic:AddEx(x, y, color, true, sim)
+end
+
+-- F2
+function Init800x600x160(self)
+
+    Logm("Init800x600x160")
+    
+    buttons = {}
+    
+    -- XXX
+    buttons["General"] = {}
+    
+    buttons["General"].sim_low = 91
+    buttons["General"].sim_normal = 94
+    buttons["General"].sim_high = 96
+    
+    buttons["General"].blank_x = 630
+    buttons["General"].blank_y = 115
+    
+    buttons["General"].back_x = 41
+    buttons["General"].back_y = 21
+    
+    -- XXX
+    buttons["home_scene"] = {}
+    
+    buttons["home_scene"].reward_01_x = 62
+    buttons["home_scene"].reward_01_y = 558
+    
+    buttons["home_scene"].reward_02_x = 185
+    buttons["home_scene"].reward_02_y = 558
+    
+    buttons["home_scene"].event_x = 422
+    buttons["home_scene"].event_y = 558
+    
+    buttons["home_scene"].play_x = 661
+    buttons["home_scene"].play_y = 558
+    
+    -- XXX
+    buttons["event_scene"] = {}
+    
+    buttons["event_scene"].event_base_x = 380
+    buttons["event_scene"].event_base_y = 196
+    
+    buttons["event_scene"].event_offset_x = (739 - 401)
+    buttons["event_scene"].event_offset_y = (387 - 209)
+    
+    -- XXX
+    buttons["battle_scene"] = {}
+    
+    buttons["battle_scene"].steering_center_x = 73
+    buttons["battle_scene"].steering_center_y = 500
+    buttons["battle_scene"].steering_size = (73 - 28)
+    
+    buttons["battle_scene"].steering_fire_x = 716
+    buttons["battle_scene"].steering_fire_y = 496
+    
+    buttons["battle_scene"].steering_power_fire_x = 622
+    buttons["battle_scene"].steering_power_fire_y = 525
+    
+    -- XXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("relative")                         
+    pic:SetRange(57, 68, 776, 522)         
+    --
+SelectColor(458, 260, RGBToColor(72, 224, 52))
+SelectColor(460, 260, RGBToColor(72, 224, 52))
+SelectColor(458, 256, RGBToColor(168, 240, 148))
+SelectColor(460, 256, RGBToColor(168, 240, 148))
+    --
+    buttons["battle_scene"].green_blood_bar = pic
+    
+    -- XXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("relative")                         
+    pic:SetRange(57, 68, 766, 522)         
+    --
+SelectColor(378, 176, RGBToColor(232, 20, 44))
+SelectColor(379, 173, RGBToColor(240, 112, 128))
+SelectColor(381, 176, RGBToColor(232, 20, 44))
+SelectColor(380, 174, RGBToColor(240, 112, 128))
+    --
+    buttons["battle_scene"].red_blood_bar = pic
+    
+    -- XXX
+    buttons["battle_scene"].offset_line = -1
+    
+    buttons["battle_scene"].offset_scorebard_x = 122
+    buttons["battle_scene"].offset_scorebard_y = 39
+    
+    return buttons
+end
+
+-- F2
+function Init1280x720x320(self)
+
+    Logm("Init1280x720x320")
+    
+    buttons = {}
+    
+    -- XX
+    buttons["General"] = {}
+    
+    buttons["General"].sim_low = 91
+    buttons["General"].sim_normal = 94
+    buttons["General"].sim_high = 96
+    
+    buttons["General"].blank_x = 1054
+    buttons["General"].blank_y = 139
+    
+    buttons["General"].back_x = 56
+    buttons["General"].back_y = 28
+    
+    -- XX
+    buttons["home_scene"] = {}
+    
+    buttons["home_scene"].reward_01_x = 102
+    buttons["home_scene"].reward_01_y = 653
+    
+    buttons["home_scene"].reward_02_x = 291
+    buttons["home_scene"].reward_02_y = 653
+    
+    buttons["home_scene"].event_x = 671
+    buttons["home_scene"].event_y = 653
+    
+    buttons["home_scene"].play_x = 1129
+    buttons["home_scene"].play_y = 653
+    
+    -- XX
+    buttons["event_scene"] = {}
+    
+    buttons["event_scene"].event_base_x = 577
+    buttons["event_scene"].event_base_y = 314
+    
+    buttons["event_scene"].event_offset_x = (1180 - 640)
+    buttons["event_scene"].event_offset_y = (620 - 354)
+    
+    -- XX
+    buttons["battle_scene"] = {}
+    
+    buttons["battle_scene"].steering_center_x = 177
+    buttons["battle_scene"].steering_center_y = 539
+    buttons["battle_scene"].steering_size = (177 - 68)
+    
+    buttons["battle_scene"].steering_fire_x = 1089
+    buttons["battle_scene"].steering_fire_y = 468
+    
+    buttons["battle_scene"].steering_power_fire_x = 872
+    buttons["battle_scene"].steering_power_fire_y = 537
+    
+    -- XX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("relative")                         
+    pic:SetRange(112, 71, 1225, 672)         
+    --
+        SelectColor(744, 287, RGBToColor(72, 224, 52))
+        SelectColor(743, 280, RGBToColor(168, 240, 148))
+        SelectColor(745, 282, RGBToColor(168, 240, 148))
+        SelectColor(745, 287, RGBToColor(72, 224, 52))
+        SelectColor(740, 286, RGBToColor(72, 224, 52))
+    --
+    buttons["battle_scene"].green_blood_bar = pic
+    
+    -- XX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("relative")                         
+    pic:SetRange(112, 71, 1225, 672)         
+    --
+        SelectColor(1107, 281, RGBToColor(232, 20, 44))
+        SelectColor(1108, 282, RGBToColor(232, 20, 44))
+        SelectColor(1108, 277, RGBToColor(240, 112, 128))
+        SelectColor(1110, 277, RGBToColor(240, 112, 128))
+        SelectColor(1111, 282, RGBToColor(232, 20, 44))
+    --
+    buttons["battle_scene"].red_blood_bar = pic
+    
+    -- XX
+    buttons["battle_scene"].offset_line = -1
+        
+    buttons["battle_scene"].offset_scorebard_x = 204
+    buttons["battle_scene"].offset_scorebard_y = 60
+    
+    return buttons
+end
+
+-- F2
+function Init1920x1080x480(self)
+
+    Logm("Init1920x1080x480")
+    
+    buttons = {}
+    
+    -- X
+    buttons["General"] = {}
+    
+    buttons["General"].sim_low = 91
+    buttons["General"].sim_normal = 94
+    buttons["General"].sim_high = 96
+    
+    buttons["General"].blank_x = 1542
+    buttons["General"].blank_y = 180
+    
+    buttons["General"].back_x = 88
+    buttons["General"].back_y = 49
+    
+    -- X
+    buttons["home_scene"] = {}
+    
+    buttons["home_scene"].reward_01_x = 172
+    buttons["home_scene"].reward_01_y = 978
+    
+    buttons["home_scene"].reward_02_x = 437
+    buttons["home_scene"].reward_02_y = 978
+    
+    buttons["home_scene"].event_x = 1287
+    buttons["home_scene"].event_y = 978
+    
+    buttons["home_scene"].play_x = 1555
+    buttons["home_scene"].play_y = 978
+    
+    -- X
+    buttons["event_scene"] = {}
+    
+    buttons["event_scene"].event_base_x = 848
+    buttons["event_scene"].event_base_y = 467
+    
+    buttons["event_scene"].event_offset_x = (1798 - 985)
+    buttons["event_scene"].event_offset_y = (595 - 196)
+    
+    -- X
+    buttons["battle_scene"] = {}
+    
+    buttons["battle_scene"].steering_center_x = 271
+    buttons["battle_scene"].steering_center_y = 864
+    buttons["battle_scene"].steering_size = (433 - 271)
+    
+    buttons["battle_scene"].steering_fire_x = 1623
+    buttons["battle_scene"].steering_fire_y = 699
+    
+    buttons["battle_scene"].steering_power_fire_x = 1312
+    buttons["battle_scene"].steering_power_fire_y = 813
+    
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("relative")                         
+    pic:SetRange(194, 137, 1875,1031)         
+    --
+        SelectColor(843, 449, RGBToColor(72, 224, 52))
+        SelectColor(852, 452, RGBToColor(72, 224, 52))
+        SelectColor(850, 449, RGBToColor(72, 224, 52))
+        SelectColor(845, 452, RGBToColor(72, 224, 52))
+    --
+    buttons["battle_scene"].green_blood_bar = pic
+    
+    -- X
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("relative")                         
+    pic:SetRange(194, 137, 1875,1031)         
+    --
+        SelectColor(930, 287, RGBToColor(232, 20, 44))
+        SelectColor(929, 289, RGBToColor(232, 20, 44))
+        SelectColor(934, 288, RGBToColor(232, 20, 44))
+        SelectColor(929, 282, RGBToColor(240, 112, 128))
+        SelectColor(933, 282, RGBToColor(240, 112, 128))
+    --
+    buttons["battle_scene"].red_blood_bar = pic
+    
+    -- X
+    buttons["battle_scene"].offset_line = -1
+    
+    buttons["battle_scene"].offset_scorebard_x = 296
+    buttons["battle_scene"].offset_scorebard_y = 89
+    
+    return buttons
+end
+
+-- F2
+function Init2560x1440x640(self)
+
+    Logm("Init2560x1440x640")
+    
+    buttons = {}
+    
+    -- XXXX
+    buttons["General"] = {}
+    
+    buttons["General"].sim_low = 91
+    buttons["General"].sim_normal = 94
+    buttons["General"].sim_high = 96
+    
+    buttons["General"].blank_x = 2202
+    buttons["General"].blank_y = 238
+    
+    buttons["General"].back_x = 128
+    buttons["General"].back_y = 82
+    
+    -- XXXX
+    buttons["home_scene"] = {}
+    
+    buttons["home_scene"].reward_01_x = 257
+    buttons["home_scene"].reward_01_y = 1288
+    
+    buttons["home_scene"].reward_02_x = 647
+    buttons["home_scene"].reward_02_y = 1288
+    
+    buttons["home_scene"].event_x = 1121
+    buttons["home_scene"].event_y = 1288
+    
+    buttons["home_scene"].play_x = 2087
+    buttons["home_scene"].play_y = 1288
+    
+    -- XXXX
+    buttons["event_scene"] = {}
+    
+    buttons["event_scene"].event_base_x = 1201
+    buttons["event_scene"].event_base_y = 635
+    
+    buttons["event_scene"].event_offset_x = (2366 - 1284)
+    buttons["event_scene"].event_offset_y = (1239 - 698)
+    
+    -- XXXX
+    buttons["battle_scene"] = {}
+    
+    buttons["battle_scene"].steering_center_x = 355
+    buttons["battle_scene"].steering_center_y = 1083
+    buttons["battle_scene"].steering_size = (355 - 137)
+    
+    buttons["battle_scene"].steering_fire_x = 2172
+    buttons["battle_scene"].steering_fire_y = 938
+    
+    buttons["battle_scene"].steering_power_fire_x = 1761
+    buttons["battle_scene"].steering_power_fire_y = 1077
+    
+    -- XXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("relative")                         
+    pic:SetRange(194, 137, 1875,1031)         
+    --
+        SelectColor(1416, 709, RGBToColor(72, 224, 52))
+        SelectColor(1425, 709, RGBToColor(72, 224, 52))
+        SelectColor(1424, 699, RGBToColor(168, 240, 148))
+        SelectColor(1418, 694, RGBToColor(168, 240, 148))
+        SelectColor(1420, 697, RGBToColor(168, 240, 148))
+    --
+    buttons["battle_scene"].green_blood_bar = pic
+    
+    -- XXXX
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("relative")                         
+    pic:SetRange(194, 137, 1875,1031)         
+    --
+        SelectColor(1046, 393, RGBToColor(233, 31, 44))
+        SelectColor(1046, 385, RGBToColor(241, 120, 128))
+        SelectColor(1051, 394, RGBToColor(233, 31, 44))
+        SelectColor(1051, 391, RGBToColor(233, 31, 44))
+        SelectColor(1048, 385, RGBToColor(241, 120, 128))
+    --
+    buttons["battle_scene"].red_blood_bar = pic
+    
+    -- X
+    buttons["battle_scene"].offset_line = -1
+        
+    buttons["battle_scene"].offset_scorebard_x = 414
+    buttons["battle_scene"].offset_scorebard_y = 133
+    
+    return buttons
+end
+
+-- F2
+function Init2960x1440x640(self)
+
+    Logm("Init2960x1440x640")
+    
+    buttons = {}
+    
+    -- XXXX
+    buttons["General"] = {}
+    
+    buttons["General"].sim_low = 91
+    buttons["General"].sim_normal = 94
+    buttons["General"].sim_high = 96
+    
+    buttons["General"].blank_x = 2412
+    buttons["General"].blank_y = 238
+    
+    buttons["General"].back_x = 128
+    buttons["General"].back_y = 82
+    
+    -- XXXX -- 11
+    buttons["home_scene"] = {}
+    
+    buttons["home_scene"].reward_01_x = 257
+    buttons["home_scene"].reward_01_y = 1288
+    
+    buttons["home_scene"].reward_02_x = 647
+    buttons["home_scene"].reward_02_y = 1288
+    
+    buttons["home_scene"].event_x = 1830
+    buttons["home_scene"].event_y = 1288
+    
+    buttons["home_scene"].play_x = 2659
+    buttons["home_scene"].play_y = 1288
+    
+    -- XXXX -- 11
+    buttons["event_scene"] = {}
+    
+    buttons["event_scene"].event_base_x = 1006
+    buttons["event_scene"].event_base_y = 506
+    
+    buttons["event_scene"].event_offset_x = (2366 - 1284)
+    buttons["event_scene"].event_offset_y = (1239 - 698)
+    
+    -- XXXX -- 11
+    buttons["battle_scene"] = {}
+    
+    buttons["battle_scene"].steering_center_x = 608
+    buttons["battle_scene"].steering_center_y = 1092
+    buttons["battle_scene"].steering_size = (355 - 137)
+    
+    buttons["battle_scene"].steering_fire_x = 1903
+    buttons["battle_scene"].steering_fire_y = 1078
+    
+    buttons["battle_scene"].steering_power_fire_x = 2327
+    buttons["battle_scene"].steering_power_fire_y = 929
+    
+    -- XXXX -- 11
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("relative")                         
+    pic:SetRange(359, 137, 2486,1031)         
+    --
+        SelectColor(1416, 709, RGBToColor(72, 224, 52))
+        SelectColor(1425, 709, RGBToColor(72, 224, 52))
+        SelectColor(1424, 699, RGBToColor(168, 240, 148))
+        SelectColor(1418, 694, RGBToColor(168, 240, 148))
+        SelectColor(1420, 697, RGBToColor(168, 240, 148))
+    --
+    buttons["battle_scene"].green_blood_bar = pic
+    
+    -- XXXX -- 11
+    pic = GetObject("LuaPictureFactory"):Create()
+    pic:SetMethod("relative")                         
+    pic:SetRange(359, 137, 2486,1031)         
+    --
+        SelectColor(1046, 393, RGBToColor(233, 31, 44))
+        SelectColor(1046, 385, RGBToColor(241, 120, 128))
+        SelectColor(1051, 394, RGBToColor(233, 31, 44))
+        SelectColor(1051, 391, RGBToColor(233, 31, 44))
+        SelectColor(1048, 385, RGBToColor(241, 120, 128))
+    --
+    buttons["battle_scene"].red_blood_bar = pic
+    
+    -- X
+    buttons["battle_scene"].offset_line = -1
+        
+    buttons["battle_scene"].offset_scorebard_x = 414
+    buttons["battle_scene"].offset_scorebard_y = 133
+    
+    return buttons
+end
+
+function RegisterObject()
+	local obj = { }  
+
+    obj.Init800x600x160 = Init800x600x160
+    obj.Init1280x720x320 = Init1280x720x320
+    obj.Init1920x1080x480 = Init1920x1080x480
+    obj.Init2560x1440x640 = Init2560x1440x640
+    obj.Init2960x1440x640 = Init2960x1440x640
+    
+	SetObject("BrawlStarsButtons", obj)
+	Logd("BrawlStarsButtons对象已经注册完成")
+end
+
+

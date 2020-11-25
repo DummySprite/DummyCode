@@ -1,0 +1,25 @@
+﻿
+Import("base.dsb>steering.dsf")
+
+function Print(self)
+    Logm("SmartBot")
+end
+
+function RegisterObject()
+	local obj = {}
+    
+    obj.Create = function(self)
+        local obj = {}
+        
+        obj.steering = GetObject("LuaSteeringFactory"):Create()
+        
+        obj.Print = Print
+        
+        return obj
+    end
+
+	
+	SetObject("LuaSmartBotFactory", obj)
+	Logd("LuaSmartBotFactory has been registered")
+end
+
